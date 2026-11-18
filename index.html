@@ -17,7 +17,9 @@
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door.
+       interactive-widget=resizes-content: op iOS duwt het toetsenbord de hele app omhoog ipv eroverheen (anders valt je notitieveld onder het toetsenbord) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <!-- Safari-statusbalk kleurt mee: donker-indigo in nachtmodus, crème in ochtendmodus.
        De app heeft een eigen thema-schakelaar, dus JS zet deze meta ook dynamisch (zie js/app.js). -->
   <meta name="theme-color" id="meta-thema" content="#0B0A1E">
@@ -36,7 +38,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=22 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=23 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    TAROT VAN SAMIR — style.css
@@ -945,6 +947,7 @@ body::before {
 }
 .element-chip .el-naam { color: var(--lav); font-weight: 600; }
 .mix-uitleg { color: var(--sec); font-size: calc(14px * var(--tekst-schaal)); line-height: 1.55; margin: 4px 0 14px; }
+.patronen { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 14px; }
 .verhaal {
   font-family: var(--serif);
   font-size: calc(17.5px * var(--tekst-schaal));
@@ -1398,6 +1401,11 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
         </div>
 
         <div class="meer-groep">
+          <p class="meer-groep-titel">Jouw tarot-cijfers</p>
+          <div id="meer-stats"></div>
+        </div>
+
+        <div class="meer-groep">
           <p class="meer-groep-titel">Synchroniseer iPhone ↔ iPad (via AirDrop, geen server)</p>
           <button class="meer-rij" id="inst-sync-deel">
             <span>Deel mijn data naar iPad (AirDrop)</span>
@@ -1514,6 +1522,7 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
         <section class="uitleg-sectie">
           <h2 class="sectie-titel">De verbintenis</h2>
           <div id="elementen-mix"></div>
+          <div id="patronen"></div>
           <div id="kaart-verbanden"></div>
           <div id="ja-nee-uitslag"></div>
           <p class="verhaal" id="verhaal-template"></p>
@@ -1527,6 +1536,9 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
           <div class="tags-rij" id="tags-rij"></div>
           <button class="knop" id="opslaan-knop">Sla deze reading op</button>
         </section>
+
+        <!-- Alleen bij een heropende reading uit de geschiedenis: zelfde legging nog eens doen -->
+        <button class="knop knop-secundair" id="nog-eens-knop" hidden>Nog eens trekken met deze legging</button>
       </section>
 
     </main>
@@ -1744,9 +1756,12 @@ const LEGGINGEN = [
   }
 ];
 
-/* Handig hulpfunctje: zoek een legging op id */
+/* Handig hulpfunctje: zoek een legging op id.
+   Ook eigen (zelfgemaakte) leggingen worden meegenomen — die staan in localStorage.
+   Zonder deze fallback crashte de app bij het heropenen van een reading met een eigen legging. */
 function leggingVind(id) {
-  return LEGGINGEN.find(l => l.id === id) || null;
+  const eigen = JSON.parse(localStorage.getItem("tarot_eigen_leggingen") || "[]");
+  return LEGGINGEN.find(l => l.id === id) || eigen.find(l => l.id === id) || null;
 }
 
 </script>
@@ -3140,7 +3155,7 @@ function toonTab(tabNaam) {
 }
 
 document.querySelectorAll(".tab").forEach(t => {
-  t.addEventListener("click", () => toonTab(t.dataset.tab));
+  t.addEventListener("click", () => { tril(8); toonTab(t.dataset.tab); });
 });
 
 // Scroll-gevoel: vodes de scrollpositie bij voor de parallax-sterren,
@@ -3155,6 +3170,11 @@ document.querySelectorAll(".scherm").forEach(scherm => {
 });
 
 /* ---------- 7. TOAST (kleine melding onderaan) ---------- */
+
+// Subtiele trilling op de iPhone bij belangrijke tikken (voelt als native app)
+function tril(ms = 12) {
+  try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { /* niet ondersteund: prima */ }
+}
 
 let toastTimer = null;
 function toast(bericht) {
@@ -3358,6 +3378,7 @@ function tikKaart(id) {
   concept.kaarten.push({ id, omgekeerd: false });
   slaConceptOp();
   renderKaartenScherm();
+  tril(10);
 }
 
 // Alles opnieuw tekenen: grid-states, teller, chips, knopstatus
@@ -3482,7 +3503,14 @@ const TAGS = ["liefde", "werk", "geld", "groei", "keuze", "familie", "vriendscha
 
 // Bouw het uitleg-scherm op uit een reading ({ leggingId, vraag, kaarten, notitie, tags })
 function bouwUitleg(reading, alleenLezen) {
-  const legging = leggingVind(reading.leggingId);
+  // fallback als de legging niet (meer) gevonden wordt — dan crasht de app niet
+  const legging = leggingVind(reading.leggingId) || {
+    id: reading.leggingId,
+    naam: reading.leggingId,
+    posities: reading.kaarten.map((_, i) => ({ label: "Positie " + (i + 1), uitleg: "" })),
+    template: null,
+    speciaal: null
+  };
   document.getElementById("uitleg-kicker").textContent =
     (reading.voorWie ? "voor " + reading.voorWie + " · " : "") + legging.naam + " · " + datumNL(new Date());
   document.getElementById("uitleg-titel").textContent = reading.vraag || (reading.voorWie ? "Reading voor " + reading.voorWie : legging.naam);
@@ -3540,7 +3568,14 @@ function bouwUitleg(reading, alleenLezen) {
   let debounce = null;
   vak.oninput = () => {
     reading.notitie = vak.value;
-    if (!alleenLezen) slaConceptOp();
+    if (!alleenLezen) {
+      slaConceptOp();
+    } else if (reading.id) {
+      // Bij een heropende, opgeslagen reading: notitie direct terugschrijven in de geschiedenis
+      const hist = lees("tarot_geschiedenis", []);
+      const item = hist.find(h => h.id === reading.id);
+      if (item) { item.notitie = vak.value; schrijf("tarot_geschiedenis", hist); }
+    }
     melding.hidden = false;
     clearTimeout(debounce);
     debounce = setTimeout(() => { melding.hidden = true; }, 1600);
@@ -3576,6 +3611,17 @@ function bouwUitleg(reading, alleenLezen) {
   document.getElementById("neemmee-sectie").style.display = alleenLezen ? "none" : "";
   document.getElementById("opslaan-knop").onclick = () => slaReadingOp(reading);
   document.getElementById("deel-knop").onclick = () => deelReading(legging, reading);
+
+  // --- bij een heropende reading: knop om dezelfde legging nog eens te doen ---
+  const nogEens = document.getElementById("nog-eens-knop");
+  nogEens.hidden = !alleenLezen;
+  nogEens.onclick = () => {
+    concept = { leggingId: reading.leggingId, vraag: "", voorWie: reading.voorWie || "", kaarten: [] };
+    slaConceptOp();
+    bouwVraagScherm();
+    pushScherm("scherm-vraag");
+    tril(10);
+  };
 }
 
 // Elementen-mix + kaart↔kaart-verbanden + rode draad + template + ja/nee-telling
@@ -3588,6 +3634,9 @@ function bouwVerbintenis(legging, reading) {
   mixEl.innerHTML = reading.kaarten.map((c, i) =>
     '<span class="element-chip">' + kaartVind(c.id).symbool + " " + namen[i] + ' — <span class="el-naam">' + emojis[els[i]] + " " + nl[els[i]] + "</span></span>"
   ).join("") + '<p class="mix-uitleg">' + mixTekst(els, namen) + "</p>";
+
+  // --- patronen: wat valt op aan de legging als geheel? ---
+  document.getElementById("patronen").innerHTML = patronenHtml(legging, reading);
 
   // --- kaart ↔ kaart: per opeenvolgende posities een verband-zin ---
   const verbandenEl = document.getElementById("kaart-verbanden");
@@ -3628,6 +3677,30 @@ function bouwVerbintenis(legging, reading) {
   }
 }
 
+// Patroon-chips voor de hele legging: hofkaarten, Grote Arcana, omkeringen, dominante kleur, cijfer-fase
+function patronenHtml(legging, reading) {
+  const kaarten = reading.kaarten.map(c => kaartVind(c.id)).filter(Boolean);
+  const hof = kaarten.filter(k => k.type === "klein" && k.nummer >= 11).length;
+  const groot = kaarten.filter(k => k.type === "groot").length;
+  const omg = reading.kaarten.filter(c => c.omgekeerd).length;
+  const kleuren = {};
+  kaarten.forEach(k => { if (k.kleur) kleuren[k.kleur] = (kleuren[k.kleur] || 0) + 1; });
+  const domKleur = Object.keys(kleuren).sort((a, b) => kleuren[b] - kleuren[a])[0];
+  const chips = [];
+  if (groot) chips.push("✨ " + groot + "× Grote Arcana — dit is een thema-gedreven reading, niet alleen ‘een kaart’");
+  if (hof) chips.push("🂠 " + hof + "× hofkaart — er spelen " + hof + (hof === 1 ? " persoon/energie" : " personen/energieën") + " mee in dit verhaal");
+  if (omg) chips.push("↧ " + omg + "× ondersteboven — er zit geblokkeerde of innerlijke energie in deze reading");
+  if (domKleur) chips.push((KLEUREN_INFO[domKleur] ? KLEUREN_INFO[domKleur].emoji + " " : "") + "Meest getrokken: " + kleuren[domKleur] + "× " + domKleur);
+  const nummers = kaarten.filter(k => k.type === "klein" && k.nummer <= 10).map(k => k.nummer);
+  if (nummers.length >= 2) {
+    const min = Math.min(...nummers), max = Math.max(...nummers);
+    const fase = min <= 4 ? "beginnen" : min <= 7 ? "het midden van" : "het einde van";
+    chips.push("🔢 Cijferkaarten " + min + " t/m " + max + " — je zit in de fase van " + fase + " de cyclus");
+  }
+  if (!chips.length) return "";
+  return '<div class="patronen">' + chips.map(c => '<span class="element-chip">' + c + "</span>").join("") + "</div>";
+}
+
 // Korte duiding van de elementen-combinatie
 function mixTekst(els, namen) {
   const tel = {};
@@ -3645,6 +3718,9 @@ function mixTekst(els, namen) {
   if (tel[dominant] === els.length && enkel[dominant]) {
     tekst += "Alles ademt " + enkel[dominant] + " — dit is een eensluidende, versterkte energie.";
   }
+  const aantalVerschillend = Object.keys(tel).filter(e => enkel[e]).length;
+  if (aantalVerschillend >= 3) tekst += "Drie of meer elementen samen: alle facetten van het leven spelen tegelijk — dit is een complete, veelzijdige reading. ";
+  if (tel.thema && tel.thema >= 2) tekst += "Meerdere Grote Arcana: dit is een heavy reading met een duidelijke lots-energie. ";
   return tekst;
 }
 
@@ -3669,7 +3745,7 @@ function verbandTussen(a, aOmg, b, bOmg) {
       "lucht-water": "Lucht + water: gevoel en gedachten in gesprek — soms troebel, soms verhelderend.",
       "vuur-water": "Vuur + water: actie botst op gevoel — óf het wordt stoom: passie die kookt of verdampt.",
       "aarde-aarde": "Twee keer aarde: alles is tastbaar en praktisch — dit gaat over het échte leven.",
-      "lucht-lucht": "Twee keer lucht: alles zit in gedachten en woorden — er is만 mening, weinig actie.",
+      "lucht-lucht": "Twee keer lucht: alles zit in gedachten en woorden — er is vooral mening, weinig actie.",
       "vuur-vuur": "Twee keer vuur: dubbele dosis passie — of dubbele dosis drama.",
       "water-water": "Twee keer water: alles stroomt van gevoel — mooi, maar let op dat het niet overspoelt."
     };
@@ -3740,6 +3816,7 @@ function slaReadingOp(reading) {
   schrijf("tarot_geschiedenis", geschiedenis);
   schrijf("tarot_concept", null);
   concept = null;
+  tril(25);
   confettiMoment();
   toast("Reading opgeslagen — zie het tabblad Geschiedenis");
   // terug naar het startscherm
@@ -4024,9 +4101,30 @@ function applyInstellingen() {
   document.documentElement.style.colorScheme = licht ? "light" : "dark";
 }
 
+// Statistiekblok in het Meer-tabblad: hoeveel readings, streak, meest getrokken kaarten
+function renderStats() {
+  const el = document.getElementById("meer-stats");
+  if (!el) return;
+  const hist = lees("tarot_geschiedenis", []);
+  const streak = dagkaartStreak();
+  const tel = {};
+  hist.forEach(r => (r.kaarten || []).forEach(c => { tel[c.id] = (tel[c.id] || 0) + 1; }));
+  const top = Object.entries(tel).sort((a, b) => b[1] - a[1]).slice(0, 3)
+    .map(([id, n]) => { const k = kaartVind(id); return k ? k.symbool + " " + k.naam_nl + " (" + n + "×)" : ""; })
+    .filter(Boolean);
+  const rij = (label, waarde) => '<div class="meer-rij"><span>' + label + '</span><span class="meer-waarde">' + waarde + "</span></div>";
+  el.innerHTML =
+    rij("Readingen opgeslagen", String(hist.length)) +
+    rij("Dagkaart-streak", streak > 0 ? streak + (streak === 1 ? " dag" : " dagen") + " op rij" : "nog geen") +
+    rij("Favoriete kaarten", String(lees("tarot_favorieten", []).length)) +
+    rij("Eigen leggingen", String(lees("tarot_eigen_leggingen", []).length)) +
+    (top.length ? rij("Meest getrokken", top.join(" · ")) : "");
+}
+
 function renderMeer() {
   document.getElementById("meer-datum").innerHTML = datumNL(new Date()) + " " + sterSvg();
   document.getElementById("meer-naam-waarde").textContent = lees("tarot_naam", "Samir");
+  renderStats();
   document.querySelectorAll("#inst-tekst button").forEach(b => {
     b.classList.toggle("actief", b.dataset.grootte === lees("tarot_tekstgrootte", "normaal"));
   });
