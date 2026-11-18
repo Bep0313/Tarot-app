@@ -1,16 +1,16 @@
 Upload ALLEEN de 7 bestanden uit deze map naar de root van je GitHub-repo Tarot-app
 (Add file → Upload files; ze overschrijven de oude).
 
-Wat er nieuw is in v24 — de emoji's zijn vervangen door ECHTE kaart-plaatjes:
-- Elke van de 78 kaarten heeft een eigen, gedetailleerde SVG-illustratie in de app-stijl
-  (donker indigo + goud): alle 22 Grote Arcana zijn los getekend (toren+bliksem, zon met
-  gezicht, ster met figuur aan het water, enz.), de 56 kleine kaarten worden automatisch
-  opgebouwd uit hun kleur/nummer/hof-rol (pips, figuren, paarden, tronen)
-- 3D-effect: in de kaart-detail en de popup kantelt de kaart met je vinger (parallax-lagen
-  + glans-veeg). In het grid en de gekozen-balk zie je mini-versies van dezelfde art
-- Nieuw bestand in de broncode: js/kaart-art.js (de "tekenmachine" — hier kun je later
-  zelf een kaart-scène aanpassen)
+Wat er nieuw is in v25 — kaarten vullen nu de HELE tegel en zijn Gedetailleerder:
+- In het kaarten-grid en de bibliotheek is de tegel nu zélf de kaart: de illustratie vult
+  de hele tegel (frame + nummer + naam zitten ín de kaart), geen losse emoji meer ernaast
+- Kaart-frame heeft nu gouden hoek-ornamenten, een sterretje onder het nummer en een
+  zachte vignette (donkere randen) voor diepte
+- Cijferkaarten hebben een groot, transparant kleur-symbool als watermark achter de pips
+- Omgevingen per element rijker: vuur = meer vonken + gloed, water = meer golfjes +
+  leliebladen + waterlelies, lucht = extra wolken + vogels, aarde = bloemen + stenen + pad
+- Detail-pagina: kaart is groter (240px) en kantelt nog steeds in 3D met je vinger
 
-Getest: alle 78 kaarten renderen zonder fouten, grid/bibliotheek/detail/popup werken.
+Getest: 78/78 kaarten renderen zonder fouten; grid, bibliotheek en detail gecheckt.
 
 Daarna: app 2x openen op iPhone/iPad (cache refresh), of beginscherm-icoon opnieuw toevoegen.
