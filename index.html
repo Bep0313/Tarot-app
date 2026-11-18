@@ -38,7 +38,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=28 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=29 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    TAROT VAN SAMIR — style.css
@@ -1266,16 +1266,32 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
 .kaart-chip { position: relative; padding: 0; overflow: hidden; aspect-ratio: 3 / 5; }
 .kaart-chip .chip-symbool { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; font-size: 0; }
 .kaart-chip .chip-symbool svg { width: 100%; height: 100%; border-radius: 0; box-shadow: none; }
-/* nummer en naam staan al ín de kaart-illustratie (in het frame) */
-.kaart-chip .chip-nummer, .kaart-chip .chip-naam { display: none; }
+.kaart-chip .chip-symbool .kaart-foto { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* nummer staat in de scan zelf; EN-naam als pill bovenaan, NL-naam als overlay onderaan */
+.kaart-chip .chip-nummer { display: none; }
+.kaart-chip .chip-naam {
+  display: block; position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
+  padding: 18px 4px 6px; text-align: center; color: #F4DE9E;
+  font-size: calc(10.5px * var(--tekst-schaal)); font-weight: 600;
+  background: linear-gradient(transparent, rgba(10, 8, 30, .9));
+}
+.chip-en {
+  position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 3;
+  max-width: 92%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: calc(8.5px * var(--tekst-schaal)); letter-spacing: .05em; text-transform: uppercase;
+  color: #F4DE9E; background: rgba(12, 10, 34, .55); border: 1px solid rgba(232, 200, 116, .35);
+  padding: 2px 8px; border-radius: 999px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
 .chip-face { padding: 0; overflow: hidden; aspect-ratio: 3 / 5; }
 .chip-face .chip-symbool { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; font-size: 0; }
 .chip-face .chip-symbool svg { width: 100%; height: 100%; border-radius: 13px; }
+.chip-face .chip-symbool .kaart-foto { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 13px; }
 .chip-face .chip-nummer, .chip-face .chip-naam { display: none; }
 .chip-face .stand { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); margin: 0; }
 .scene3d { perspective: 900px; display: flex; justify-content: center; touch-action: none; }
 .card3d { position: relative; transform-style: preserve-3d; transition: transform .18s ease-out; border-radius: 16px; }
 .card3d svg { display: block; width: 100%; height: 100%; border-radius: 16px; }
+.card3d .kaart-foto { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
 .card3d .layer { transform: translateZ(var(--z, 0px)); transform-style: preserve-3d; }
 .glare {
   position: absolute; inset: 0; border-radius: 16px; pointer-events: none;
@@ -3389,6 +3405,25 @@ function kaartArt(kaart) {
 </svg>`;
 }
 
+// ---- echte Rider-Waite-scans (publiek domein, via Wikimedia Commons) -------
+// kaartBeeld() gebruikt de echte kaart-foto (kaart-<id>.jpg in de repo-root).
+// Als die (nog) niet geladen kan worden, valt automatisch terug op de
+// SVG-illustratie hierboven — de app blijft dus altijd werken.
+function kaartBeeld(kaart) {
+  return `<img class="kaart-foto" src="kaart-${kaart.id}.jpg" alt="${kaart.naam_nl} (${kaart.naam_en})" loading="lazy" decoding="async" draggable="false" data-id="${kaart.id}">`;
+}
+
+// Vangnet: als een kaart-foto niet geladen kan worden (nog niet geüpload),
+// vervang hem dan door de SVG-illustratie. (capture-fase pakt img-errors op)
+document.addEventListener("error", e => {
+  const t = e.target;
+  if (t && t.tagName === "IMG" && t.classList && t.classList.contains("kaart-foto") && !t.dataset.fallback) {
+    t.dataset.fallback = "1";
+    const k = KAARTEN.find(x => x.id === t.dataset.id);
+    if (k) t.outerHTML = kaartArt(k);
+  }
+}, true);
+
 // ---- 3D-tilt: bind aan een scene-container --------------------------------
 // sceneEl = element met perspective, cardEl = de kaart, glareEl = glans-laag
 function bindTilt(sceneEl, cardEl, glareEl) {
@@ -4010,8 +4045,8 @@ function bouwKaartenGrid() {
       b.style.setProperty("--i", teller % 24);
       teller++;
       b.innerHTML =
-        '<span class="chip-nummer">' + nummerLabel(kaart) + "</span>" +
-        '<span class="chip-symbool">' + kaartArt(kaart) + "</span>" +
+        '<span class="chip-en">' + kaart.naam_en + "</span>" +
+        '<span class="chip-symbool">' + kaartBeeld(kaart) + "</span>" +
         '<span class="chip-naam">' + kaart.naam_nl + "</span>" +
         '<span class="positie-badge" hidden></span>';
       b.addEventListener("click", () => tikKaart(kaart.id));
@@ -4113,15 +4148,15 @@ function bouwGekozenChip(c, index) {
     '<div class="flip-inner">' +
       '<div class="chip-face front">' +
         '<span class="chip-positie">' + (index + 1) + "</span>" +
-        '<span class="chip-nummer">' + nummerLabel(kaart) + "</span>" +
-        '<span class="chip-symbool">' + kaartArt(kaart) + "</span>" +
+        '<span class="chip-en">' + kaart.naam_en + "</span>" +
+        '<span class="chip-symbool">' + kaartBeeld(kaart) + "</span>" +
         '<span class="chip-naam">' + kaart.naam_nl + "</span>" +
         '<span class="stand rechtop">Rechtop</span>' +
       "</div>" +
       '<div class="chip-face back">' +
         '<span class="chip-positie">' + (index + 1) + "</span>" +
-        '<span class="chip-nummer">' + nummerLabel(kaart) + "</span>" +
-        '<span class="chip-symbool">' + kaartArt(kaart) + "</span>" +
+        '<span class="chip-en">' + kaart.naam_en + "</span>" +
+        '<span class="chip-symbool">' + kaartBeeld(kaart) + "</span>" +
         '<span class="chip-naam">' + kaart.naam_nl + "</span>" +
         '<span class="stand omgekeerd">↧ Ondersteboven</span>' +
       "</div>" +
@@ -4450,7 +4485,7 @@ function toonKaartPopup(id) {
   const kaartEl = document.getElementById("kaart-popup-kaart");
   kaartEl.innerHTML =
     '<div class="scene3d popup-scene" id="popup-scene"><div class="card3d popup-kaart3d" id="popup-kaart3d">' +
-      kaartArt(kaart) + '<div class="glare" id="popup-glare"></div></div></div>' +
+      kaartBeeld(kaart) + '<div class="glare" id="popup-glare"></div></div></div>' +
     "<h3>" + kaart.symbool + " " + kaart.naam_nl + "</h3>" +
     '<p class="popup-kernwoord">' + kaart.kernwoord + " · " + kaart.naam_en + "</p>" +
     '<div class="popup-rij"><p class="popup-label">Thema</p><p>' + themaVan(kaart) + "</p></div>" +
@@ -4706,8 +4741,8 @@ function renderBibliotheek() {
       teller++;
       b.innerHTML =
         (favs.includes(kaart.id) ? '<span class="positie-badge" style="left:auto;right:-7px">★</span>' : "") +
-        '<span class="chip-nummer">' + nummerLabel(kaart) + "</span>" +
-        '<span class="chip-symbool">' + kaartArt(kaart) + "</span>" +
+        '<span class="chip-en">' + kaart.naam_en + "</span>" +
+        '<span class="chip-symbool">' + kaartBeeld(kaart) + "</span>" +
         '<span class="chip-naam">' + kaart.naam_nl + "</span>";
       b.addEventListener("click", () => openKaartDetail(kaart.id));
       rij.appendChild(b);
@@ -4737,7 +4772,7 @@ function openKaartDetail(id) {
 
   document.getElementById("kd-inhoud").innerHTML =
     '<div class="kd-hero"><div class="scene3d" id="kd-scene"><div class="card3d kd-kaart" id="kd-kaart">' +
-      kaartArt(k) + '<div class="glare" id="kd-glare"></div></div></div>' +
+      kaartBeeld(k) + '<div class="glare" id="kd-glare"></div></div></div>' +
     '<p class="kd-kernwoord">' + k.kernwoord + '</p>' +
     '<p class="kd-vertaling">“' + k.vertaling + '”</p></div>' +
     '<p class="kd-tilt-hint">beweeg over de kaart voor 3D</p>' +

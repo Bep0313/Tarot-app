@@ -1,26 +1,27 @@
-Upload ALLEEN de 7 bestanden uit deze map naar de root van je GitHub-repo Tarot-app
-(Add file → Upload files; ze overschrijven de oude).
+Upload ALLE 85 bestanden uit deze map naar de root van je GitHub-repo Tarot-app
+(Add file → Upload files; ze overschrijven/toevoegen automatisch).
 
-v28 = alles van de afgelopen requests samen (v27 is overgeslagen omdat daar een bug in zat):
+- 7 app-bestanden: index.html, sw.js, manifest.webmanifest, icon.svg, icon-192.png,
+  icon-512.png, apple-touch-icon.png
+- 78 kaart-afbeeldingen: kaart-<naam>.jpg (de echte Rider-Waite-kaarten, publiek domein)
 
-1. Wachtwoordscherm HELEMAAL weg — de app opent direct (na het korte opstartscherm).
-   Ook weg: wachtwoord-stap in de onboarding (nu 3 stappen) en “Wachtwoord wijzigen” in Meer.
-2. Sync iPhone ↔ iPad via iCloud Drive: in Meer → “Exporteer data-bestand” → kies in het
-   deelscherm “Bewaar in Bestanden” → iCloud Drive. Op je andere apparaat: Importeer uit JSON
-   → kies dat bestand. Geschiedenis/favorieten/eigen leggingen worden SAMENGEVOEGD (niets raakt kwijt).
-   (Volautomatische sync zonder server kan technisch niet — dit iCloud-bestand is de sync.)
-3. Kaarten-mooier: nieuwe elegante kelk (bekers), figuren met haar-kap + ceintuur (ook de Pages),
-   De Gehangene/Kracht/Keizer/Zegewagen opnieuw getekend, Engelse naam staat nu óp elke kaart
-   (onder de Nederlandse naam, in het frame) en de zoekbalk zoekt al op NL + EN.
-4. Layout: 3 kaarten per rij op telefoon, op iPad/breed scherm bredere inhoud (780px, 3 per rij;
-   heel breed 980px, 4 per rij) — geen lege zijkanten meer. Kaart-rondingen kloppen nu (chip clipt
-   de kaart zelf), minder lege ruimte onderaan.
-5. Leggingen: elke legging heeft nu een “hoe lees je dit”-tip op het vraag-scherm.
-6. De verbintenis in de uitleg is uitgebreider: eerst “Elke kaart in zijn positie” (positie-label +
-   kaart + kernwoord + eerste zin van de betekenis), daarna de kaart↔kaart-verbanden, patronen,
-   elementen-mix en de rode draad.
+v29 = DE ECHTE KAARTEN:
 
-Getest: alle 78 kaarten renderen met EN-naam, nul JS-fouten, wachtwoordscherm afwezig,
-tip + 10 verbanden-rijen in een 5-kaart reading gecheckt.
+1. Alle 78 kaarten gebruiken nu de echte Rider-Waite-scans (hoogwaardig, publiek domein,
+   van Wikimedia Commons) in plaats van de zelfgetekende SVG's. De 3D-tilt + glans-laag
+   erboven blijven gewoon werken: in de Bibliotheek, bij het kiezen van kaarten, in de
+   gekozen-balk, in de popup en op de detail-pagina.
+2. Engelse naam (bv. "THE MAGICIAN") staat als gouden pill bovenaan elke kaart-chip;
+   de Nederlandse naam staat onderaan over de kaart heen. Zo match je makkelijk met je
+   fysieke Engelse deck.
+3. Vangnet: als een kaart-afbeelding niet geladen kan worden (bv. nóg niet geüpload),
+   wisselt de app automatisch terug naar de oude SVG-illustratie — de app werkt altijd.
+4. Alles zit in v29: wachtwoordscherm weg, onboarding 3 stappen, iCloud-sync (export/
+   import JSON in Meer), iPad/iOS layout, tips bij leggingen, uitgebreide verbintenis.
 
-Daarna: app 2x openen op iPhone/iPad (cache refresh), of beginscherm-icoon opnieuw toevoegen.
+Getest (headless): 78/78 kaart-afbeeldingen laden, 78 chips met <img> (0 fallbacks),
+EN-pills zichtbaar, detail-pagina met 3D-kaart OK, nul JS-fouten.
+
+Uploaden: 85 bestanden in één keer selecteren mag. Daarna op iPhone/iPad de app 2x
+openen (of beginscherm-icoon opnieuw toevoegen) zodat de nieuwe cache (v29) pakt.
+De 78 jpg's worden door de service worker gecached — daarna laadt alles offline.
