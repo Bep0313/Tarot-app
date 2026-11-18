@@ -18,20 +18,25 @@
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <!-- Safari-statusbalk kleurt mee in het donker-indigo -->
-  <meta name="theme-color" content="#0B0A1E">
+  <!-- Safari-statusbalk kleurt mee: donker-indigo in nachtmodus, crème in ochtendmodus.
+       De app heeft een eigen thema-schakelaar, dus JS zet deze meta ook dynamisch (zie js/app.js). -->
+  <meta name="theme-color" id="meta-thema" content="#0B0A1E">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F4F1EA">
+  <!-- color-scheme: zo rendert Safari o.a. scrollbalken en formuliervelden in de juiste mode -->
+  <meta name="color-scheme" content="dark light">
   <meta name="description" content="Persoonlijke tarot-app van Samir: leggingen, 78 Rider-Waite kaarten, reflectie en dagboek. Werkt offline, zonder accounts.">
   <meta name="format-detection" content="telephone=no">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="apple-touch-startup-image" href="opstart-afbeelding.png">
+  <link rel="apple-touch-startup-image" href="opstart-afbeelding.png" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- black-translucent: de app tekent zélf onder de statusbalk door, en theme-color kleurt de balk mee -->
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Tarot van Samir">
   <title>Tarot van Samir</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <!-- ?v=20 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
+  <!-- ?v=22 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    TAROT VAN SAMIR — style.css
@@ -68,6 +73,13 @@
 /* BELANGRIJK: zonder dit wint een eigen display-stijl het van het hidden-attribuut */
 [hidden] { display: none !important; }
 
+html {
+  height: 100%;
+  /* iOS mag tekst nóóit spontaan vergroten (anders springt de layout bij landscape) */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 html, body {
   height: 100%;
   overscroll-behavior: none;           /* geen "rubber band" bovenaan */
@@ -83,6 +95,7 @@ body {
     radial-gradient(70% 45% at 8% 108%, rgba(232, 200, 116, 0.05), transparent 60%),
     var(--bg);
   background-attachment: fixed;
+  color-scheme: dark;                  /* donkere scrollbalken/formulieren in nachtmodus */
   -webkit-user-select: none;           /* geen tekstselectie bij tikken */
   user-select: none;
   -webkit-tap-highlight-color: transparent; /* geen grijs flitsje bij tikken */
@@ -1150,6 +1163,7 @@ body.geen-omgekeerd .chip-flip { display: none !important; }
 
 /* Ochtend-modus (licht thema): alle变量 meekleuren */
 body.licht {
+  color-scheme: light;                 /* lichte scrollbalken/formulieren in ochtendmodus */
   --bg: #F4F1EA;
   --glow: #EAE2F8;
   --vlak: rgba(255, 255, 255, 0.78);
@@ -1735,6 +1749,8 @@ function leggingVind(id) {
   return LEGGINGEN.find(l => l.id === id) || null;
 }
 
+</script>
+  <script>
 /* ============================================================
    js/kaarten.js — ALLE 78 RIDER-WAITE KAARTEN
    ------------------------------------------------------------
@@ -2616,6 +2632,8 @@ function kaartVind(id) {
   return KAARTEN.find(k => k.id === id) || null;
 }
 
+</script>
+  <script>
 /* ============================================================
    js/app.js — de "motor" van de app
    ------------------------------------------------------------
@@ -3997,8 +4015,13 @@ bibZoekVeld.addEventListener("input", () => { bibZoek = bibZoekVeld.value.trim()
 function applyInstellingen() {
   const grootte = lees("tarot_tekstgrootte", "normaal");
   document.documentElement.style.setProperty("--tekst-schaal", grootte === "groot" ? "1.22" : "1");
-  document.body.classList.toggle("licht", lees("tarot_thema", "donker") === "licht");
+  const licht = lees("tarot_thema", "donker") === "licht";
+  document.body.classList.toggle("licht", licht);
   document.body.classList.toggle("geen-omgekeerd", lees("tarot_lees_omgekeerd", true) === false);
+  // Safari-statusbalk + browser-UI mee laten kleuren met het gekozen thema
+  const metaThema = document.querySelector('meta[name="theme-color"]#meta-thema');
+  if (metaThema) metaThema.setAttribute("content", licht ? "#F4F1EA" : "#0B0A1E");
+  document.documentElement.style.colorScheme = licht ? "light" : "dark";
 }
 
 function renderMeer() {
