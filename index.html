@@ -38,7 +38,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=29 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=30 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    TAROT VAN SAMIR — style.css
@@ -824,8 +824,6 @@ body::before {
 }
 .chip-face.back { transform: rotateY(180deg); border-color: rgba(232, 139, 139, 0.55); background: linear-gradient(165deg, rgba(96, 48, 66, 0.85), rgba(30, 20, 44, 0.95)); }
 .chip-face .chip-symbool { font-size: 24px; }
-.chip-face .chip-naam { font-size: 10px; }
-.chip-face .chip-nummer { font-size: 9px; }
 .stand { font-size: 9px; font-weight: 700; letter-spacing: 0.04em; padding: 3px 7px; border-radius: 999px; margin-top: 2px; }
 .stand.rechtop { color: var(--goud); background: rgba(232, 200, 116, 0.14); border: 1px solid rgba(232, 200, 116, 0.4); }
 .stand.omgekeerd { color: var(--roze); background: rgba(232, 139, 139, 0.14); border: 1px solid rgba(232, 139, 139, 0.45); }
@@ -1267,13 +1265,23 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
 .kaart-chip .chip-symbool { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; font-size: 0; }
 .kaart-chip .chip-symbool svg { width: 100%; height: 100%; border-radius: 0; box-shadow: none; }
 .kaart-chip .chip-symbool .kaart-foto { width: 100%; height: 100%; object-fit: cover; display: block; }
-/* nummer staat in de scan zelf; EN-naam als pill bovenaan, NL-naam als overlay onderaan */
-.kaart-chip .chip-nummer { display: none; }
-.kaart-chip .chip-naam {
+/* Uniform op ALLE kaarten: EN-naam als pill bovenaan, NL-naam als overlay onderaan */
+.kaart-chip .chip-naam, .chip-face .chip-naam, .card3d .chip-naam {
   display: block; position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
   padding: 18px 4px 6px; text-align: center; color: #F4DE9E;
   font-size: calc(10.5px * var(--tekst-schaal)); font-weight: 600;
   background: linear-gradient(transparent, rgba(10, 8, 30, .9));
+}
+.card3d .chip-naam { border-radius: 0 0 16px 16px; }
+body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht .card3d .chip-naam { color: #F4DE9E; }
+/* fijn goud randje om elke kaart-foto — uniform kader */
+.kaart-chip .chip-symbool::after, .chip-face .chip-symbool::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(232, 200, 116, .30);
+}
+.card3d::after {
+  content: ""; position: absolute; inset: 0; border-radius: 16px; pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(232, 200, 116, .30);
 }
 .chip-en {
   position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 3;
@@ -1286,8 +1294,7 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
 .chip-face .chip-symbool { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; font-size: 0; }
 .chip-face .chip-symbool svg { width: 100%; height: 100%; border-radius: 13px; }
 .chip-face .chip-symbool .kaart-foto { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 13px; }
-.chip-face .chip-nummer, .chip-face .chip-naam { display: none; }
-.chip-face .stand { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); margin: 0; }
+.chip-face .stand { position: absolute; top: 27px; bottom: auto; left: 50%; transform: translateX(-50%); margin: 0; }
 .scene3d { perspective: 900px; display: flex; justify-content: center; touch-action: none; }
 .card3d { position: relative; transform-style: preserve-3d; transition: transform .18s ease-out; border-radius: 16px; }
 .card3d svg { display: block; width: 100%; height: 100%; border-radius: 16px; }
@@ -4006,12 +4013,6 @@ function bouwVraagScherm() {
 
 /* ---------- 7e. KAARTEN KIEZEN ---------- */
 
-function nummerLabel(kaart) {
-  if (kaart.type === "groot") return String(kaart.nummer);
-  if (kaart.nummer <= 10) return String(kaart.nummer);
-  return { 11: "XI", 12: "XII", 13: "XIII", 14: "XIV" }[kaart.nummer];
-}
-
 function bouwKaartenScherm() {
   const legging = leggingVind(concept.leggingId);
   document.getElementById("kaarten-titel").textContent = legging.naam;
@@ -4485,7 +4486,7 @@ function toonKaartPopup(id) {
   const kaartEl = document.getElementById("kaart-popup-kaart");
   kaartEl.innerHTML =
     '<div class="scene3d popup-scene" id="popup-scene"><div class="card3d popup-kaart3d" id="popup-kaart3d">' +
-      kaartBeeld(kaart) + '<div class="glare" id="popup-glare"></div></div></div>' +
+      kaartBeeld(kaart) + '<span class="chip-en">' + kaart.naam_en + '</span><span class="chip-naam">' + kaart.naam_nl + '</span><div class="glare" id="popup-glare"></div></div></div>' +
     "<h3>" + kaart.symbool + " " + kaart.naam_nl + "</h3>" +
     '<p class="popup-kernwoord">' + kaart.kernwoord + " · " + kaart.naam_en + "</p>" +
     '<div class="popup-rij"><p class="popup-label">Thema</p><p>' + themaVan(kaart) + "</p></div>" +
@@ -4772,7 +4773,7 @@ function openKaartDetail(id) {
 
   document.getElementById("kd-inhoud").innerHTML =
     '<div class="kd-hero"><div class="scene3d" id="kd-scene"><div class="card3d kd-kaart" id="kd-kaart">' +
-      kaartBeeld(k) + '<div class="glare" id="kd-glare"></div></div></div>' +
+      kaartBeeld(k) + '<span class="chip-en">' + k.naam_en + '</span><span class="chip-naam">' + k.naam_nl + '</span><div class="glare" id="kd-glare"></div></div></div>' +
     '<p class="kd-kernwoord">' + k.kernwoord + '</p>' +
     '<p class="kd-vertaling">“' + k.vertaling + '”</p></div>' +
     '<p class="kd-tilt-hint">beweeg over de kaart voor 3D</p>' +
