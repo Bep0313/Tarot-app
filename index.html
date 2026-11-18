@@ -38,7 +38,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=26 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=28 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    TAROT VAN SAMIR — style.css
@@ -143,11 +143,11 @@ body::before {
   inset: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;   /* Amerikaans scrollen op iPhone (momentum) */
-  padding: calc(env(safe-area-inset-top) + 24px) 16px calc(env(safe-area-inset-bottom) + 112px);
+  padding: calc(env(safe-area-inset-top) + 24px) 16px calc(env(safe-area-inset-bottom) + 96px);
   scrollbar-width: none;               /* geen scrollbalk in de app */
   /* Content fadet zacht weg aan de randen (iOS-gevoel) */
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 56px), transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 56px), transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 36px), transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 36px), transparent 100%);
 }
 .scherm::-webkit-scrollbar { display: none; }
 .scherm[hidden] { display: none; }
@@ -731,12 +731,12 @@ body::before {
   margin: 24px 4px 10px;
   display: flex; align-items: center; gap: 8px;
 }
-.grid-rij { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.grid-rij { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 
 .kaart-chip {
   position: relative;
-  aspect-ratio: 5 / 8;
-  border-radius: 13px;
+  aspect-ratio: 3 / 5;
+  border-radius: 14px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0) 42%),
     rgba(32, 28, 66, 0.82);
@@ -1233,16 +1233,24 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
 .verband-rij.rode-draad { border-color: rgba(232, 200, 116, 0.35); background: linear-gradient(135deg, rgba(232,200,116,0.10), rgba(122,90,248,0.10)); }
 
 /* ---------- 21. iPad / grote schermen: content gecentreerd, niet uitgerekt ---------- */
+/* iPad / breder scherm: content ruimer en gecentreerd, 3 grote kaarten per rij */
 @media (min-width: 700px) {
-  .scherm { max-width: 680px; margin-left: auto; margin-right: auto; }
+  .scherm { max-width: 780px; margin-left: auto; margin-right: auto; }
+  .grid-rij { grid-template-columns: repeat(3, 1fr); gap: 16px; }
   #tabbalk, .gekozen-balk {
     left: 50%;
     right: auto;
     transform: translateX(-50%);
-    width: calc(100% - 24px);
-    max-width: 656px;
+    width: calc(100% - 32px);
+    max-width: 748px;
   }
-  .sheet { max-width: 680px; margin: 0 auto; }
+  .sheet { max-width: 780px; margin: 0 auto; }
+}
+@media (min-width: 1100px) {
+  .scherm { max-width: 980px; }
+  .grid-rij { grid-template-columns: repeat(4, 1fr); }
+  #tabbalk, .gekozen-balk { max-width: 948px; }
+  .sheet { max-width: 980px; }
 }
 
 /* ---------- 22. TOEGANKELIJKHEID: minder beweging als de iPhone dat vraagt ---------- */
@@ -1279,6 +1287,9 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
 .popup-kaart3d { width: 150px; aspect-ratio: 3 / 5; margin: 0 auto 12px; filter: drop-shadow(0 16px 30px rgba(0,0,0,.5)); }
 .kd-tilt-hint { text-align: center; color: var(--sec); font-size: calc(11px * var(--tekst-schaal)); margin: -6px 0 12px; }
 @media (prefers-reduced-motion: reduce) { .card3d { transition: none; } }
+
+/* tip bij de legging op het vraag-scherm */
+.vraag-tip { color: var(--sec); font-size: calc(13.5px * var(--tekst-schaal)); line-height: 1.55; margin: -6px 4px 14px; font-style: italic; }
 
 </style>
 </head>
@@ -1399,10 +1410,6 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
             <span class="meer-waarde" id="meer-naam-waarde"></span>
             <svg class="meer-pijl" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <button class="meer-rij" id="inst-wachtwoord">
-            <span>Wachtwoord wijzigen</span>
-            <svg class="meer-pijl" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
           <div class="meer-rij">
             <span>Tekstgrootte</span>
             <span class="seg" id="inst-tekst">
@@ -1432,12 +1439,12 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
         </div>
 
         <div class="meer-groep">
-          <p class="meer-groep-titel">Synchroniseer iPhone ↔ iPad (via AirDrop, geen server)</p>
+          <p class="meer-groep-titel">Synchroniseer iPhone ↔ iPad (via iCloud Drive, geen server)</p>
           <button class="meer-rij" id="inst-sync-deel">
-            <span>Deel mijn data naar iPad (AirDrop)</span>
+            <span>Exporteer data-bestand (bewaar in iCloud Drive)</span>
             <svg class="meer-pijl" viewBox="0 0 24 24"><path d="M12 3v12M12 3l-4 4M12 3l4 4M6 13v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <p class="meer-versie" style="text-align:left;margin:2px 6px 0">Exporteert alles als JSON-bestand en opent het iOS-deelscherm — kies AirDrop naar je iPad. Daarna op de iPad: importeren (zie hieronder).</p>
+          <p class="meer-versie" style="text-align:left;margin:2px 6px 0">Stap 1: tik hieronder en kies in het deelscherm “Bewaar in Bestanden” → iCloud Drive. Stap 2: op je iPad/iPhone open je de app → Importeer uit JSON → kies hetzelfde bestand uit iCloud Drive. De geschiedenis wordt samengevoegd (niets raakt kwijt). Automatische sync zonder server kan helaas niet — dit bestand in iCloud is de sync.</p>
         </div>
 
         <div class="meer-groep">
@@ -1459,20 +1466,6 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
         <p class="meer-versie">Tarot van Samir · lokaal, offline, zonder accounts of AI</p>
       </section>
 
-      <!-- ================= SCHERM 0: WACHTWOORD (slot) ================= -->
-      <section class="scherm scherm-slot" id="scherm-wachtwoord" hidden>
-        <div class="slot-kaart">
-          <div class="slot-icoon">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="15.2" r="1.4" fill="currentColor"/></svg>
-          </div>
-          <h1 class="slot-titel">Welkom terug</h1>
-          <p class="slot-onder">Voer je wachtwoord in om je tarot-dagboek te openen.</p>
-          <input type="password" id="wachtwoord-invoer" class="invoer" placeholder="Wachtwoord" autocomplete="current-password" autocapitalize="off">
-          <p class="slot-fout" id="wachtwoord-fout" hidden>Dat wachtwoord klopt niet — probeer het opnieuw.</p>
-          <button class="knop" id="ontgrendel-knop">Ontgrendel</button>
-        </div>
-      </section>
-
       <!-- ================= ONBOARDING (alleen de eerste keer) ================= -->
       <section class="scherm scherm-slot" id="scherm-onboarding" hidden>
         <!-- De 4 stapjes worden hier door JavaScript in gevuld -->
@@ -1491,6 +1484,7 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
             <h1 class="sub-titel" id="vraag-titel"></h1>
           </div>
         </header>
+        <p class="vraag-tip" id="vraag-tip"></p>
         <div class="vraag-kaart">
           <label class="vraag-label" for="voorwie-invoer">Voor wie is deze reading? <span class="optioneel">(optioneel)</span></label>
           <input type="text" id="voorwie-invoer" class="invoer" placeholder="Naam van de persoon..." maxlength="40">
@@ -1637,6 +1631,7 @@ const LEGGINGEN = [
     naam: "Dagkaart",
     aantal: 1,
     wanneer: "Elke ochtend één kaart als energie van de dag.",
+    tip: "Lees de kaart als de energie van vandaag: geen voorspelling, maar iets om vandaag bewust mee te doen.",
     posities: [
       { label: "De energie van vandaag", uitleg: "de kaart die vandaag met je meedoet" }
     ],
@@ -1649,6 +1644,7 @@ const LEGGINGEN = [
     naam: "Verleden / Heden / Toekomst",
     aantal: 3,
     wanneer: "De klassieker voor situaties die zich ontwikkelen.",
+    tip: "Lees van links naar rechts: wat was, wat leeft nu, wat kan komen. De middelste kaart is waar jij nu staat.",
     posities: [
       { label: "Verleden",   uitleg: "waar het begon" },
       { label: "Heden",      uitleg: "wat er nu leeft" },
@@ -1663,6 +1659,7 @@ const LEGGINGEN = [
     naam: "Situatie / Obstakel / Advies",
     aantal: 3,
     wanneer: "De standaard voor “wat moet ik weten over…”.",
+    tip: "De obstakelkaart is niet eng — die laat zien wat nu in de weg zit, waardoor het advies (3e kaart) scherp wordt.",
     posities: [
       { label: "Situatie",  uitleg: "waar het nu om gaat" },
       { label: "Obstakel",  uitleg: "wat in de weg staat" },
@@ -1677,6 +1674,7 @@ const LEGGINGEN = [
     naam: "Jij / De ander / De verbinding",
     aantal: 3,
     wanneer: "Voor relaties van elke soort.",
+    tip: "Kijk niet alleen naar de kaart van de ander: de verbinding (3e kaart) laat zien wat er tussen jullie leeft.",
     posities: [
       { label: "Jij",          uitleg: "jouw rol in dit moment" },
       { label: "De ander",     uitleg: "wat de ander inbrengt" },
@@ -1691,6 +1689,7 @@ const LEGGINGEN = [
     naam: "Optie A / Optie B / Wat je moet weten",
     aantal: 3,
     wanneer: "Voor keuzestress: je bent nieuwsgierig naar twee wegen.",
+    tip: "Vergelijk de twee opties niet op “beter”, maar op energie: welke weg voelt nu lichter? De 3e kaart vertelt wat bij beide hoort.",
     posities: [
       { label: "Optie A",            uitleg: "de eerste weg" },
       { label: "Optie B",            uitleg: "de tweede weg" },
@@ -1705,6 +1704,7 @@ const LEGGINGEN = [
     naam: "Ja/nee-check",
     aantal: 3,
     wanneer: "Rechtop telt als ja, ondersteboven als nee. Twee tegen één wint.",
+    tip: "Rechtop = ja, ondersteboven = nee. Bij 2-tegen-1 wint de meerderheid — kijk ook naar de betekenissen waarom.",
     posities: [
       { label: "Eerste stem",  uitleg: "rechtop = ja, ondersteboven = nee" },
       { label: "Tweede stem",  uitleg: "rechtop = ja, ondersteboven = nee" },
@@ -1719,6 +1719,7 @@ const LEGGINGEN = [
     naam: "Maandoverzicht",
     aantal: 4,
     wanneer: "Aan het begin van de maand: vier terreinen in één blik.",
+    tip: "Dit is maand-energie, geen dagvoorspelling. Kijk aan het eind van de maand terug: wat heb je er echt mee gedaan?",
     posities: [
       { label: "Werk",               uitleg: "je werk en ambities deze maand" },
       { label: "Liefde",             uitleg: "je relaties en connecties" },
@@ -1734,6 +1735,7 @@ const LEGGINGEN = [
     naam: "Energiescan",
     aantal: 5,
     wanneer: "Als je wilt weten wat je voedt en wat je leegtrekt.",
+    tip: "Wees eerlijk bij “wat negeer ik” — daar zit vaak de boodschap. De 5e kaart (boodschap) is de les voor deze periode.",
     posities: [
       { label: "Wat voedt me",        uitleg: "energie die je energie geeft" },
       { label: "Wat trekt me leeg",   uitleg: "energie die je kost" },
@@ -1750,6 +1752,7 @@ const LEGGINGEN = [
     naam: "Drieluik-verhaal",
     aantal: 3,
     wanneer: "Om de kaarten als één verhaal te leren lezen.",
+    tip: "Lees de drie kaarten als begin – midden – eind van één verhaal. De middelste kaart is het kantelpunt.",
     posities: [
       { label: "Begin", uitleg: "waar het verhaal start" },
       { label: "Midden", uitleg: "het hart van het verhaal" },
@@ -1764,6 +1767,7 @@ const LEGGINGEN = [
     naam: "Keltisch Kruis",
     aantal: 10,
     wanneer: "Het volledige kruis voor een grote, complexe vraag.",
+    tip: "Begin bij 1 (de situatie) en 4 (de wortel). Positie 10 is de uitkomst als alles meezit. 7–9 zijn jij, je omgeving en je hoop of vrees.",
     posities: [
       { label: "De situatie",        uitleg: "het hier en nu" },
       { label: "De uitdaging",      uitleg: "wat er dwarszit" },
@@ -2728,13 +2732,15 @@ function artSky(id, top, mid, bottom) {
 function artFrame(kaart, labelBoven) {
   const naam = kaart.naam_nl.toUpperCase();
   const hoek = (x, y, dx, dy) => `<path d="M${x} ${y + 16 * dy} L${x} ${y} L${x + 16 * dx} ${y}" fill="none" stroke="url(#artGold)" stroke-width="2.2" stroke-linecap="round"/>`;
-  return `<rect x="6" y="6" width="288" height="488" rx="14" fill="none" stroke="url(#artGold)" stroke-width="2.4"/>
-    <rect x="12" y="12" width="276" height="476" rx="10" fill="none" stroke="#E8C874" stroke-width="0.8" opacity="0.5"/>
+  const en = (kaart.naam_en || "").toUpperCase();
+  return `<rect x="6" y="6" width="288" height="488" fill="none" stroke="url(#artGold)" stroke-width="2.4"/>
+    <rect x="12" y="12" width="276" height="476" rx="8" fill="none" stroke="#E8C874" stroke-width="0.8" opacity="0.5"/>
     ${hoek(18, 18, 1, 1)}${hoek(282, 18, -1, 1)}${hoek(18, 482, 1, -1)}${hoek(282, 482, -1, -1)}
-    <rect width="300" height="500" rx="14" fill="url(#artVign)"/>
+    <rect width="300" height="500" fill="url(#artVign)"/>
     <text x="150" y="46" text-anchor="middle" font-family="Georgia, serif" font-size="20" fill="url(#artGold)" letter-spacing="3">${labelBoven}</text>
     ${artSter4(150, 62, 5, "#E8C874", 0.85)}
-    <text x="150" y="478" text-anchor="middle" font-family="Georgia, serif" font-size="${naam.length > 14 ? 13 : 16}" fill="#E8C874" letter-spacing="2.5">${naam}</text>`;
+    <text x="150" y="462" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#B9A7E8" letter-spacing="1.6" opacity="0.9">${en}</text>
+    <text x="150" y="480" text-anchor="middle" font-family="Georgia, serif" font-size="${naam.length > 14 ? 12.5 : 15.5}" fill="#E8C874" letter-spacing="2.5">${naam}</text>`;
 }
 
 const ART_SKIN = "#E8D9C4", ART_HAIR = "#2A2140";
@@ -2742,8 +2748,10 @@ const ART_SKIN = "#E8D9C4", ART_HAIR = "#2A2140";
 function artFig(x, y, s, robe) {
   return `<g transform="translate(${x},${y}) scale(${s})">
     <circle cx="0" cy="-36" r="9" fill="${ART_SKIN}"/>
-    <path d="M-9 -38 a9 9 0 0 1 18 -1 q2 -11 -9 -11 q-11 0 -9 12Z" fill="${ART_HAIR}"/>
+    <path d="M-9.5 -34 a9.5 9.5 0 0 1 19 0 l 0 3 q -3 -7 -9.5 -7 q -6.5 0 -9.5 7 Z" fill="${ART_HAIR}"/>
+    <circle cx="0" cy="-45" r="4.6" fill="${ART_HAIR}"/>
     <path d="M-8 -26 C -13 -10 -13 6 -8 20 L 8 20 C 13 6 13 -10 8 -26 Z" fill="${robe}"/>
+    <path d="M-8 -24 C -4 -20 4 -20 8 -24 L 8 -20 C 4 -16 -4 -16 -8 -20 Z" fill="#E8C874" opacity="0.85"/>
     <path d="M-7 -22 L -17 -8 M7 -22 L 17 -10" stroke="${robe}" stroke-width="5" stroke-linecap="round" fill="none"/>
     <path d="M-5 20 L -6 38 M5 20 L 6 38" stroke="${robe}" stroke-width="6.5" stroke-linecap="round" fill="none"/>
   </g>`;
@@ -2783,11 +2791,13 @@ function artStav(x, y, s, rot) {
 }
 function artBeker(x, y, s) {
   return `<g transform="translate(${x},${y}) scale(${s})">
-    <path d="M-16 -18 L 16 -18 C 16 2 9 12 0 12 C -9 12 -16 2 -16 -18 Z" fill="#9FB8E8" stroke="#5E7BB8" stroke-width="1.6"/>
-    <path d="M-13 -13 C -6 -9 6 -9 13 -13" stroke="#DFF0FF" stroke-width="2" fill="none" opacity="0.8"/>
-    <rect x="-3" y="12" width="6" height="10" fill="#5E7BB8"/>
-    <rect x="-12" y="22" width="24" height="5" rx="2.5" fill="#5E7BB8"/>
-    <path d="M16 -14 q 8 2 6 10" stroke="#5E7BB8" stroke-width="3" fill="none"/>
+    <path d="M-17 -20 C -17 -6 -10 2 0 2 C 10 2 17 -6 17 -20 Z" fill="#B9CBEA" stroke="#5E7BB8" stroke-width="1.8"/>
+    <ellipse cx="0" cy="-20" rx="17" ry="4.6" fill="#DFF0FF" stroke="#5E7BB8" stroke-width="1.4"/>
+    <ellipse cx="0" cy="-20" rx="12" ry="2.8" fill="#9FB8E8"/>
+    <path d="M17 -17 q 9 1 7 10 q -1 6 -7 6" fill="none" stroke="#5E7BB8" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M-4 2 L 4 2 L 3 12 L -3 12 Z" fill="#8FA6CE"/>
+    <path d="M-13 12 C -8 15 8 15 13 12 L 13 15 C 8 18 -8 18 -13 15 Z" fill="#5E7BB8"/>
+    <path d="M-11 -16 C -11 -8 -7 -2 -3 0" stroke="#F5FAFF" stroke-width="1.8" fill="none" opacity="0.85" stroke-linecap="round"/>
   </g>`;
 }
 function artZwaard(x, y, s, rot) {
@@ -2913,8 +2923,10 @@ function artGrond(y, fill) { return `<path d="M0 ${y} Q 150 ${y - 12} 300 ${y} V
 function artFig2(x, y, s, robe, armen) {
   return `<g transform="translate(${x},${y}) scale(${s})">
     <circle cx="0" cy="-36" r="9" fill="${ART_SKIN}"/>
-    <path d="M-9 -38 a9 9 0 0 1 18 -1 q2 -11 -9 -11 q-11 0 -9 12Z" fill="${ART_HAIR}"/>
+    <path d="M-9.5 -34 a9.5 9.5 0 0 1 19 0 l 0 3 q -3 -7 -9.5 -7 q -6.5 0 -9.5 7 Z" fill="${ART_HAIR}"/>
+    <circle cx="0" cy="-45" r="4.6" fill="${ART_HAIR}"/>
     <path d="M-8 -26 C -13 -10 -13 6 -8 20 L 8 20 C 13 6 13 -10 8 -26 Z" fill="${robe}"/>
+    <path d="M-8 -24 C -4 -20 4 -20 8 -24 L 8 -20 C 4 -16 -4 -16 -8 -20 Z" fill="#E8C874" opacity="0.85"/>
     ${armen || '<path d="M-7 -22 L -17 -8 M7 -22 L 17 -10" stroke-width="5" stroke-linecap="round" fill="none" stroke="' + robe + '"/>'}
     <path d="M-5 20 L -6 38 M5 20 L 6 38" stroke="${robe}" stroke-width="6.5" stroke-linecap="round" fill="none"/>
   </g>`;
@@ -2986,7 +2998,8 @@ const ART_MAJOOR = {
       <path d="M-16 -14 C -20 0 -20 10 -16 16 L 16 16 C 20 10 20 0 16 -14 Z" fill="#8A3A4A"/>
       <circle cx="0" cy="-28" r="9" fill="${ART_SKIN}"/>
       <path d="M-9 -30 a9 9 0 0 1 18 0 q0 -10 -9 -10 q-9 0 -9 10Z" fill="#C9C9D4"/>
-      <path d="M-9 -38 h 18 l -3 -6 h -12 Z" fill="#8A8FA8"/>
+      <path d="M-10 -38 h 20 l -3 -7 h -14 Z" fill="#8A8FA8"/>
+      <path d="M-10 -38 q 10 -8 20 0" stroke="#C9A24E" stroke-width="1.6" fill="none"/>
       <path d="M16 -10 L 30 -34" stroke="#8A3A4A" stroke-width="6" stroke-linecap="round"/>
       <circle cx="32" cy="-40" r="5" fill="#E8C874"/><path d="M32 -46 v -6 M27 -43 h 10" stroke="#E8C874" stroke-width="2"/>
       <path d="M-16 -10 L -28 -26" stroke="#8A3A4A" stroke-width="6" stroke-linecap="round"/>
@@ -3034,26 +3047,29 @@ const ART_MAJOOR = {
       <path d="M9 -16 L 26 -34" stroke="#F1ECFB" stroke-width="5.6" stroke-linecap="round"/>
       <path d="M-9 -16 L -24 -2" stroke="#F1ECFB" stroke-width="5.6" stroke-linecap="round"/>
     </g>
-    <path d="M46 336 q -16 -10 -12 -30 q 14 -2 12 30 Z" fill="#F5F3FF"/>
-    <path d="M254 336 q 16 -10 12 -30 q -14 -2 -12 30 Z" fill="#191540"/>
+    <g transform="translate(40,330)"><ellipse cx="0" cy="0" rx="13" ry="17" fill="#F5F3FF"/><path d="M-13 -4 a 13 13 0 0 1 26 0 l 0 -8 a 13 13 0 0 0 -26 0 Z" fill="#D8D2E8"/><circle cx="0" cy="-8" r="5" fill="#F5F3FF"/></g>
+    <g transform="translate(260,330)"><ellipse cx="0" cy="0" rx="13" ry="17" fill="#191540"/><path d="M-13 -4 a 13 13 0 0 1 26 0 l 0 -8 a 13 13 0 0 0 -26 0 Z" fill="#2C2650"/><circle cx="0" cy="-8" r="5" fill="#191540"/></g>
+    <path d="M64 210 L 60 238 M236 210 L 240 238" stroke="#E8C874" stroke-width="1.6" opacity="0.7"/>
     <path d="M118 244 q -6 -10 2 -16 M182 244 q 6 -10 -2 -16" stroke="#E8C874" stroke-width="2.4" fill="none"/>
     ${artGrond(430, "#1B1B30")}`,
   "kracht": () => `
-    <path d="M120 84 a 11 8.5 0 0 1 0 17 a 11 8.5 0 0 0 0 -17" fill="none" stroke="#E8C874" stroke-width="2.6"/>
-    ${artFig2(112, 340, 1.4, "#F1ECFB", '<path d="M8 -22 L 34 -30" stroke="#F1ECFB" stroke-width="5.6" stroke-linecap="round" fill="none"/><path d="M-7 -22 L -17 -8" stroke="#F1ECFB" stroke-width="5.6" stroke-linecap="round" fill="none"/>')}
-    ${artHalo(112, 296, 13)}
-    <g transform="translate(212,330)">
-      <ellipse cx="0" cy="0" rx="27" ry="15" fill="#C98A4A"/>
-      <circle cx="-26" cy="-9" r="12" fill="#C98A4A"/>
-      <circle cx="-26" cy="-9" r="15" fill="#8A5A34" opacity="0.5"/>
-      <circle cx="-29" cy="-11" r="1.8" fill="#2A2140"/>
-      <path d="M-32 -4 q 6 4 10 0" stroke="#2A2140" stroke-width="1.8" fill="none"/>
-      <path d="M-14 12 l -4 22 M-2 14 l 0 22 M12 12 l 4 22 M20 8 l 6 20" stroke="#C98A4A" stroke-width="6" stroke-linecap="round"/>
-      <path d="M26 -4 q 14 2 12 16" stroke="#8A5A34" stroke-width="5" fill="none" stroke-linecap="round"/>
-    </g>
+    <path d="M112 84 a 11 8.5 0 0 1 0 17 a 11 8.5 0 0 0 0 -17" fill="none" stroke="#E8C874" stroke-width="2.6"/>
     <path d="M0 400 L 60 330 L 110 390 L 170 320 L 240 400 V 500 H 0 Z" fill="#221C4E"/>
     ${artGrond(436, "#2A1A22")}
-    <path d="M40 440 q 5 -14 10 0 M250 444 q 5 -14 10 0" stroke="#8FB168" stroke-width="2.4" fill="none"/>`,
+    ${artFig2(108, 344, 1.4, "#F1ECFB", '<path d="M8 -22 L 36 -32" stroke="#F1ECFB" stroke-width="5.6" stroke-linecap="round" fill="none"/><path d="M-7 -22 L -17 -8" stroke="#F1ECFB" stroke-width="5.6" stroke-linecap="round" fill="none"/>')}
+    ${artHalo(108, 300, 13)}
+    <path d="M96 296 q 12 -10 24 0" stroke="#7FA05A" stroke-width="3.4" fill="none"/>
+    ${[0,1,2,3,4].map(i => `<circle cx="${94 + i * 6}" cy="${293 - Math.sin(i / 4 * Math.PI) * 5}" r="2.6" fill="#8FB168"/>`).join("")}
+    <g transform="translate(214,334)">
+      <ellipse cx="0" cy="0" rx="28" ry="15" fill="#C98A4A"/>
+      <circle cx="-27" cy="-9" r="12" fill="#C98A4A"/>
+      <path d="M-39 -9 a 12 12 0 0 1 24 0 a 15 15 0 0 0 -24 0" fill="#8A5A34"/>
+      <circle cx="-30" cy="-11" r="1.8" fill="#2A2140"/>
+      <path d="M-33 -4 q 6 4 10 0" stroke="#2A2140" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <path d="M-14 12 l -4 22 M-2 14 l 0 22 M12 12 l 4 22 M20 8 l 6 20" stroke="#C98A4A" stroke-width="6" stroke-linecap="round"/>
+      <path d="M27 -4 q 14 2 12 16" stroke="#8A5A34" stroke-width="5" fill="none" stroke-linecap="round"/>
+    </g>
+    <path d="M40 444 q 5 -14 10 0 M250 448 q 5 -14 10 0" stroke="#8FB168" stroke-width="2.4" fill="none"/>`,
   "de-kluizenaar": () => `
     <path d="M0 440 L 105 218 L 185 350 L 245 268 L 300 340 V 500 H 0 Z" fill="#2E2E4A"/>
     <path d="M105 218 L 88 252 L 122 252 Z" fill="#F5F3FF"/>
@@ -3100,20 +3116,21 @@ const ART_MAJOOR = {
     <path d="M70 400 h 160" stroke="#4A4478" stroke-width="3"/>`,
   "de-gehangene": () => `
     ${artGrond(446, "#221C4E")}
-    <rect x="58" y="118" width="184" height="13" rx="5" fill="#6B4E2E" stroke="#4A3220" stroke-width="1.4"/>
-    <rect x="141" y="131" width="18" height="250" rx="5" fill="#6B4E2E" stroke="#4A3220" stroke-width="1.4"/>
-    <path d="M58 131 q -8 -10 2 -16 M242 131 q 8 -10 -2 -16" stroke="#5E7B3A" stroke-width="3" fill="none"/>
-    <g transform="translate(150,148)">
-      <path d="M0 0 L 0 46" stroke="#6B4E2E" stroke-width="4"/>
-      <path d="M-11 46 L 11 46" stroke="#F1ECFB" stroke-width="7" stroke-linecap="round"/>
-      <path d="M-8 46 C -12 62 -12 78 -8 92 L 8 92 C 12 78 12 62 8 46 Z" fill="#B9A7E8"/>
-      <circle cx="0" cy="-12" r="9" fill="${ART_SKIN}"/>
-      <path d="M-9 -14 a9 9 0 0 1 18 0 q0 -10 -9 -10 q-9 0 -9 10Z" fill="#E8C874"/>
-      <path d="M-9 -6 C -18 4 -18 16 -10 24 M9 -6 C 18 4 18 16 10 24" stroke="#E8D9C4" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <rect x="58" y="116" width="184" height="13" rx="5" fill="#6B4E2E" stroke="#4A3220" stroke-width="1.4"/>
+    <rect x="141" y="129" width="18" height="252" rx="5" fill="#6B4E2E" stroke="#4A3220" stroke-width="1.4"/>
+    <path d="M58 129 q -8 -10 2 -16 M242 129 q 8 -10 -2 -16" stroke="#5E7B3A" stroke-width="3" fill="none"/>
+    <g transform="translate(150,142)">
+      <path d="M0 0 L 0 40" stroke="#6B4E2E" stroke-width="4.4"/>
+      <circle cx="0" cy="44" r="4" fill="#C9A24E"/>
+      <path d="M-7 46 L 7 46" stroke="#F1ECFB" stroke-width="7" stroke-linecap="round"/>
+      <path d="M-8 48 C -12 64 -12 82 -8 96 L 8 96 C 12 82 12 64 8 48 Z" fill="#B9A7E8"/>
+      <path d="M-8 54 C -17 62 -17 74 -9 82 M8 54 C 17 62 17 74 9 82" stroke="#E8D9C4" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <circle cx="0" cy="-10" r="9" fill="${ART_SKIN}"/>
+      <path d="M-9.5 -12 a9.5 9.5 0 0 1 19 0 l 0 3 q -3 -7 -9.5 -7 q -6.5 0 -9.5 7 Z" fill="#E8C874"/>
     </g>
-    ${artHalo(150, 136, 14)}
-    ${artSter4(150, 420, 13, "#E8C874")}
-    ${artSter4(90, 400, 7, "#B9A7E8", 0.8)}${artSter4(215, 412, 8, "#B9A7E8", 0.8)}`,
+    ${artHalo(150, 132, 14)}
+    ${artSter4(150, 424, 13, "#E8C874")}
+    ${artSter4(88, 402, 7, "#B9A7E8", 0.8)}${artSter4(216, 414, 8, "#B9A7E8", 0.8)}`,
   "de-dood": () => `
     <circle cx="236" cy="92" r="26" fill="#E8C874"/><circle cx="236" cy="92" r="36" fill="#E8C874" opacity="0.15"/>
     ${artTorenKlein(52, 400, 1.1, "#3A3560")}${artTorenKlein(248, 400, 1.1, "#3A3560")}
@@ -3565,14 +3582,12 @@ function sluitSplash() {
   routeNaSplash();
 }
 
-// Na het opstartscherm: onboarding (eerste keer) → wachtwoord (als nodig) → home
+// Na het opstartscherm: onboarding (eerste keer) → meteen naar home.
+// (Vroeger zat hier een wachtwoord-slot; die is eruit — de app is privé op je eigen toestel.)
 function routeNaSplash() {
   if (!lees("tarot_onboarding_klaar", false)) {
     toonOverlay("scherm-onboarding");
     startOnboarding();
-  } else if (!isIngelogd()) {
-    toonOverlay("scherm-wachtwoord");
-    startWachtwoordScherm();
   } else {
     toonTab("nieuw");
     updateDagMelding();
@@ -3588,91 +3603,7 @@ function toonOverlay(id) {
   el.classList.add("tab-in");
 }
 function verbergOverlays() {
-  ["scherm-wachtwoord", "scherm-onboarding"].forEach(id => { document.getElementById(id).hidden = true; });
-}
-
-/* ---------- WACHTWOORD & SESSIE ---------- */
-
-const SESSIE_DAGEN = 30; // "ingelogd blijven" geldt 30 dagen
-
-// Ben je nog geldig ingelogd?
-function isIngelogd() {
-  const s = lees("tarot_sessie", 0);
-  return !!s && (Date.now() - s) < SESSIE_DAGEN * 24 * 3600 * 1000;
-}
-function slaSessieOp() { schrijf("tarot_sessie", Date.now()); }
-
-function genereerZout() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
-// Fallback-hash voor als crypto.subtle niet beschikbaar is (bv. file://)
-function cyrb53(str, seed = 0) {
-  let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
-  for (let i = 0; i < str.length; i++) {
-    const ch = str.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
-  }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  return (h2 >>> 0).toString(16) + (h1 >>> 0).toString(16);
-}
-
-// SHA-256 via de ingebouwde crypto van de browser (werkt op https en localhost)
-async function hashMetSubtle(pw, zout) {
-  if (window.crypto && crypto.subtle && crypto.subtle.digest) {
-    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(zout + "::" + pw));
-    return "sha256:" + [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
-  }
-  return null;
-}
-
-// Hash een wachtwoord — de app slaat NOOIT het wachtwoord zelf op, alleen deze hash
-async function hashWachtwoord(pw, zout) {
-  const sha = await hashMetSubtle(pw, zout);
-  return sha || ("cyrb53:" + cyrb53(zout + "::" + pw));
-}
-
-// Controleer een ingegeven wachtwoord tegen de opgeslagen hash
-async function controleerWachtwoord(pw) {
-  const opgeslagen = lees("tarot_hash", null);
-  if (!opgeslagen) return false;
-  const zout = lees("tarot_zout", "");
-  const sha = await hashMetSubtle(pw, zout);
-  if (sha && sha === opgeslagen) return true;
-  return ("cyrb53:" + cyrb53(zout + "::" + pw)) === opgeslagen;
-}
-
-// Het slot-scherm: knop + Enter-toets
-function startWachtwoordScherm() {
-  const invoer = document.getElementById("wachtwoord-invoer");
-  const knop = document.getElementById("ontgrendel-knop");
-  const fout = document.getElementById("wachtwoord-fout");
-  invoer.value = "";
-  fout.hidden = true;
-  async function probeer() {
-    knop.disabled = true;
-    const ok = await controleerWachtwoord(invoer.value);
-    knop.disabled = false;
-    if (ok) {
-      slaSessieOp();
-      verbergOverlays();
-      toonTab("nieuw");
-      updateDagMelding();
-      toast("Welkom terug, " + lees("tarot_naam", "Samir"));
-    } else {
-      fout.hidden = false;
-      invoer.classList.remove("fout");
-      void invoer.offsetWidth; // animatie opnieuw starten
-      invoer.classList.add("fout");
-      invoer.value = "";
-      invoer.focus();
-    }
-  }
-  knop.onclick = probeer;
-  invoer.onkeydown = e => { if (e.key === "Enter") probeer(); };
-  setTimeout(() => invoer.focus(), 350);
+  ["scherm-onboarding"].forEach(id => { document.getElementById(id).hidden = true; });
 }
 
 /* ---------- ONBOARDING (4 kaart-dunne stapjes, alleen de eerste keer) ---------- */
@@ -3689,7 +3620,7 @@ function renderOnboardingStap() {
   const punten = document.getElementById("onboarding-punten");
   // puntjes onderaan
   punten.innerHTML = "";
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 3; i++) {
     const s = document.createElement("span");
     if (i === onboardingStap) s.classList.add("actief");
     punten.appendChild(s);
@@ -3698,41 +3629,18 @@ function renderOnboardingStap() {
   const stap = document.createElement("div");
   stap.className = "onboarding-stap";
 
-  const lockIcoon = '<div class="slot-icoon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>';
   const sterIcoon = '<div class="slot-icoon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></div>';
 
   if (onboardingStap === 0) {
-    // STAP 1: kies wachtwoord
-    stap.innerHTML = lockIcoon +
-      "<h2>Kies je wachtwoord</h2>" +
-      "<p>Alleen jij kent dit wachtwoord. De app bewaart alléén een versleutelde hash ervan — nooit het wachtwoord zelf in leesbare tekst.</p>" +
-      '<input type="password" id="ob-pw1" class="invoer" placeholder="Wachtwoord" autocomplete="new-password">' +
-      '<input type="password" id="ob-pw2" class="invoer" placeholder="Herhaal wachtwoord" autocomplete="new-password">' +
-      '<p class="slot-fout" id="ob-fout" hidden></p>' +
-      '<button class="knop" id="ob-knop">Wachtwoord opslaan</button>';
-    kaart.appendChild(stap);
-    document.getElementById("ob-knop").onclick = async () => {
-      const pw1 = document.getElementById("ob-pw1").value;
-      const pw2 = document.getElementById("ob-pw2").value;
-      const err = document.getElementById("ob-fout");
-      if (pw1.length < 4) { err.textContent = "Kies minstens 4 tekens."; err.hidden = false; return; }
-      if (pw1 !== pw2) { err.textContent = "De wachtwoorden komen niet overeen."; err.hidden = false; return; }
-      const zout = genereerZout();
-      schrijf("tarot_zout", zout);
-      schrijf("tarot_hash", await hashWachtwoord(pw1, zout));
-      onboardingStap++;
-      renderOnboardingStap();
-    };
-  } else if (onboardingStap === 1) {
-    // STAP 2: hoe werkt de app (3 zinnen)
+    // STAP 1: hoe werkt de app (3 zinnen)
     stap.innerHTML = sterIcoon +
       "<h2>Hoe werkt de app?</h2>" +
       "<p>1. Jij trekt zelf met je eigen, fysieke tarot-deck.<br>2. Tik in de app welke kaarten je hebt getrokken — rechtop of ondersteboven.<br>3. De app helpt je met betekenissen, de verbinding tussen de kaarten en reflectievragen.<br><br>Jij bent degene die leest — er zit geen AI in.</p>" +
       '<button class="knop" id="ob-knop">Begrepen, verder</button>';
     kaart.appendChild(stap);
     document.getElementById("ob-knop").onclick = () => { onboardingStap++; renderOnboardingStap(); };
-  } else if (onboardingStap === 2) {
-    // STAP 3: je naam
+  } else if (onboardingStap === 1) {
+    // STAP 2: je naam
     stap.innerHTML = sterIcoon +
       "<h2>Hoe heet je?</h2>" +
       "<p>Deze naam zie je straks op het opstartscherm, bijvoorbeeld “Welkom terug, Samir”.</p>" +
@@ -3748,7 +3656,7 @@ function renderOnboardingStap() {
       renderOnboardingStap();
     };
   } else {
-    // STAP 4: klaar — veel leesplezier
+    // STAP 3: klaar — veel leesplezier
     const naam = lees("tarot_naam", "Samir");
     stap.innerHTML =
       '<span class="onboarding-klaar-ster">✨</span>' +
@@ -3758,7 +3666,6 @@ function renderOnboardingStap() {
     kaart.appendChild(stap);
     document.getElementById("ob-knop").onclick = () => {
       schrijf("tarot_onboarding_klaar", true);
-      slaSessieOp();
       verbergOverlays();
       toonTab("nieuw");
       updateDagMelding();
@@ -4019,6 +3926,7 @@ function bouwVraagScherm() {
   const legging = leggingVind(concept.leggingId);
   document.getElementById("vraag-kicker").textContent = legging.aantal + (legging.aantal === 1 ? " kaart" : " kaarten") + " · " + legging.wanneer;
   document.getElementById("vraag-titel").textContent = legging.naam;
+  document.getElementById("vraag-tip").textContent = legging.tip || "";
   const invoer = document.getElementById("vraag-invoer");
   invoer.value = concept.vraag || "";
   const voorWie = document.getElementById("voorwie-invoer");
@@ -4383,7 +4291,17 @@ function bouwVerbintenis(legging, reading) {
 
   // --- kaart ↔ kaart: per opeenvolgende posities een verband-zin ---
   const verbandenEl = document.getElementById("kaart-verbanden");
-  let vHtml = '<h3 class="verbinding-kop">Hoe de kaarten met elkaar praten</h3>';
+  let vHtml = '<h3 class="verbinding-kop">Elke kaart in zijn positie</h3>';
+  const eersteZin = t => (t.match(/[^.!?]+[.!?]/) || [t])[0].trim();
+  reading.kaarten.forEach((c, i) => {
+    const k = kaartVind(c.id);
+    const pos = legging.posities[i];
+    const bet = c.omgekeerd ? k.betekenis_omgekeerd : k.betekenis_rechtop;
+    vHtml += '<div class="verband-rij" style="--i:' + i + '">' +
+      '<span class="verband-pos">' + (i + 1) + ". " + pos.label + "</span>" +
+      "<p><strong>" + k.symbool + " " + k.naam_nl + "</strong> (" + k.kernwoord + (c.omgekeerd ? ", ondersteboven" : "") + ") in deze positie: " + eersteZin(bet) + "</p></div>";
+  });
+  vHtml += '<h3 class="verbinding-kop" style="margin-top:16px">Hoe de kaarten met elkaar praten</h3>';
   for (let i = 0; i < reading.kaarten.length - 1; i++) {
     const A = kaartVind(reading.kaarten[i].id);
     const B = kaartVind(reading.kaarten[i + 1].id);
@@ -4934,33 +4852,6 @@ document.getElementById("inst-naam").addEventListener("click", () => {
   };
 });
 
-// Wachtwoord wijzigen (oud → nieuw → herhaal)
-document.getElementById("inst-wachtwoord").addEventListener("click", () => {
-  const el = toonModal(
-    "<h3>Wachtwoord wijzigen</h3>" +
-    '<input type="password" id="modal-pw-oud" class="invoer" placeholder="Huidig wachtwoord" autocomplete="current-password">' +
-    '<input type="password" id="modal-pw-nieuw" class="invoer" placeholder="Nieuw wachtwoord (min. 4 tekens)" autocomplete="new-password">' +
-    '<input type="password" id="modal-pw-herhaal" class="invoer" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password">' +
-    '<p class="slot-fout" id="modal-pw-fout" hidden></p>' +
-    '<button class="knop" id="modal-pw-opslaan">Wijzig wachtwoord</button>'
-  );
-  el.querySelector("#modal-pw-opslaan").onclick = async () => {
-    const oud = el.querySelector("#modal-pw-oud").value;
-    const nieuw = el.querySelector("#modal-pw-nieuw").value;
-    const herhaal = el.querySelector("#modal-pw-herhaal").value;
-    const fout = el.querySelector("#modal-pw-fout");
-    if (!(await controleerWachtwoord(oud))) { fout.textContent = "Huidig wachtwoord klopt niet."; fout.hidden = false; return; }
-    if (nieuw.length < 4) { fout.textContent = "Nieuw wachtwoord moet minstens 4 tekens zijn."; fout.hidden = false; return; }
-    if (nieuw !== herhaal) { fout.textContent = "Nieuwe wachtwoorden komen niet overeen."; fout.hidden = false; return; }
-    const zout = genereerZout();
-    schrijf("tarot_zout", zout);
-    schrijf("tarot_hash", await hashWachtwoord(nieuw, zout));
-    slaSessieOp(); // je sessie wordt ververst: je blijft gewoon ingelogd
-    document.getElementById("kaart-popup").hidden = true;
-    toast("Wachtwoord gewijzigd");
-  };
-});
-
 // Tekstgrootte
 document.querySelectorAll("#inst-tekst button").forEach(b => {
   b.addEventListener("click", () => {
@@ -5026,10 +4917,21 @@ document.getElementById("import-bestand").addEventListener("change", e => {
       if (!data || typeof data !== "object" || !("tarot_geschiedenis" in data || "tarot_naam" in data)) {
         throw new Error("geen tarot-backup");
       }
-      ["tarot_naam", "tarot_geschiedenis", "tarot_favorieten", "tarot_eigen_leggingen", "tarot_concept", "tarot_tekstgrootte", "tarot_lees_omgekeerd", "tarot_thema"].forEach(k => {
-        if (k in data) schrijf(k, data[k]);
-      });
-      toast("Back-up geïmporteerd — de app herlaadt");
+      // samenvoegen ipv overschrijven (voor sync tussen apparaten)
+      if ("tarot_geschiedenis" in data) {
+        const bestaand = lees("tarot_geschiedenis", []);
+        const ids = new Set(bestaand.map(r => r.id));
+        const 尺 = data.tarot_geschiedenis.filter(r => r && r.id && !ids.has(r.id));
+        schrijf("tarot_geschiedenis", bestaand.concat(尺).sort((a, b) => new Date(b.datum) - new Date(a.datum)));
+      }
+      if ("tarot_favorieten" in data) schrijf("tarot_favorieten", [...new Set([...lees("tarot_favorieten", []), ...data.tarot_favorieten])]);
+      if ("tarot_eigen_leggingen" in data) {
+        const bestaand = lees("tarot_eigen_leggingen", []);
+        const ids = new Set(bestaand.map(l => l.id));
+        schrijf("tarot_eigen_leggingen", bestaand.concat(data.tarot_eigen_leggingen.filter(l => l && l.id && !ids.has(l.id))));
+      }
+      ["tarot_naam", "tarot_tekstgrootte", "tarot_lees_omgekeerd", "tarot_thema"].forEach(k => { if (k in data) schrijf(k, data[k]); });
+      toast("Samengevoegd met je back-up — de app herlaadt");
       setTimeout(() => location.reload(), 900);
     } catch (err) {
       toast("Dit bestand is geen geldige back-up");
