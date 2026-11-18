@@ -1,9 +1,8 @@
-UPLOAD DEZE 5 BESTANDEN NAAR github.com/Bep0313/Tarot-app
-(Add file → Upload files → sleep deze map-inhoud erin → Commit)
+Upload ALLEEN de 6 bestanden uit deze map naar de root van je GitHub-repo Tarot-app
+(Add file → Upload files, ze overschrijven de oude). NIET de README.txt zelf nodig, mag wel meegeüpload.
 
-Wat zit in v20:
-- index.html : iPad-weergave (content gecentreerd) + AirDrop-sync-knop in "Meer"
-- sw.js      : cache-versie v20 (zodat iPhones de update écht ophalen)
-- icon-192.png / icon-512.png / apple-touch-icon.png : nieuw sparkle-ster icoon
+Waarom: je iPhone had een oude cache (zonder styling). v21 forceert een refresh van die cache.
 
-Daarna op iPhone: oud beginscherm-icoon verwijderen en opnieuw toevoegen.
+Daarna op je iPhone:
+1. Open de app-URL 2x (of 1x en ververs de pagina) — de nieuwe cache wordt dan geladen.
+2. Verwijder het oude beginscherm-icoon en voeg opnieuw toe via Delen → Voeg toe aan beginscherm.
