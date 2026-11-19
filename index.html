@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="34">
+<html lang="nl" data-versie="35">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=34 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=35 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    TAROT VAN SAMIR — style.css
@@ -142,7 +142,7 @@ body::before {
   inset: 0;
   overflow-y: auto;
   overscroll-behavior-y: contain;      /* geen bounce-doorgeef naar de pagina erachter */
-  padding: calc(env(safe-area-inset-top) + 24px) 16px calc(env(safe-area-inset-bottom) + 96px);
+  padding: calc(env(safe-area-inset-top) + 24px) 16px calc(env(safe-area-inset-bottom) + 78px);
   scrollbar-width: none;               /* geen scrollbalk in de app */
   /* NB: géén mask-image hier — een mask op een scroll-container forceert op iOS
      een volledige herpaint per scroll-frame en maakt scrollen stroef */
@@ -486,8 +486,8 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   bottom: 0;                                   /* klevend aan de onderkant: geen dode ruimte onder de home-indicator */
   z-index: 40;
   display: flex;
-  padding: 9px 12px calc(10px + env(safe-area-inset-bottom));
-  border-radius: 24px 24px 0 0;
+  padding: 6px 10px calc(8px + env(safe-area-inset-bottom));
+  border-radius: 20px 20px 0 0;
   background: rgba(26, 22, 54, 0.55);
   backdrop-filter: blur(26px) saturate(1.5);   /* het "liquid glass"-effect */
   -webkit-backdrop-filter: blur(26px) saturate(1.5);
@@ -502,20 +502,20 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 7px 0;
-  min-height: 44px;
+  gap: 2px;
+  padding: 4px 0;
+  min-height: 40px;
   background: none;
   border: none;
   border-radius: 12px;
   color: var(--sec);
   font-family: var(--sans);
-  font-size: 11px;
+  font-size: 10px;
   cursor: pointer;
   transition: color 0.2s ease, transform 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.tab svg { width: 22px; height: 22px; transition: transform 0.25s cubic-bezier(0.34, 1.45, 0.64, 1); }
+.tab svg { width: 20px; height: 20px; transition: transform 0.25s cubic-bezier(0.34, 1.45, 0.64, 1); }
 .tab:active { transform: scale(0.92); }
 /* Actief tabblad krijgt het subtiele gouden gloedje */
 .tab.actief {
@@ -793,11 +793,11 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   backdrop-filter: blur(24px) saturate(1.4);
   -webkit-backdrop-filter: blur(24px) saturate(1.4);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 24px 24px 0 0;
-  padding: 12px 14px calc(14px + env(safe-area-inset-bottom));
+  border-radius: 20px 20px 0 0;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 40px rgba(0, 0, 0, 0.5);
 }
-.gekozen-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.gekozen-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 #gekozen-teller { font-size: calc(13px * var(--tekst-schaal)); color: var(--sec); font-weight: 600; letter-spacing: 0.03em; }
 .wis-knop {
   background: none; border: none;
@@ -810,11 +810,11 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 }
 .wis-knop:active { color: var(--roze); }
 .wis-knop.gevaar { color: var(--roze); font-weight: 600; }
-.gekozen-chips { display: flex; gap: 14px; overflow-x: auto; padding: 12px 6px 18px; margin-bottom: 6px; scrollbar-width: none; }
+.gekozen-chips { display: flex; gap: 10px; overflow-x: auto; padding: 8px 4px 10px; margin-bottom: 4px; scrollbar-width: none; }
 .gekozen-chips::-webkit-scrollbar { display: none; }
 
 /* Gekozen kaart als mini-kaartje met echte 3D-flip */
-.gekozen-chip { position: relative; flex-shrink: 0; width: 84px; height: 118px; perspective: 700px; }
+.gekozen-chip { position: relative; flex-shrink: 0; width: 64px; height: 90px; perspective: 700px; }
 .flip-inner { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.45s cubic-bezier(0.3, 0.8, 0.3, 1.05); }
 .gekozen-chip.flip .flip-inner { transform: rotateY(180deg); }
 .chip-face {
@@ -833,7 +833,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .stand { font-size: 9px; font-weight: 700; letter-spacing: 0.04em; padding: 3px 7px; border-radius: 999px; margin-top: 2px; }
 .stand.rechtop { color: var(--goud); background: rgba(232, 200, 116, 0.14); border: 1px solid rgba(232, 200, 116, 0.4); }
 .stand.omgekeerd { color: var(--roze); background: rgba(232, 139, 139, 0.14); border: 1px solid rgba(232, 139, 139, 0.45); }
-.chip-positie { position: absolute; top: -8px; left: -8px; z-index: 2; min-width: 23px; height: 23px; padding: 0 6px; border-radius: 999px; background: linear-gradient(135deg, #F0D48A, var(--goud)); color: #2A2140; font-size: 11.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(0,0,0,.45); }
+.chip-positie { position: absolute; top: 4px; left: 4px; z-index: 4; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: linear-gradient(135deg, #F0D48A, var(--goud)); color: #2A2140; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(0,0,0,.45); }
 .chip-verwijder {
   position: absolute; top: -8px; right: -8px; z-index: 2;
   width: 24px; height: 24px; border-radius: 50%;
@@ -1308,7 +1308,7 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
    rechtsboven de verwijder-knop), naam onderaan vrij van de flip-knop */
 /* kleine gekozen-chip: EN-pill + NL-pill onder elkaar bovenaan, onderkant vrij voor de flip-knop */
 .chip-face .stand { position: absolute; top: auto; bottom: -6px; right: -6px; left: auto; transform: none; margin: 0; padding: 2px 5px; font-size: 8px; }
-.chip-face .chip-en { top: 4px; max-width: 70%; }
+.chip-face .chip-en { top: 4px; max-width: 84%; }
 .chip-face .chip-naam {
   bottom: auto; top: 25px; left: 50%; right: auto; transform: translateX(-50%);
   max-width: 76%; padding: 2px 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -1333,6 +1333,34 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
 
 /* tip bij de legging op het vraag-scherm */
 .vraag-tip { color: var(--sec); font-size: calc(13.5px * var(--tekst-schaal)); line-height: 1.55; margin: -6px 4px 14px; font-style: italic; }
+
+/* ---------- SPREAD-DIAGRAM (visuele vorm van de legging in de uitleg) ---------- */
+.spread-diagram { position: relative; margin: 4px 0 18px; }
+.spread-kaart {
+  position: absolute; transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+  aspect-ratio: 3 / 5; border-radius: 8px; overflow: visible;
+  box-shadow: 0 6px 16px rgba(0,0,0,.5), inset 0 0 0 1px rgba(232,200,116,.35);
+}
+.spread-kaart .kaart-foto { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block; }
+.spread-kaart.omgekeerd .kaart-foto { transform: rotate(180deg); }
+.spread-num {
+  position: absolute; top: -8px; left: -8px; z-index: 3;
+  min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
+  background: linear-gradient(135deg, #F0D48A, var(--goud)); color: #2A2140;
+  font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 8px rgba(0,0,0,.5);
+}
+.spread-label {
+  position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%);
+  white-space: nowrap; font-size: 9.5px; color: var(--sec); letter-spacing: .02em;
+  max-width: 140%; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ---------- DAGSPREUK op het startscherm ---------- */
+.dagspreuk {
+  margin: 10px 2px 0; font-family: var(--serif); font-style: italic;
+  font-size: calc(15px * var(--tekst-schaal)); color: var(--goud); line-height: 1.4;
+}
 
 </style>
   <script>
@@ -1383,6 +1411,7 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
           <p class="home-datum"><span id="home-datum-tekst"></span><span class="streak-chip" id="home-streak" hidden></span></p>
           <h1 class="home-titel">Kies je legging<svg class="titel-ster" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" fill="currentColor"/></svg></h1>
           <p class="home-ondertitel">Pak je deck erbij en tik op een legging</p>
+          <p class="dagspreuk" id="dagspreuk"></p>
         </header>
 
         <!-- melding bij de eerste keer openen op een nieuwe dag -->
@@ -1457,11 +1486,10 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
 
         <div class="meer-groep">
           <p class="meer-groep-titel">Jij</p>
-          <button class="meer-rij" id="inst-naam">
+          <div class="meer-rij">
             <span>Naam op het opstartscherm</span>
-            <span class="meer-waarde" id="meer-naam-waarde"></span>
-            <svg class="meer-pijl" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
+            <span class="meer-waarde">Samir</span>
+          </div>
           <div class="meer-rij">
             <span>Tekstgrootte</span>
             <span class="seg" id="inst-tekst">
@@ -1586,6 +1614,9 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
             <svg viewBox="0 0 24 24"><path d="M12 3v12M12 3l-4 4M12 3l4 4M6 13v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </header>
+
+        <!-- Visuele spread: de getrokken kaarten in de vorm van de legging -->
+        <div class="spread-diagram" id="uitleg-spread"></div>
 
         <!-- Per positie een blok (wordt door JS opgebouwd) -->
         <div id="uitleg-posities"></div>
@@ -3673,7 +3704,7 @@ let splashBezig = false;
 
 function startSplash() {
   const nu = new Date();
-  const naam = lees("tarot_naam", "Samir"); // standaardnaam, later instelbaar
+  const naam = "Samir"; // deze app is persoonlijk voor Samir
   document.getElementById("splash-groet").textContent = groetOpMoment(nu);
   document.getElementById("splash-naam").textContent = "Welkom terug, " + naam;
   document.getElementById("splash-datum").innerHTML = datumNL(nu) + " " + sterSvg();
@@ -3755,24 +3786,14 @@ function renderOnboardingStap() {
     kaart.appendChild(stap);
     document.getElementById("ob-knop").onclick = () => { onboardingStap++; renderOnboardingStap(); };
   } else if (onboardingStap === 1) {
-    // STAP 2: je naam
-    stap.innerHTML = sterIcoon +
-      "<h2>Hoe heet je?</h2>" +
-      "<p>Deze naam zie je straks op het opstartscherm, bijvoorbeeld “Welkom terug, Samir”.</p>" +
-      '<input type="text" id="ob-naam" class="invoer" placeholder="Je naam" maxlength="24" value="Samir">' +
-      '<button class="knop" id="ob-knop">Naam opslaan</button>';
-    kaart.appendChild(stap);
-    const naamVeld = document.getElementById("ob-naam");
-    setTimeout(() => { naamVeld.focus(); naamVeld.select(); }, 100);
-    document.getElementById("ob-knop").onclick = () => {
-      const naam = naamVeld.value.trim() || "Samir";
-      schrijf("tarot_naam", naam);
-      onboardingStap++;
-      renderOnboardingStap();
-    };
+    // STAP 2: deze app is persoonlijk voor Samir — geen naamvraag meer
+    schrijf("tarot_naam", "Samir");
+    onboardingStap++;
+    renderOnboardingStap();
+    return;
   } else {
     // STAP 3: klaar — veel leesplezier
-    const naam = lees("tarot_naam", "Samir");
+    const naam = "Samir";
     stap.innerHTML =
       '<span class="onboarding-klaar-ster">✨</span>' +
       "<h2>Veel leesplezier, " + naam + "!</h2>" +
@@ -3790,6 +3811,42 @@ function renderOnboardingStap() {
 
 /* ---------- 4. DAG-MELDING ("Nieuwe dag, nieuwe kaart") ---------- */
 
+
+/* Dagspreuk: elke dag één bemoedigende zin op het startscherm (index = dag van de maand) */
+const DAGSPREUKEN = [
+  "Adem in — dit is een nieuwe dag.",
+  "Vandaag mag je even niets.",
+  "Loslaten maakt ruimte voor iets nieuws.",
+  "Kies vandaag één moment voor jezelf.",
+  "Energie volgt je aandacht.",
+  "Vertrouw het ritme van vandaag.",
+  "Een kleine stap is ook een stap.",
+  "Wat je nu zaait, proef je later.",
+  "Je hoeft vandaag niet alles te weten.",
+  "Rust is ook productief.",
+  "Kijk met zachtheid naar jezelf.",
+  "Nieuwe dag, nieuw licht.",
+  "Wat oud is, mag mee — of los.",
+  "Je bent sterker dan gisteren.",
+  "Vandaag telt wat je voelt, niet wat je moet.",
+  "Doe één ding tegelijk.",
+  "Lachen is ook een vorm van helen.",
+  "Wat je geeft, komt terug in een andere vorm.",
+  "Vertraging is geen verloren tijd.",
+  "Kies de weg die lichter voelt.",
+  "Vandaag is een goed moment om te beginnen.",
+  "Je mag trots zijn op hoe ver je bent.",
+  "Adem uit — en laat het gaan.",
+  "De kaart van vandaag is een spiegel, geen vonnis.",
+  "Geniet van het kleine.",
+  "Wat je aandacht geeft, groeit.",
+  "Je hoeft niet perfect te zijn om te beginnen.",
+  "Vandaag mag je kiezen voor rust.",
+  "Iets nieuws beginnen voelt even eng — dat hoort erbij.",
+  "Eindig de dag met dankbaarheid, hoe klein ook.",
+  "Morgen is een schone lei."
+];
+
 function updateDagMelding() {
   const vandaag = new Date().toDateString();
   const melding = document.getElementById("dag-melding");
@@ -3804,6 +3861,10 @@ function updateDagMelding() {
   const chip = document.getElementById("home-streak");
   chip.hidden = streak < 1;
   if (streak >= 1) chip.innerHTML = sterSvg() + " " + streak + (streak === 1 ? " dag op rij" : " dagen op rij");
+  // dagspreuk van vandaag (draait per kalenderdag mee)
+  const nu = new Date();
+  const spreuk = DAGSPREUKEN[(nu.getDate() - 1) % DAGSPREUKEN.length];
+  document.getElementById("dagspreuk").textContent = "✦ " + spreuk;
 }
 
 // Lokale datum-sleutel (YYYY-MM-DD) — voorkomt timezone-verschuivingen
@@ -4305,6 +4366,69 @@ function bouwGekozenChip(c, index) {
 const TAGS = ["liefde", "werk", "geld", "groei", "keuze", "familie", "vriendschap", "zelfzorg"];
 
 // Bouw het uitleg-scherm op uit een reading ({ leggingId, vraag, kaarten, notitie, tags })
+
+/* Visuele spread: layout per aantal kaarten (x/y in % van het diagram, kaart gecentreerd) */
+function spreadLayout(aantal, leggingId) {
+  if (leggingId === "keltisch-kruis") {
+    return { h: 470, w: "14%", pos: [
+      { x: 40, y: 66 }, { x: 56, y: 66, rot: 90 }, { x: 48, y: 84 }, { x: 32, y: 66 },
+      { x: 48, y: 48 }, { x: 48, y: 30 }, { x: 80, y: 22 }, { x: 80, y: 42 }, { x: 80, y: 62 }, { x: 48, y: 12 }
+    ] };
+  }
+  if (leggingId === "jaaroverzicht") {
+    // 12 maanden als klok/ cirkel
+    const pos = [];
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * 2 * Math.PI - Math.PI / 2;
+      pos.push({ x: 50 + 38 * Math.cos(a), y: 50 + 38 * Math.sin(a) });
+    }
+    return { h: 320, w: "17%", pos };
+  }
+  switch (aantal) {
+    case 1: return { h: 190, w: "38%", pos: [{ x: 50, y: 50 }] };
+    case 3: return { h: 160, w: "26%", pos: [{ x: 16, y: 50 }, { x: 50, y: 50 }, { x: 84, y: 50 }] };
+    case 4: return { h: 250, w: "30%", pos: [{ x: 30, y: 27 }, { x: 70, y: 27 }, { x: 30, y: 73 }, { x: 70, y: 73 }] };
+    case 5: return { h: 260, w: "22%", pos: [{ x: 50, y: 50 }, { x: 50, y: 13 }, { x: 50, y: 87 }, { x: 13, y: 50 }, { x: 87, y: 50 }] };
+    case 7: return { h: 270, w: "20%", pos: [{ x: 11, y: 27 }, { x: 37, y: 27 }, { x: 63, y: 27 }, { x: 89, y: 27 }, { x: 25, y: 76 }, { x: 50, y: 76 }, { x: 75, y: 76 }] };
+    default: {
+      // standaard: rijen van 3
+      const pos = [];
+      const rijen = Math.ceil(aantal / 3);
+      for (let i = 0; i < aantal; i++) {
+        const rij = Math.floor(i / 3), inRij = Math.min(3, aantal - rij * 3);
+        const x = inRij === 1 ? 50 : 50 + (i % 3 - (inRij - 1) / 2) * 34;
+        const y = 50 + (rij - (rijen - 1) / 2) * (86 / Math.max(1, rijen - 1) || 0);
+        pos.push({ x, y: rijen === 1 ? 50 : y });
+      }
+      return { h: 170 * rijen, w: "26%", pos };
+    }
+  }
+}
+
+function bouwSpreadDiagram(legging, kaarten) {
+  const el = document.getElementById("uitleg-spread");
+  if (!el || !kaarten || !kaarten.length) { if (el) el.innerHTML = ""; return; }
+  const layout = spreadLayout(kaarten.length, legging.id);
+  el.style.height = layout.h + "px";
+  el.innerHTML = "";
+  kaarten.forEach((c, i) => {
+    const kaart = kaartVind(c.id);
+    if (!kaart) return;
+    const p = layout.pos[i] || { x: 50, y: 50 };
+    const mini = document.createElement("div");
+    mini.className = "spread-kaart" + (c.omgekeerd ? " omgekeerd" : "");
+    mini.style.left = p.x + "%";
+    mini.style.top = p.y + "%";
+    mini.style.width = layout.w;
+    if (p.rot) mini.style.setProperty("--rot", p.rot + "deg");
+    mini.innerHTML =
+      '<span class="spread-num">' + (i + 1) + "</span>" +
+      kaartBeeld(kaart) +
+      '<span class="spread-label">' + (legging.posities[i] ? legging.posities[i].label : "") + "</span>";
+    el.appendChild(mini);
+  });
+}
+
 function bouwUitleg(reading, alleenLezen) {
   // fallback als de legging niet (meer) gevonden wordt — dan crasht de app niet
   const legging = leggingVind(reading.leggingId) || {
@@ -4317,6 +4441,7 @@ function bouwUitleg(reading, alleenLezen) {
   document.getElementById("uitleg-kicker").textContent =
     (reading.voorWie ? "voor " + reading.voorWie + " · " : "") + legging.naam + " · " + datumNL(new Date());
   document.getElementById("uitleg-titel").textContent = reading.vraag || (reading.voorWie ? "Reading voor " + reading.voorWie : legging.naam);
+  bouwSpreadDiagram(legging, reading.kaarten);
 
   // --- per-positie blokken ---
   const container = document.getElementById("uitleg-posities");
@@ -5026,7 +5151,6 @@ function renderMeer() {
   const vn = document.getElementById("versie-nr");
   if (vn) vn.textContent = "v" + v;
   document.getElementById("meer-datum").innerHTML = datumNL(new Date()) + " " + sterSvg();
-  document.getElementById("meer-naam-waarde").textContent = lees("tarot_naam", "Samir");
   renderStats();
   document.querySelectorAll("#inst-tekst button").forEach(b => {
     b.classList.toggle("actief", b.dataset.grootte === lees("tarot_tekstgrootte", "normaal"));
@@ -5070,23 +5194,6 @@ document.getElementById("kaart-popup").addEventListener("click", e => {
   if (e.target === e.currentTarget) e.currentTarget.hidden = true;
 });
 
-// Naam wijzigen
-document.getElementById("inst-naam").addEventListener("click", () => {
-  const el = toonModal(
-    "<h3>Hoe heet je?</h3>" +
-    '<p class="popup-kernwoord">Deze naam zie je op het opstartscherm.</p>' +
-    '<input type="text" id="modal-naam" class="invoer" maxlength="24" value="' + lees("tarot_naam", "Samir") + '">' +
-    '<button class="knop" id="modal-opslaan">Opslaan</button>'
-  );
-  const veld = el.querySelector("#modal-naam");
-  setTimeout(() => { veld.focus(); veld.select(); }, 100);
-  el.querySelector("#modal-opslaan").onclick = () => {
-    schrijf("tarot_naam", veld.value.trim() || "Samir");
-    document.getElementById("kaart-popup").hidden = true;
-    renderMeer();
-    toast("Naam aangepast");
-  };
-});
 
 // Tekstgrootte
 document.querySelectorAll("#inst-tekst button").forEach(b => {
@@ -5103,7 +5210,7 @@ function maakExportData() {
   return {
     app: "Tarot van Samir",
     geëxporteerd_op: new Date().toISOString(),
-    tarot_naam: lees("tarot_naam", "Samir"),
+    tarot_naam: "Samir",
     tarot_geschiedenis: lees("tarot_geschiedenis", []),
     tarot_favorieten: lees("tarot_favorieten", []),
     tarot_eigen_leggingen: lees("tarot_eigen_leggingen", []),
