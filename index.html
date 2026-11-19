@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="38">
+<html lang="nl" data-versie="40">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=38 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=40 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    TAROT VAN SAMIR — style.css
@@ -142,7 +142,7 @@ body::before {
   inset: 0;
   overflow-y: auto;
   overscroll-behavior-y: contain;      /* geen bounce-doorgeef naar de pagina erachter */
-  padding: calc(env(safe-area-inset-top) + 24px) 16px calc(env(safe-area-inset-bottom) + 96px);
+  padding: calc(env(safe-area-inset-top) + 24px) 16px calc(env(safe-area-inset-bottom) + 104px);
   scrollbar-width: none;               /* geen scrollbalk in de app */
   /* NB: géén mask-image hier — een mask op een scroll-container forceert op iOS
      een volledige herpaint per scroll-frame en maakt scrollen stroef */
@@ -483,7 +483,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 #tabbalk {
   position: fixed;
   left: 12px; right: 12px;
-  bottom: calc(env(safe-area-inset-bottom) + 5px);   /* zwevende pil: net boven de home-indicator */
+  bottom: calc(env(safe-area-inset-bottom) + 12px);  /* duidelijk zwevende pil: lucht eronder */
   z-index: 40;
   display: flex;
   padding: 7px 10px;
@@ -494,8 +494,9 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   border: 1px solid rgba(255, 255, 255, 0.10);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),   /* glasrandje bovenop */
-    0 14px 36px rgba(0, 0, 0, 0.50),
-    0 0 28px rgba(122, 90, 248, 0.10);
+    0 22px 48px rgba(0, 0, 0, 0.60),           /* duidelijke lift: de pil hangt boven de sterren */
+    0 2px 10px rgba(0, 0, 0, 0.35),
+    0 0 34px rgba(122, 90, 248, 0.12);
 }
 .tab {
   flex: 1;
@@ -786,7 +787,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .gekozen-balk {
   position: fixed;
   left: 12px; right: 12px;
-  bottom: calc(env(safe-area-inset-bottom) + 5px);
+  bottom: calc(env(safe-area-inset-bottom) + 12px);
   z-index: 42;
   background: rgba(26, 22, 54, 0.82);
   backdrop-filter: blur(18px) saturate(1.35);
@@ -1244,7 +1245,7 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
   #tabbalk, .gekozen-balk {
     left: 50%;
     right: auto;
-    bottom: calc(env(safe-area-inset-bottom) + 8px);
+    bottom: calc(env(safe-area-inset-bottom) + 14px);
     transform: translateX(-50%);
     width: calc(100% - 32px);
     max-width: 748px;
@@ -1371,6 +1372,58 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
 .veil.open { opacity: 1; }
 body.licht .veil { background: rgba(42, 33, 10, 0.28); }
 
+
+/* ---------- JOURNAAL ---------- */
+.journaal-maand { font-family: var(--serif); font-size: calc(15px * var(--tekst-schaal)); color: var(--lav); margin: 22px 2px 8px; letter-spacing: .02em; }
+.journaal-item {
+  background: linear-gradient(165deg, rgba(58, 48, 110, 0.32), rgba(24, 20, 50, 0.4));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px; padding: 12px 14px; margin-bottom: 10px;
+}
+.journaal-kop { display: flex; align-items: center; gap: 10px; }
+.journaal-stemming { font-size: 22px; line-height: 1; }
+.journaal-dag { font-family: var(--serif); font-size: calc(15px * var(--tekst-schaal)); color: var(--tekst); }
+.journaal-humeur { font-size: calc(11.5px * var(--tekst-schaal)); color: var(--sec); }
+.journaal-kop .wis-knop { margin-left: auto; }
+.journaal-tekst { color: var(--tekst); font-size: calc(14px * var(--tekst-schaal)); line-height: 1.5; margin-top: 8px; white-space: pre-wrap; }
+.journaal-stemmingen { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 12px; justify-content: center; }
+.stemming-keuze {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 14px; padding: 8px 10px; min-width: 58px; cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.stemming-keuze span { font-size: 20px; }
+.stemming-keuze em { font-style: normal; font-size: 11px; color: var(--sec); }
+.stemming-keuze.actief { border-color: rgba(232, 200, 116, 0.65); background: rgba(232, 200, 116, 0.10); transform: scale(1.04); }
+.stemming-keuze.actief em { color: var(--goud); }
+body.licht .journaal-item { background: rgba(255, 255, 255, 0.72); border-color: rgba(42, 36, 64, 0.10); }
+
+/* ---------- LEER-MODUS ---------- */
+.leer-open-knop { margin: 4px 0 14px; }
+.leer-kaart-scene { display: flex; justify-content: center; margin: 10px 0 6px; }
+.leer-kaart { width: min(190px, 52vw); aspect-ratio: 3 / 5; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(232, 200, 116, 0.35); }
+.leer-kaart .kaart-foto { width: 100%; height: 100%; object-fit: cover; display: block; }
+.leer-stand { text-align: center; color: var(--sec); font-size: calc(12px * var(--tekst-schaal)); margin-bottom: 14px; }
+.leer-opties { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.leer-optie {
+  min-height: 52px; border-radius: 14px; cursor: pointer;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.10);
+  color: var(--tekst); font-family: var(--sans); font-size: calc(14px * var(--tekst-schaal)); font-weight: 600;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; padding: 8px 10px;
+}
+.leer-optie:active { transform: scale(0.96); }
+.leer-optie.goed { border-color: rgba(139, 217, 156, 0.8); background: rgba(139, 217, 156, 0.12); color: #C9EDD2; }
+.leer-optie.fout { border-color: rgba(232, 139, 139, 0.8); background: rgba(232, 139, 139, 0.12); color: #F2C4C4; }
+.leer-optie:disabled { opacity: 0.75; }
+.leer-feedback { text-align: center; margin-top: 14px; font-size: calc(14px * var(--tekst-schaal)); color: var(--tekst); }
+body.licht .leer-optie { background: rgba(42, 36, 64, 0.05); border-color: rgba(42, 36, 64, 0.12); color: var(--tekst); }
+body.licht .leer-optie.goed { background: rgba(74, 143, 96, 0.12); color: #2E6B44; }
+body.licht .leer-optie.fout { background: rgba(178, 74, 74, 0.12); color: #8C3A3A; }
+
 </style>
   <script>
     // Komt er een NIEUWE service worker (na een update van de app)? Dan één keer
@@ -1452,6 +1505,7 @@ body.licht .veil { background: rgba(42, 33, 10, 0.28); }
           <input type="search" id="bib-zoek" class="invoer zoek-invoer" placeholder="Zoek op NL/EN naam of kernwoord...">
         </div>
         <div class="tags-rij" id="bib-filters"></div>
+        <button class="knop knop-secundair leer-open-knop" id="leer-knop">Leer de kaarten — quiz</button>
         <div id="bib-lijst"></div>
       </section>
 
@@ -1470,6 +1524,31 @@ body.licht .veil { background: rgba(42, 33, 10, 0.28); }
           </button>
         </header>
         <div id="kd-inhoud"></div>
+      </section>
+
+      <!-- ================= SCHERM: LEER-MODUS (flashcards) ================= -->
+      <section class="scherm scherm-sub" id="scherm-leer" hidden>
+        <header class="sub-kop">
+          <button class="terug" data-terug aria-label="Terug">
+            <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div style="flex:1">
+            <p class="sub-kicker">Leer-modus</p>
+            <h1 class="sub-titel" id="leer-titel">Welke kaart is dit?</h1>
+          </div>
+        </header>
+        <div id="leer-inhoud"></div>
+      </section>
+
+      <!-- ================= SCHERM: JOURNAAL (dagboek) ================= -->
+      <section class="scherm" id="scherm-journaal" hidden>
+        <header class="home-kop">
+          <p class="home-datum" id="journaal-datum"></p>
+          <h1 class="home-titel">Journaal</h1>
+          <p class="home-ondertitel">Jouw dagelijkse spiegel — stemming en korte notitie</p>
+        </header>
+        <button class="knop" id="journaal-nieuw">+ Vandaag een invoer schrijven</button>
+        <div id="journaal-lijst"></div>
       </section>
 
       <section class="scherm" id="scherm-geschiedenis" hidden>
@@ -1685,6 +1764,10 @@ body.licht .veil { background: rgba(42, 33, 10, 0.28); }
       <button class="tab" data-tab="bibliotheek">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 5.5v15M20 18v3H6.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>Bibliotheek</span>
+      </button>
+      <button class="tab" data-tab="journaal">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h10A1.5 1.5 0 0 1 18.5 5v15.2L12 16.9l-6.5 3.3V5A1.5 1.5 0 0 1 7 3.5z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <span>Journaal</span>
       </button>
       <button class="tab" data-tab="geschiedenis">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1920,6 +2003,57 @@ const LEGGINGEN = [
     template: "Ik sta nu bij {1}, laat {2} achter en neem {3} mee. De brug is {4}: de eerste stap is {5}, onderweg gesteund door {6}, en ik kom aan bij {7}.",
     speciaal: null,
     gegroepeerd: true
+  },
+  {
+    id: "relatiespiegel",
+    naam: "Relatiespiegel",
+    aantal: 6,
+    wanneer: "Voor één belangrijke relatie: liefde, vriendschap of familie.",
+    tip: "Leg de kaarten 1-3 (jouw kant) en 4-5 (de ander) naast elkaar. Kaart 6 is wat er tussen jullie kan groeien.",
+    posities: [
+      { label: "Ik in deze relatie",    uitleg: "hoe je jezelf nu laat zien" },
+      { label: "Mijn behoefte",        uitleg: "wat jij eigenlijk wilt" },
+      { label: "Wat ik inbreng",       uitleg: "jouw gift aan de verbinding" },
+      { label: "De ander",             uitleg: "hoe de ander erin staat" },
+      { label: "Hun behoefte",         uitleg: "wat de ander eigenlijk vraagt" },
+      { label: "Waar het groeien kan", uitleg: "de volgende stap samen" }
+    ],
+    template: "In deze relatie ben ik {1} en heb ik {2} nodig; de ander is {4} en vraagt om {5}. Ik breng {3} in — en het kan groeien richting {6}.",
+    speciaal: null,
+    gegroepeerd: true
+  },
+  {
+    id: "carriere-check",
+    naam: "Carrière-check",
+    aantal: 5,
+    wanneer: "Voor werk, studie en ambities die (even) vastzitten.",
+    tip: "Wees eerlijk bij kaart 2 (wat me remt) — daar zit bijna altijd de sleutel. Kaart 5 is de eerste concrete actie.",
+    posities: [
+      { label: "Waar ik sta",      uitleg: "jouw plek op dit moment" },
+      { label: "Wat me remt",      uitleg: "het blok dat er echt zit" },
+      { label: "Mijn talent",      uitleg: "waar jij van nature sterk in bent" },
+      { label: "De kans die er ligt", uitleg: "wat zich nu aanbiedt" },
+      { label: "Volgende stap",   uitleg: "de eerste concrete actie" }
+    ],
+    template: "Ik sta bij {1}, {2} remt me, maar {3} is mijn talent — en {4} is de kans die er ligt. Volgende stap: {5}.",
+    speciaal: null,
+    gegroepeerd: true
+  },
+  {
+    id: "de-spiegel",
+    naam: "De Spiegel",
+    aantal: 4,
+    wanneer: "Als iets je bezighoudt en je wilt eerder zien wat er van jóú afkomstig is.",
+    tip: "Alles wat je ziet is een spiegel: kaart 1 laat zien wat je de wereld toont, kaart 4 wat er werkelijk leeft.",
+    posities: [
+      { label: "Wat ik laat zien",   uitleg: "de kant die de wereld ziet" },
+      { label: "Wat ik verberg",    uitleg: "de kant die je wegmoffelt" },
+      { label: "Wat ik projecteer", uitleg: "wat je bij anderen oproept" },
+      { label: "Wat er echt leeft",  uitleg: "de waarheid onder de oppervlakte" }
+    ],
+    template: "Ik laat {1} zien en verberg {2}; ik projecteer {3} — maar wat er echt leeft is {4}.",
+    speciaal: null,
+    gegroepeerd: false
   }
 ];
 
@@ -3566,6 +3700,108 @@ function bindTilt(sceneEl, cardEl, glareEl) {
 </script>
   <script>
 /* ============================================================
+   js/kaart-diepte.js — extra duiding per kaart
+   ------------------------------------------------------------
+   KAART_DIEPTE[id] = { liefde: "...", werk: "..." }
+   Korte, concrete zinnen over hoe de kaart zich verhoudt tot
+   relaties (liefde/vriendschap) en tot werk/studie/geld (werk).
+   Wordt getoond in de kaart-popup en het kaart-scherm (Bibliotheek).
+   ============================================================ */
+
+const KAART_DIEPTE = {
+
+  /* ---------- Grote Arcana ---------- */
+  "de-dwaas":            { liefde: "verliefd zonder land onder de voeten",                    werk: "stap het onbekende in, plan komt onderweg" },
+  "de-magier":           { liefde: "charme en initiatief nemen",                            werk: "alles ligt klaar: maak het waar" },
+  "de-hogepriesteres":   { liefde: "luister naar je onderbuikgevoel",                        werk: "de oplossing zit binnenin, niet buiten je" },
+  "de-keizerin":         { liefde: "warmte, verzorging, laten bloeien",                      werk: "groei geduldig voeden tot iets rijps" },
+  "de-keizer":           { liefde: "duidelijkheid en afspraken zijn sexy",                  werk: "orde, regels en verantwoordelijkheid nemen" },
+  "de-hierofant":       { liefde: "erkenning van buiten, officieel maken",                  werk: "volgens het boekje, opleiding, leerling zijn" },
+  "de-geliefden":        { liefde: "een echte keuze tussen twee mensen of wegen",            werk: "kiezen voor wat (en wie) er echt toe doet" },
+  "de-zegewagen":        { liefde: "samen de slee in beweging zetten",                       werk: "doorzetten richting iets groots" },
+  "kracht":              { liefde: "geduld zegeviert over hard schreeuwen",                  werk: "zachte overtuiging is je sterkste spier" },
+  "de-kluizenaar":       { liefde: "even alleen zijn om te weten wat je voelt",             werk: "met terugtrekken win je helderheid" },
+  "rad-van-fortuin":     { liefde: "wat vastzat komt weer in beweging",                     werk: "timing — de wind draait, surf mee" },
+  "gerechtigheid":       { liefde: "er eerlijk van harte over praten",                       werk: "harde feiten wegen, eerlijk oordelen" },
+  "de-gehangene":        { liefde: "een keer de wereld door de ogen van de ander",          werk: "iets stilleggen om het anders te zien" },
+  "de-dood":             { liefde: "iets eindigen zodat er plaats komt",                    werk: "een deur gaat dicht — en dat is goed" },
+  "matigheid":           { liefde: "geven en nemen in gelijke maat",                        werk: "rustig tempo, de juiste mix vinden" },
+  "de-duivel":           { liefde: "zoete ketens: ben je vrij in deze liefde?",             werk: "kijk naar je eigen verslaving aan status of werk" },
+  "de-toren":            { liefde: "echt contact pas na een schok",                            werk: "wat kraakt gaat om — bouw daarna beter" },
+  "de-ster":             { liefde: "open wonden helen, hoop komt terug",                     werk: "geloof weer in je eigen licht" },
+  "de-maan":             { liefde: "angst en verlangens vertroebelen wat je ziet",          werk: "niet alles is wat het lijkt — onderzoek" },
+  "de-zon":              { liefde: "open, vrolijk en zonder spelletjes",                    werk: "zichtbaar stralen, succes voelen" },
+  "het-oordeel":         { liefde: "oude bekenden keren terug, opnieuw beginnen",           werk: "wat lang sliep wordt wakker geroepen" },
+  "de-wereld":           { liefde: "een vol, afgerond hoofdstuk samen",                    werk: "ronde maken, beloning innen, eromheen dansen" },
+
+  /* ---------- Staven ---------- */
+  "aas-van-staven":      { liefde: "een sprankje passie, vonk van nu",                      werk: "nieuw idee vastpakken en laten branden" },
+  "2-van-staven":        { liefde: "de wereld ligt open — verleg je grenzen",              werk: "plannen maken voor groter dan nu" },
+  "3-van-staven":        { liefde: "uitkijken naar wat eraan komt",                        werk: "schepen op zee: jouw inzet komt terug" },
+  "4-van-staven":       { liefde: "thuis vieren, samen feest",                             werk: "mijlpaal halen en er evenbij stilstaan" },
+  "5-van-staven":        { liefde: "prikkelen of echt ruzie?",                             werk: "gezonde concurrentie, botende ego's" },
+  "6-van-staven":        { liefde: "trots mogen stralen voor je partner",                  werk: "erkenning en publiek succes" },
+  "7-van-staven":        { liefde: "je plek verdedigen zonder te vechten",                 werk: "positie houden onder druk" },
+  "8-van-staven":        { liefde: "het gaat snel — geniet van de rit",                    werk: "alle ballen zijn in de lucht: tempo!" },
+  "9-van-staven":        { liefde: "moe maar niet opgeven",                                werk: "uitgeput doorgaan — de laatste loodjes" },
+  "10-van-staven":      { liefde: "teveel gewicht — leg wat af",                          werk: "niet alles zelf sjouwen" },
+  "page-van-staven":     { liefde: "speelse, ontdekkende verliefdheid",                    werk: "nieuw talent ontdekken met enthousiasme" },
+  "ridder-van-staven":   { liefde: "hartstocht — blijf branden, niet opbranden",           werk: "vol enthousiasme op weg, kijk uit waar" },
+  "koningin-van-staven": { liefde: "warm, zelfverzekerd en gul",                          werk: "natuurlijk leiderschap dat inspireert" },
+  "koning-van-staven":   { liefde: "groot hart, grote warme visie",                   werk: "visie neerzetten en mensen meekrijgen" },
+
+  /* ---------- Bekers ---------- */
+  "aas-van-bekers":      { liefde: "een nieuw vat vol gevoel, aanbod",                     werk: "werk dat vanuit je hart stroomt" },
+  "2-van-bekers":        { liefde: "wederkerige liefde, eerlijk delen",                  werk: "samenwerking op basis van respect" },
+  "3-van-bekers":        { liefde: "vriendschap en community rondom jullie",             werk: "team wat samen succes viert" },
+  "4-van-bekers":       { liefde: "mismoedig — kijk nog eens om je heen",                 werk: "interne ontevredenheid, uit je schulp" },
+  "5-van-bekers":       { liefde: "rouw om wat is, hoop over het hoofd gezien",           werk: "verlies verwerken zonder blind te worden" },
+  "6-van-bekers":       { liefde: "nostalgie, een oude liefde of vriendschap",            werk: "herinneren hoe het begon, terug naar je basis" },
+  "7-van-bekers":       { liefde: "fantasieën versus de echte relatie",                  werk: "teveel opties — maak een keuze" },
+  "8-van-bekers":       { liefde: "weglopen van wat je niet meer voedt",                 werk: "klaren achterlaten, op zoek naar zin" },
+  "9-van-bekers":       { liefde: "tevreden in je vel, alleen maar niet eenzaam",         werk: "je hebben genoeg — geniet ervan" },
+  "10-van-bekers":      { liefde: "gezinshuiselijk geluk, harmonie",                    werk: "emotionele compleetheid thuis en op werk" },
+  "page-van-bekers":    { liefde: "een kaartje, gevoelig en verlegen",                   werk: "creatief beginnen, boodschap van binnen" },
+  "ridder-van-bekers":  { liefde: "de romantische ridder — grootste gebaar",              werk: "aanbieding op tafel, design je droom" },
+  "koningin-van-bekers":{ liefde: "mededogen, je hele hart open",                        werk: "empathie als kracht, intuïtief besluiten" },
+  "koning-van-bekers":  { liefde: "warme steun zonder oordelen",                        werk: "balans tussen zakelijk en menselijk" },
+
+  /* ---------- Zwaarden ---------- */
+  "aas-van-zwaarden":    { liefde: "eerlijk zeggen hoe het zit",                          werk: "heldere analyse, kwestie doorsnijden" },
+  "2-van-zwaarden":      { liefde: "stilzwijgen verbergt een keuze",                     werk: "met dubbele info toch beslissen" },
+  "3-van-zwaarden":      { liefde: "pijn onder ogen zien, hart eruit",                   werk: "teleurstelling verwerken, niet doorslikken" },
+  "4-van-zwaarden":      { liefde: "even adem ruimen in je eentje",                     werk: "time-out! recuperatie is productief" },
+  "5-van-zwaarden":      { liefde: "kleine overwinning, grote afstand",                 werk: "winst pakken terwijl de relatie lijdt" },
+  "6-van-zwaarden":      { liefde: "samen weg van ruzie naar rust",                    werk: "verhuizen naar rustiger water" },
+  "7-van-zwaarden":      { liefde: "niet alles delen met de ander",                   werk: "listig te werk, of oneerlijk spel?" },
+  "8-van-zwaarden":      { liefde: "je voelt gevangen — de deur staat open",           werk: "zelfbeperking losmaken" },
+  "9-van-zwaarden":      { liefde: "'s nachts piekeren over de liefde",               werk: "angst groter dan het echte probleem" },
+  "10-van-zwaarden":     { liefde: "echt voorbij — eindpunt bereikt",                werk: "het ergste is voorbij, daarna komt opluchting" },
+  "page-van-zwaarden":   { liefde: "scherpe woorden, nieuwsgierig naar waarheid",    werk: "blij leren, kritisch meekijken" },
+  "ridder-van-zwaarden": { liefde: "direct, snel verliefd, altijd weg",           werk: "brutale energie, snelle uitdaging aan" },
+  "koningin-van-zwaarden":{ liefde: "scherp zien wat er speelt, helder praten",  werk: "ervaren, nuchter oordelen" },
+  "koning-van-zwaarden": { liefde: "hoofd boven hart, rationeel",                werk: "autoriteit met kennis en logica" },
+
+  /* ---------- Pentakels ---------- */
+  "aas-van-pentakels":   { liefde: "een concreet aanbod, tastbaar",            werk: "kans met voeten in de klei: pak aan" },
+  "2-van-pentakels":     { liefde: "balanceren tussen jaw en nee",           werk: " twee projecten tegelijk jongleren" },
+  "3-van-pentakels":     { liefde: "elkaars talent binnenhalen en waarderen", werk: "samen bouwen, vakmanschap samen" },
+  "4-van-pentakels":     { liefde: "vasthouden of vastzitten?",             werk: "buffer opbouwen, niet gierig worden" },
+  "5-van-pentakels":     { liefde: "tekort dat je samen kunt dragen",     werk: "even moeite — hulp bestaat, kijk op" },
+  "6-van-pentakels":     { liefde: "geven en nemen in evenwicht",       werk: "delen van kennis of geld — genereus" },
+  "7-van-pentakels":     { liefde: "geduld: liefde groeit in haar eigen tempo", werk: "langzaam groeien is nog steeds groeien" },
+  "8-van-pentakels":     { liefde: "elke dag een klein beetje investeren", werk: "doorgaan, je vak verfijnen" },
+  "9-van-pentakels":     { liefde: "genieten van wat je samen hebt",   werk: "vruchten plukken, financiÃ«le rust" },
+  "10-van-pentakels":    { liefde: "familie, geslacht, langdurig welzijn", werk: "erfenis of winstgevende afronding" },
+  "page-van-pentakels":  { liefde: "aandacht voor praktische gebaren",  werk: "leergeïj-ierige kansen aangrijpen" },
+  "ridder-van-pentakels":{ liefde: "trouw, betrouwbaar, traag maar zeker", werk: "stug doorwerken, routine is goud" },
+  "koningin-van-pentakels":{ liefde: "verzorgend, warm en praktisch", werk: "groeien met rust — werk met zorg" },
+  "koning-van-pentakels": { liefde: "vast, trouw, beschermend",      werk: "stevig resultaat, bouwen aan imperium" }
+};
+
+</script>
+  <script>
+/* ============================================================
    js/app.js — de "motor" van de app
    ------------------------------------------------------------
    Wat hier gebeurt (stap 1):
@@ -3961,6 +4197,7 @@ function bouwLeggingLijst() {
 const TAB_NAAR_SCHERM = {
   nieuw: "scherm-home",
   bibliotheek: "scherm-bibliotheek",
+  journaal: "scherm-journaal",
   geschiedenis: "scherm-geschiedenis",
   meer: "scherm-meer"
 };
@@ -3980,6 +4217,7 @@ function toonTab(tabNaam) {
   document.getElementById("gekozen-balk").hidden = true;
   if (tabNaam === "nieuw") { updateConceptMelding(); updateDagMelding(); }
   if (tabNaam === "geschiedenis") renderGeschiedenis();
+  if (tabNaam === "journaal") renderJournaal();
   if (tabNaam === "bibliotheek") renderBibliotheek();
   if (tabNaam === "meer") renderMeer();
   // Alle schermen: alleen het gevraagde tonen, met een kleine fade-in
@@ -4820,6 +5058,13 @@ function rodeDraad(legging, reading) {
 }
 
 // Popup met extra info bij een kaart
+// Korte duiding per kaart over liefde/werk (zie js/kaart-diepte.js)
+function kaartDiepteRegel(kaart, soort) {
+  const d = (typeof KAART_DIEPTE !== "undefined") ? KAART_DIEPTE[kaart.id] : null;
+  if (!d) return "-";
+  return (d[soort] || "-").replace(/</g, "&lt;");
+}
+
 function toonKaartPopup(id) {
   const kaart = kaartVind(id);
   const popup = document.getElementById("kaart-popup");
@@ -4832,6 +5077,8 @@ function toonKaartPopup(id) {
     '<div class="popup-rij"><p class="popup-label">Thema</p><p>' + themaVan(kaart) + "</p></div>" +
     '<div class="popup-rij"><p class="popup-label">Fase</p><p>' + faseVan(kaart) + "</p></div>" +
     '<div class="popup-rij"><p class="popup-label">Kijkrichting</p><p>' + kaart.kijkrichting + "</p></div>" +
+    '<div class="popup-rij"><p class="popup-label">In liefde</p><p>' + kaartDiepteRegel(kaart, "liefde") + "</p></div>" +
+    '<div class="popup-rij"><p class="popup-label">In werk</p><p>' + kaartDiepteRegel(kaart, "werk") + "</p></div>" +
     '<div class="popup-rij"><p class="popup-label">Reflectievraag</p><p>' + kaart.reflectievraag + "</p></div>" +
     '<button class="knop knop-secundair popup-sluit" id="popup-sluit">Sluiten</button>';
   popup.hidden = false;
@@ -4887,15 +5134,120 @@ function confettiMoment() {
 
 // Deel de reading als nette tekst (iPhone-deelmenu of klembord)
 function deelReading(legging, reading) {
+  deelReadingAlsAfbeelding(legging, reading).catch(() => deelReadingAlsTekst(legging, reading));
+}
+
+// Probeert eerst: reading als mooie afbeelding delen (iOS deelscherm), anders tekst
+async function deelReadingAlsAfbeelding(legging, reading) {
+  const kaartImages = await Promise.all(reading.kaarten.map(c => new Promise((res) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = () => res(null);
+    img.src = "kaart-" + c.id + ".jpg";
+  })));
+  const L = spreadLayout(reading.kaarten.length, legging.id);
+  const schaal = 1080 / 393 * 0.92;
+  const W = 1080;
+  const marge = Math.round((1080 - 361 * schaal) / 2);
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = Math.round(300 + L.h * schaal + 120 + reading.kaarten.length * 42);
+  const ctx = canvas.getContext("2d");
+  const gr = ctx.createLinearGradient(0, 0, W, canvas.height);
+  gr.addColorStop(0, "#0B0A1E"); gr.addColorStop(0.6, "#141132"); gr.addColorStop(1, "#0B0A1E");
+  ctx.fillStyle = gr; ctx.fillRect(0, 0, W, canvas.height);
+  // sterretjes
+  for (let i = 0; i < 90; i++) {
+    ctx.globalAlpha = 0.12 + Math.random() * 0.3;
+    ctx.fillStyle = "#F5F3FF";
+    ctx.beginPath(); ctx.arc(Math.random() * W, Math.random() * canvas.height, 1 + Math.random() * 1.6, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#F0D48A";
+  ctx.font = "600 44px -apple-system, sans-serif";
+  ctx.fillText("TAROT VAN SAMIR", W / 2, 96);
+  ctx.fillStyle = "#F5F3FF";
+  ctx.font = "700 54px Georgia, serif";
+  ctx.fillText(legging.naam, W / 2, 168);
+  if (reading.vraag) { ctx.fillStyle = "#B9A7E8"; ctx.font = "italic 34px Georgia, serif"; ctx.fillText("\u201C" + reading.vraag.slice(0, 64) + "\u201D", W / 2, 224); }
+  ctx.fillStyle = "#8B84A8"; ctx.font = "30px -apple-system, sans-serif";
+  ctx.fillText(datumNL(new Date()) + " \u00b7 " + reading.kaarten.length + " kaarten", W / 2, 264);
+  // kaarten
+  const zoneY = 300, zoneH = L.h * schaal;
+  const zoneW = 361 * schaal;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(marge - 20, zoneY - 10, zoneW + 40, zoneH + 20); ctx.clip();
+  reading.kaarten.forEach((c, i) => {
+    const p = L.pos[i] || { x: 50, y: 50 };
+    const cw = (parseFloat(L.w) / 100) * zoneW;
+    const cx = marge + (p.x / 100) * zoneW;
+    const cy = zoneY + (p.y / 100) * zoneH;
+    const img = kaartImages[i];
+    if (img) {
+      const th = cw * 5 / 3, tw = cw;
+      const hoek = (p.rot || 0) * Math.PI / 180;
+      ctx.save();
+      ctx.translate(cx, cy); ctx.rotate(hoek);
+      ctx.shadowColor = "rgba(0,0,0,0.55)"; ctx.shadowBlur = 26; ctx.shadowOffsetY = 12;
+      ctx.fillStyle = "#1c1838";
+      ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-tw / 2, -th / 2, tw, th, 16) : ctx.rect(-tw / 2, -th / 2, tw, th); ctx.fill();
+      ctx.shadowBlur = 0;
+      const srcR = img.width / img.height, dstR = tw / th;
+      let sx, sy, sw, sh;
+      if (srcR > dstR) { sh = img.height; sw = sh * dstR; sx = (img.width - sw) / 2; sy = 0; }
+      else { sw = img.width; sh = sw / dstR; sx = 0; sy = (img.height - sh) / 2; }
+      ctx.save();
+      ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-tw / 2, -th / 2, tw, th, 16) : ctx.rect(-tw / 2, -th / 2, tw, th); ctx.clip();
+      ctx.drawImage(img, sx, sy, sw, sh, -tw / 2, -th / 2, tw, th);
+      ctx.restore();
+      ctx.strokeStyle = "rgba(232,200,116,0.5)"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-tw / 2, -th / 2, tw, th, 16) : ctx.rect(-tw / 2, -th / 2, tw, th); ctx.stroke();
+      ctx.restore();
+    }
+    // positienummer
+    ctx.fillStyle = "#F0D48A";
+    ctx.beginPath(); ctx.arc(cx, cy, 20, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#2A2140"; ctx.font = "bold 24px -apple-system, sans-serif";
+    ctx.fillText(String(i + 1), cx, cy + 8);
+  });
+  ctx.restore();
+  // voet: positie + naam per kaart, één kolom
+  const voetY = zoneY + zoneH + 80;
+  ctx.textAlign = "left";
+  ctx.font = "26px -apple-system, sans-serif";
+  reading.kaarten.forEach((c, i) => {
+    const k = kaartVind(c.id);
+    const y = voetY + i * 42;
+    ctx.fillStyle = "#F0D48A";
+    ctx.fillText(String(i + 1), marge, y);
+    ctx.fillStyle = "rgba(245,243,255,0.92)";
+    ctx.fillText(legging.posities[i].label + ": " + k.naam_nl + (c.omgekeerd ? " \u21a7" : ""), marge + 38, y);
+  });
+  const blob = await new Promise(r => canvas.toBlob(r, "image/png"));
+  const bestand = new File([blob], "tarot-reading.png", { type: "image/png" });
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [bestand] })) {
+    await navigator.share({ files: [bestand], title: "Mijn tarot-reading" });
+    return;
+  }
+  // fallback: afbeelding downloaden
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "tarot-reading.png";
+  a.click();
+  toast("Reading opgeslagen als afbeelding");
+}
+
+function deelReadingAlsTekst(legging, reading) {
   const regels = [];
-  regels.push("✦ Tarot-reading — " + legging.naam);
+  regels.push("\u2726 Tarot-reading \u2014 " + legging.naam);
   regels.push("Datum: " + datumNL(new Date()));
   if (reading.voorWie) regels.push("Voor: " + reading.voorWie);
   if (reading.vraag) regels.push("Vraag: " + reading.vraag);
   regels.push("");
   reading.kaarten.forEach((c, i) => {
     const k = kaartVind(c.id);
-    regels.push((i + 1) + ". " + legging.posities[i].label + ": " + k.naam_nl + (c.omgekeerd ? " (ondersteboven)" : " (rechtop)") + " — " + k.kernwoord);
+    regels.push((i + 1) + ". " + legging.posities[i].label + ": " + k.naam_nl + (c.omgekeerd ? " (ondersteboven)" : " (rechtop)") + " \u2014 " + k.kernwoord);
   });
   regels.push("");
   if (legging.template) regels.push("Verhaal: " + legging.template.replace(/\{(\d+)\}/g, (m, n) => kaartVind(reading.kaarten[n - 1].id).naam_nl));
@@ -4909,6 +5261,172 @@ function deelReading(legging, reading) {
     toast("Delen wordt niet ondersteund in deze browser");
   }
 }
+
+
+/* ---------- 7i. JOURNAAL (dagelijkse spiegel) ---------- */
+
+const JOURNAAL_STEMMINGEN = [
+  ["✨", "Stralend"],
+  ["🙂", "Goed"],
+  ["😐", "Gewoon"],
+  ["😕", "Zwaar"],
+  ["🌙", "Dof"]
+];
+
+function laadJournaal() { return lees("tarot_journaal", []); }
+
+function journaalNieuwBewerken() {
+  const vandaag = lokaleDatumSleutel(new Date());
+  const bestaand = laadJournaal().find(e => e.d === vandaag);
+  const el = toonModal(
+    "<h3>Je dag van vandaag</h3>" +
+    '<p class="popup-kernwoord">Hoe voel je je, en wat wil je even van je af schrijven?</p>' +
+    '<div class="journaal-stemmingen" id="journaal-stemmingen">' +
+      JOURNAAL_STEMMINGEN.map((st, i) =>
+        '<button type="button" class="stemming-keuze' + (bestaand && bestaand.s === i ? " actief" : "") + '" data-stemming="' + i + '"><span>' + st[0] + "</span><em>" + st[1] + "</em></button>"
+      ).join("") +
+    "</div>" +
+    '<textarea id="journaal-tekst" class="invoer" rows="4" maxlength="300" placeholder="Kort en eerlijk — drie zinnen is genoeg...">' + (bestaand ? (bestaand.t || "").replace(/</g, "&lt;") : "") + "</textarea>" +
+    '<button class="knop" id="journaal-opslaan">' + (bestaand ? "Invoer van vandaag bijwerken" : "Opslaan in journaal") + "</button>"
+  );
+  let stemming = bestaand ? bestaand.s : 0;
+  el.querySelectorAll(".stemming-keuze").forEach(b => {
+    b.onclick = () => {
+      el.querySelectorAll(".stemming-keuze").forEach(x => x.classList.remove("actief"));
+      b.classList.add("actief");
+      stemming = Number(b.dataset.stemming);
+    };
+  });
+  el.querySelector("#journaal-opslaan").onclick = () => {
+    const tekst = el.querySelector("#journaal-tekst").value.trim().slice(0, 300);
+    let lijst = laadJournaal();
+    const existing = lijst.find(e => e.d === vandaag);
+    if (existing) { existing.s = stemming; existing.t = tekst; }
+    else { lijst.unshift({ d: vandaag, s: stemming, t: tekst }); }
+    lijst.sort((a, b) => (a.d < b.d ? 1 : -1));
+    schrijf("tarot_journaal", lijst);
+    document.getElementById("kaart-popup").hidden = true;
+    renderJournaal();
+    toast("In je journaal gezet");
+  };
+}
+
+function renderJournaal() {
+  document.getElementById("journaal-datum").innerHTML = datumNL(new Date()) + " " + sterSvg();
+  const lijst = laadJournaal();
+  const el = document.getElementById("journaal-lijst");
+  if (!lijst.length) {
+    el.innerHTML = '<div class="leeg-midden"><div class="leeg-icoon"><svg viewBox="0 0 24 24"><path d="M7 3.5h10A1.5 1.5 0 0 1 18.5 5v15.2L12 16.9l-6.5 3.3V5A1.5 1.5 0 0 1 7 3.5z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></div><h2>Nog niks geschreven</h2><p>Eén dingetje per dag — hoe klein ook — en je hebt binnenkort een mooie spiegel van jezelf.</p></div>';
+    return;
+  }
+  el.innerHTML = "";
+  let vorigeMaand = "";
+  lijst.forEach((e, i) => {
+    const d = new Date(e.d + "T12:00:00");
+    const maand = d.toLocaleDateString("nl-NL", { month: "long", year: "numeric" });
+    if (maand !== vorigeMaand) {
+      vorigeMaand = maand;
+      const kop = document.createElement("p");
+      kop.className = "journaal-maand";
+      kop.textContent = maand.charAt(0).toUpperCase() + maand.slice(1);
+      el.appendChild(kop);
+    }
+    const st = JOURNAAL_STEMMINGEN[e.s] || JOURNAAL_STEMMINGEN[2];
+    const item = document.createElement("div");
+    item.className = "journaal-item";
+    const dag = d.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric" });
+    item.innerHTML =
+      '<div class="journaal-kop"><span class="journaal-stemming">' + st[0] + '</span><div><p class="journaal-dag">' + dag + '</p><p class="journaal-humeur">' + st[1] + '</p></div>' +
+      '<button class="wis-knop gevaar journaal-wis" data-i="' + i + '" aria-label="Verwijder invoer">×</button></div>' +
+      (e.t ? '<p class="journaal-tekst">' + e.t.replace(/</g, "&lt;") + "</p>" : "");
+    el.appendChild(item);
+  });
+  el.querySelectorAll(".journaal-wis").forEach(b => {
+    b.onclick = () => {
+      let lijst2 = laadJournaal();
+      lijst2.splice(Number(b.dataset.i), 1);
+      schrijf("tarot_journaal", lijst2);
+      renderJournaal();
+      toast("Invoer gewist");
+    };
+  });
+}
+
+document.getElementById("journaal-nieuw").addEventListener("click", journaalNieuwBewerken);
+
+/* ---------- 7j. LEER-MODUS (flashcards over alle 78 kaarten) ---------- */
+
+let leerSet = null;
+
+function startLeerSessie() {
+  const kaarten = KAARTEN.slice();
+  for (let i = kaarten.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [kaarten[i], kaarten[j]] = [kaarten[j], kaarten[i]];
+  }
+  leerSet = { set: kaarten.slice(0, 10), i: 0, goed: 0, klaar: false };
+  document.getElementById("leer-titel").textContent = "Welke kaart is dit?";
+  renderLeerVraag();
+  pushScherm("scherm-leer");
+}
+
+function renderLeerVraag() {
+  const el = document.getElementById("leer-inhoud");
+  const st = leerSet;
+  if (!st) return;
+  if (st.i >= st.set.length) { renderLeerEinde(); return; }
+  const kaart = st.set[st.i];
+  const rest = KAARTEN.filter(k => k.id !== kaart.id);
+  const afleiders = [];
+  while (afleiders.length < 3) {
+    const k = rest[Math.floor(Math.random() * rest.length)];
+    if (!afleiders.includes(k)) afleiders.push(k);
+  }
+  const opties = [kaart, ...afleiders];
+  for (let i = opties.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [opties[i], opties[j]] = [opties[j], opties[i]]; }
+  el.innerHTML =
+    '<div class="leer-kaart-scene"><div class="leer-kaart">' + kaartBeeld(kaart) + "</div></div>" +
+    '<p class="leer-stand">vraag ' + (st.i + 1) + " van " + st.set.length + "</p>" +
+    '<div class="leer-opties">' +
+      opties.map(o => '<button class="leer-optie" data-id="' + o.id + '">' + o.naam_nl + "</button>").join("") +
+    "</div>";
+  el.querySelectorAll(".leer-optie").forEach(b => {
+    b.onclick = () => {
+      const juist = b.dataset.id === kaart.id;
+      if (juist) { st.goed++; tril(10); } else tril(20);
+      el.querySelectorAll(".leer-optie").forEach(x => {
+        x.disabled = true;
+        if (x.dataset.id === kaart.id) x.classList.add("goed");
+      });
+      if (!juist) b.classList.add("fout");
+      const uitleg = document.createElement("p");
+      uitleg.className = "leer-feedback";
+      uitleg.innerHTML = juist
+        ? "✓ Klopt — " + kaart.kernwoord
+        : "✗ Dit is <strong>" + kaart.naam_nl + "</strong> (" + kaart.kernwoord + ")";
+      el.appendChild(uitleg);
+      st.i++;
+      setTimeout(renderLeerVraag, 1100);
+    };
+  });
+}
+
+function renderLeerEinde() {
+  const st = leerSet;
+  const el = document.getElementById("leer-inhoud");
+  const beste = Math.max(lees("tarot_leer_best", 0), st.goed);
+  schrijf("tarot_leer_best", beste);
+  document.getElementById("leer-titel").textContent = "Klaar!";
+  el.innerHTML =
+    '<div class="leeg-midden"><div class="leeg-icoon"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div>' +
+    "<h2>" + st.goed + " van de " + st.set.length + " goed</h2>" +
+    "<p>Je beste score ooit: " + beste + " van de " + st.set.length + ".</p></div>" +
+    '<button class="knop" id="leer-opnieuw">Nog een rondje</button>';
+  el.querySelector("#leer-opnieuw").onclick = startLeerSessie;
+  leerSet = null;
+}
+
+document.getElementById("leer-knop").addEventListener("click", startLeerSessie);
 
 /* ---------- 7g. GESCHIEDENIS (tabblad) ---------- */
 
@@ -5121,7 +5639,8 @@ function openKaartDetail(id) {
     '<div class="kd-blok omgekeerd" style="--i:2"><p class="kd-label">Ondersteboven</p><p>' + k.betekenis_omgekeerd + "</p></div>" +
     '<div class="kd-blok" style="--i:3"><p class="kd-label">Kijkrichting</p><p>' + k.kijkrichting + "</p></div>" +
     '<div class="kd-blok" style="--i:4"><p class="kd-label">Reflectievraag</p><p>' + k.reflectievraag + "</p></div>" +
-    '<div class="kd-blok" style="--i:5"><p class="kd-label">Thema & fase</p><p>' + themaVan(k) + "<br>" + faseVan(k) + "</p></div>";
+    '<div class="kd-blok" style="--i:5"><p class="kd-label">In liefde &amp; in werk</p><p><strong>' + kaartDiepteRegel(k, "liefde") + "</strong><br>" + kaartDiepteRegel(k, "werk") + "</p></div>" +
+    '<div class="kd-blok" style="--i:6"><p class="kd-label">Thema & fase</p><p>' + themaVan(k) + "<br>" + faseVan(k) + "</p></div>";
   bindTilt(document.getElementById("kd-scene"), document.getElementById("kd-kaart"), document.getElementById("kd-glare"));
   pushScherm("scherm-kaartdetail");
 }
@@ -5161,6 +5680,8 @@ function renderStats() {
     rij("Dagkaart-streak", streak > 0 ? streak + (streak === 1 ? " dag" : " dagen") + " op rij" : "nog geen") +
     rij("Favoriete kaarten", String(lees("tarot_favorieten", []).length)) +
     rij("Eigen leggingen", String(lees("tarot_eigen_leggingen", []).length)) +
+    rij("Journaal-invoeren", String(lees("tarot_journaal", []).length)) +
+    rij("Beste leerscore", String(lees("tarot_leer_best", 0)) + " van 10") +
     (top.length ? rij("Meest getrokken", top.join(" · ")) : "");
 }
 
@@ -5233,6 +5754,7 @@ function maakExportData() {
     tarot_geschiedenis: lees("tarot_geschiedenis", []),
     tarot_favorieten: lees("tarot_favorieten", []),
     tarot_eigen_leggingen: lees("tarot_eigen_leggingen", []),
+    tarot_journaal: lees("tarot_journaal", []),
     tarot_concept: lees("tarot_concept", null),
     tarot_tekstgrootte: lees("tarot_tekstgrootte", "normaal"),
     tarot_lees_omgekeerd: lees("tarot_lees_omgekeerd", true),
@@ -5287,6 +5809,11 @@ document.getElementById("import-bestand").addEventListener("change", e => {
         schrijf("tarot_geschiedenis", bestaand.concat(尺).sort((a, b) => new Date(b.datum) - new Date(a.datum)));
       }
       if ("tarot_favorieten" in data) schrijf("tarot_favorieten", [...new Set([...lees("tarot_favorieten", []), ...data.tarot_favorieten])]);
+      if ("tarot_journaal" in data) {
+        const eigenJ = lees("tarot_journaal", []);
+        const datums = new Set(eigenJ.map(e => e.d));
+        schrijf("tarot_journaal", eigenJ.concat((data.tarot_journaal || []).filter(e => e && e.d && !datums.has(e.d))));
+      }
       if ("tarot_eigen_leggingen" in data) {
         const bestaand = lees("tarot_eigen_leggingen", []);
         const ids = new Set(bestaand.map(l => l.id));
