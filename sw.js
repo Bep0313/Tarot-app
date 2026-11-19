@@ -7,7 +7,7 @@
    Bij elke update van de app wordt het versienummer hieronder hoger,
    zodat oude caches automatisch ververst worden.
    ============================================================ */
-const CACHE_NAAM = "tarot-van-samir-v41";
+const CACHE_NAAM = "tarot-van-samir-v42";
 
 // Bij installatie: start met een lege cache (we vullen hem tijdens gebruik)
 self.addEventListener("install", (event) => {
