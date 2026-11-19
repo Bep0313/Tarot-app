@@ -13,16 +13,16 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="43">
+<html lang="nl" data-versie="45">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
        interactive-widget=resizes-content: op iOS duwt het toetsenbord de hele app omhoog ipv eroverheen (anders valt je notitieveld onder het toetsenbord) -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <!-- Safari-statusbalk kleurt mee: donker-indigo in nachtmodus, crème in ochtendmodus.
        De app heeft een eigen thema-schakelaar, dus JS zet deze meta ook dynamisch (zie js/app.js). -->
   <meta name="theme-color" id="meta-thema" content="#0B0A1E">
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F4F1EA">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F8F4EC">
   <!-- color-scheme: zo rendert Safari o.a. scrollbalken en formuliervelden in de juiste mode -->
   <meta name="color-scheme" content="dark light">
   <meta name="description" content="Persoonlijke tarot-app van Samir: leggingen, 78 Rider-Waite kaarten, reflectie en dagboek. Werkt offline, zonder accounts.">
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=43 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=45 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    LETTERTYPES (ingebed — de app blijft 100% offline)
@@ -76,7 +76,13 @@
   --lav: #B9A7E8;           /* accent 2: lavendel (secundair) */
   --tekst: #F5F3FF;         /* bijna-wit hoofdtekst */
   --sec: #B9B3D6;           /* secundaire tekst: lila-grijs, net wat leesbaarder */
-  --roze: #E88B8B;          /* badge "ondersteboven": zacht roze */
+  --roze: #E88B8B;          /* gevaar/fout: zacht rood */
+  --goud-rgb: 232, 200, 116;
+  --lav-rgb: 185, 167, 232;
+  --roze-rgb: 232, 139, 139;
+  --accent: #E8C874;         /* decoratief accent (nacht = goud) */
+  --accent-deep: #D9AE5F;
+  --accent-rgb: 232, 200, 116;
 
   /* Serif voor kaartnamen en titels. Georgia zit standaard op de iPhone,
      dus de app ziet er meteen chique uit zonder lettertype te downloaden. */
@@ -114,12 +120,12 @@ html, body {
 
 body {
   font-family: var(--sans);
-  font-size: calc(16px * var(--tekst-schaal));
+  font-size: calc(1.0rem * var(--tekst-schaal));
   color: var(--tekst);
   background:
     radial-gradient(120% 70% at 50% -10%, var(--glow), transparent 65%),
-    radial-gradient(90% 55% at 88% 112%, rgba(185, 167, 232, 0.07), transparent 60%),
-    radial-gradient(70% 45% at 8% 108%, rgba(232, 200, 116, 0.05), transparent 60%),
+    radial-gradient(90% 55% at 88% 112%, rgba(var(--lav-rgb), 0.07), transparent 60%),
+    radial-gradient(70% 45% at 8% 108%, rgba(var(--goud-rgb), 0.05), transparent 60%),
     var(--bg);
   background-attachment: fixed;
   color-scheme: dark;                  /* donkere scrollbalken/formulieren in nachtmodus */
@@ -139,7 +145,7 @@ body::before {
   pointer-events: none;
   background:
     radial-gradient(38% 32% at 72% 18%, rgba(122, 90, 248, 0.10), transparent 70%),
-    radial-gradient(30% 26% at 18% 82%, rgba(232, 200, 116, 0.05), transparent 70%);
+    radial-gradient(30% 26% at 18% 82%, rgba(var(--goud-rgb), 0.05), transparent 70%);
   animation: nevelDrift 28s ease-in-out infinite alternate;
   will-change: transform;
 }
@@ -234,7 +240,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   position: absolute;
   inset: -46px;
   z-index: -1;
-  background: radial-gradient(closest-side, rgba(232, 200, 116, 0.17), transparent 72%);
+  background: radial-gradient(closest-side, rgba(var(--goud-rgb), 0.17), transparent 72%);
   animation: gloedPulse 3.4s ease-in-out infinite;
 }
 @keyframes gloedPulse {
@@ -279,17 +285,17 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   position: absolute;
   inset: 6px;
   border-radius: var(--r-s);
-  border: 1px solid rgba(232, 200, 116, 0.55);
+  border: 1px solid rgba(var(--goud-rgb), 0.55);
   pointer-events: none;
 }
 .kaart-rug      { background: linear-gradient(160deg, rgba(52, 43, 110, 0.88), rgba(19, 16, 41, 0.92) 72%); color: var(--goud); }
 .kaart-voorkant { background: linear-gradient(160deg, rgba(74, 61, 138, 0.88), rgba(25, 21, 64, 0.92) 72%); color: var(--lav); transform: rotateY(180deg); }
-.splash-ster { width: 44px; height: 44px; filter: drop-shadow(0 0 8px rgba(232, 200, 116, 0.6)); }
-.splash-maan { width: 46px; height: 46px; filter: drop-shadow(0 0 8px rgba(185, 167, 232, 0.6)); }
+.splash-ster { width: 44px; height: 44px; filter: drop-shadow(0 0 8px rgba(var(--goud-rgb), 0.6)); }
+.splash-maan { width: 46px; height: 46px; filter: drop-shadow(0 0 8px rgba(var(--lav-rgb), 0.6)); }
 
 .splash-groet {
   color: var(--lav);
-  font-size: calc(15px * var(--tekst-schaal));
+  font-size: calc(0.9375rem * var(--tekst-schaal));
   letter-spacing: 0.14em;
   text-transform: uppercase;
   opacity: 0;
@@ -298,7 +304,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .splash-naam {
   font-family: var(--serif);
   font-weight: 600;
-  font-size: calc(34px * var(--tekst-schaal));
+  font-size: calc(2.125rem * var(--tekst-schaal));
   letter-spacing: -0.02em;
   font-variation-settings: "opsz" 144;
   margin-top: 8px;
@@ -311,7 +317,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 }
 .splash-datum {
   color: var(--sec);
-  font-size: calc(14px * var(--tekst-schaal));
+  font-size: calc(0.875rem * var(--tekst-schaal));
   margin-top: 10px;
   display: flex;
   align-items: center;
@@ -344,7 +350,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .home-kop.compact .home-ondertitel { opacity: 0; max-height: 0; margin-top: 0; }
 .home-datum {
   color: var(--sec);
-  font-size: calc(11px * var(--tekst-schaal));
+  font-size: calc(0.6875rem * var(--tekst-schaal));
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.09em;
@@ -362,7 +368,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .home-datum svg { width: 12px; height: 12px; color: var(--goud); }
 .home-titel {
   font-family: var(--serif);
-  font-size: calc(37px * var(--tekst-schaal));
+  font-size: calc(2.3125rem * var(--tekst-schaal));
   font-weight: 600;
   letter-spacing: -0.022em;
   font-variation-settings: "opsz" 144;   /* Fraunces display-cut: eleganter op groot formaat */
@@ -381,7 +387,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   margin-left: 8px;
   color: var(--goud);
   vertical-align: 2px;
-  filter: drop-shadow(0 0 7px rgba(232, 200, 116, 0.8));
+  filter: drop-shadow(0 0 7px rgba(var(--goud-rgb), 0.8));
   animation: twinkel 2.6s ease-in-out infinite;
 }
 @keyframes twinkel {
@@ -391,7 +397,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .home-ondertitel {
   color: var(--sec);
   margin-top: 4px;
-  font-size: calc(14px * var(--tekst-schaal));
+  font-size: calc(0.875rem * var(--tekst-schaal));
   max-height: 26px;
   overflow: hidden;
   transition: opacity 0.25s ease, max-height 0.3s ease, margin-top 0.3s ease;
@@ -403,15 +409,15 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   align-items: center;
   gap: 10px;
   background:
-    linear-gradient(90deg, rgba(185, 167, 232, 0.18), rgba(232, 200, 116, 0.12)),
+    linear-gradient(90deg, rgba(var(--lav-rgb), 0.18), rgba(var(--goud-rgb), 0.12)),
     rgba(32, 28, 66, 0.6);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(185, 167, 232, 0.45);
+  border: 1px solid rgba(var(--lav-rgb), 0.45);
   border-radius: var(--r-m);
   padding: 12px 14px;
   margin-bottom: 18px;
-  font-size: calc(14px * var(--tekst-schaal));
+  font-size: calc(0.875rem * var(--tekst-schaal));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 8px 20px rgba(0, 0, 0, 0.25);
   animation: fadeUp 0.5s cubic-bezier(0.22, 0.9, 0.28, 1) both;
 }
@@ -460,23 +466,21 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   will-change: transform;
 }
 /* Druk-feedback: kaartje gaat iets kleiner + krijgt een gouden gloed */
-.legging:active {
-  transform: scale(0.965);
-  border-color: rgba(232, 200, 116, 0.55);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1px rgba(232, 200, 116, 0.35), 0 12px 30px rgba(232, 200, 116, 0.16);
+.legging:active { transform: scale(0.96);
+  border-color: rgba(var(--goud-rgb), 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1px rgba(var(--goud-rgb), 0.35), 0 12px 30px rgba(var(--goud-rgb), 0.16);
 }
 .legging-info { flex: 1; min-width: 0; }
 .legging-naam {
   font-family: var(--serif);
-  font-size: calc(19.5px * var(--tekst-schaal));
-  font-variation-settings: "opsz" 40;
+  font-size: calc(1.2188rem * var(--tekst-schaal));
   letter-spacing: -0.01em;
   display: block;
   line-height: 1.2;
 }
 .legging-wanneer {
   color: var(--sec);
-  font-size: calc(13px * var(--tekst-schaal));
+  font-size: calc(0.8125rem * var(--tekst-schaal));
   display: block;
   margin-top: 4px;
   line-height: 1.35;
@@ -486,8 +490,8 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   font-size: 12px;
   font-weight: 600;
   color: var(--goud);
-  border: 1px solid rgba(232, 200, 116, 0.50);
-  background: rgba(232, 200, 116, 0.12);
+  border: 1px solid rgba(var(--goud-rgb), 0.50);
+  background: rgba(var(--goud-rgb), 0.12);
   padding: 5px 11px;
   border-radius: 999px;
   white-space: nowrap;
@@ -511,7 +515,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 }
 .leeg-icoon { width: 40px; height: 40px; color: var(--goud); opacity: 0.8; margin-bottom: 12px; }
 .leeg-midden h2 { font-family: var(--serif); color: var(--tekst); font-size: 22px; margin-bottom: 8px; }
-.leeg-midden p { font-size: calc(14px * var(--tekst-schaal)); line-height: 1.5; }
+.leeg-midden p { font-size: calc(0.875rem * var(--tekst-schaal)); line-height: 1.5; }
 
 /* ---------- 8. TABBALK ---------- */
 /* Zwevende liquid-glass pil: zit los van de schermrand, met blur over de sterren */
@@ -540,7 +544,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   align-items: center;
   gap: 2px;
   padding: 4px 0;
-  min-height: 40px;
+  min-height: 44px;
   background: none;
   border: none;
   border-radius: var(--r-s);
@@ -552,11 +556,11 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   -webkit-tap-highlight-color: transparent;
 }
 .tab svg { width: 20px; height: 20px; transition: transform 0.25s cubic-bezier(0.34, 1.45, 0.64, 1); }
-.tab:active { transform: scale(0.92); }
+.tab:active { transform: scale(0.96); }
 /* Actief tabblad krijgt het subtiele gouden gloedje */
 .tab.actief {
   color: var(--goud);
-  filter: drop-shadow(0 0 7px rgba(232, 200, 116, 0.55));
+  filter: drop-shadow(0 0 7px rgba(var(--goud-rgb), 0.55));
 }
 .tab.actief svg { transform: scale(1.12); }
 
@@ -570,18 +574,18 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   background: rgba(30, 26, 60, 0.65);
   backdrop-filter: blur(20px) saturate(1.4);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border: 1px solid rgba(232, 200, 116, 0.35);
+  border: 1px solid rgba(var(--goud-rgb), 0.35);
   color: var(--tekst);
   padding: 11px 18px;
   border-radius: 999px;
-  font-size: calc(14px * var(--tekst-schaal));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 18px rgba(232, 200, 116, 0.12);
+  font-size: calc(0.875rem * var(--tekst-schaal));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 18px rgba(var(--goud-rgb), 0.12);
   animation: toastIn 0.3s cubic-bezier(0.3, 0.9, 0.3, 1.2) both;
   pointer-events: none;
   white-space: nowrap;
   max-width: 88vw;
 }
-.toast.uit { animation: toastOut 0.3s ease both; }
+.toast.uit { animation: toastOut 0.18s ease both; }
 @keyframes toastIn  { from { opacity: 0; transform: translate(-50%, 12px) scale(0.95); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
 @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translate(-50%, 8px); } }
 
@@ -614,13 +618,13 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   color: var(--goud);
-  background: rgba(232, 200, 116, 0.10);
-  border: 1px solid rgba(232, 200, 116, 0.35);
-  box-shadow: 0 0 20px rgba(232, 200, 116, 0.15);
+  background: rgba(var(--goud-rgb), 0.10);
+  border: 1px solid rgba(var(--goud-rgb), 0.35);
+  box-shadow: 0 0 20px rgba(var(--goud-rgb), 0.15);
 }
 .slot-icoon svg { width: 26px; height: 26px; }
-.slot-titel { font-family: var(--serif); font-size: calc(26px * var(--tekst-schaal)); font-weight: 600; }
-.slot-onder { color: var(--sec); font-size: calc(14px * var(--tekst-schaal)); margin: 8px 0 20px; line-height: 1.5; }
+.slot-titel { font-family: var(--serif); font-size: calc(1.625rem * var(--tekst-schaal)); font-weight: 600; }
+.slot-onder { color: var(--sec); font-size: calc(0.875rem * var(--tekst-schaal)); margin: 8px 0 20px; line-height: 1.5; }
 
 /* Invoerveld: minimaal 16px lettergrootte, anders zoomt de iPhone automatisch in */
 .invoer {
@@ -639,10 +643,10 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   appearance: none;
 }
 .invoer::placeholder { color: var(--sec); opacity: 0.7; }
-.invoer:focus { border-color: rgba(232, 200, 116, 0.6); box-shadow: 0 0 0 3px rgba(232, 200, 116, 0.12); }
-.invoer.fout { border-color: rgba(232, 139, 139, 0.7); animation: shake 0.35s ease; }
+.invoer:focus { border-color: rgba(var(--goud-rgb), 0.6); box-shadow: 0 0 0 3px rgba(var(--goud-rgb), 0.12); }
+.invoer.fout { border-color: rgba(var(--roze-rgb), 0.7); animation: shake 0.35s ease; }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
-.slot-fout { color: var(--roze); font-size: calc(13px * var(--tekst-schaal)); margin: -4px 0 12px; }
+.slot-fout { color: var(--roze); font-size: calc(0.8125rem * var(--tekst-schaal)); margin: -4px 0 12px; }
 
 /* Primaire knop: glazen goud — goudkleurige rand + tekst op een zachte gloed.
    (Een volgekleurd goudblok viel te veel op tussen de donkere vlakken.) */
@@ -650,23 +654,23 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   width: 100%;
   min-height: 50px;
   font-family: var(--sans);
-  font-size: calc(15.5px * var(--tekst-schaal));
+  font-size: calc(0.9688rem * var(--tekst-schaal));
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--goud);
-  background: linear-gradient(135deg, rgba(232, 200, 116, 0.16), rgba(232, 200, 116, 0.07) 60%);
-  border: 1px solid rgba(232, 200, 116, 0.55);
+  background: linear-gradient(135deg, rgba(var(--goud-rgb), 0.16), rgba(var(--goud-rgb), 0.07) 60%);
+  border: 1px solid rgba(var(--goud-rgb), 0.55);
   border-radius: var(--r-s);
   padding: 13px 18px;
   cursor: pointer;
-  box-shadow: 0 8px 22px rgba(232, 200, 116, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  box-shadow: 0 8px 22px rgba(var(--goud-rgb), 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.07);
   transition: transform 0.18s cubic-bezier(0.34, 1.45, 0.64, 1), background 0.18s ease, box-shadow 0.18s ease;
   -webkit-tap-highlight-color: transparent;
 }
 .knop:active {
-  transform: scale(0.97);
-  background: linear-gradient(135deg, rgba(232, 200, 116, 0.30), rgba(232, 200, 116, 0.16) 60%);
-  box-shadow: 0 0 26px rgba(232, 200, 116, 0.38);
+  transform: scale(0.96);
+  background: linear-gradient(135deg, rgba(var(--goud-rgb), 0.30), rgba(var(--goud-rgb), 0.16) 60%);
+  box-shadow: 0 0 26px rgba(var(--goud-rgb), 0.38);
 }
 .knop:disabled { opacity: 0.4; }
 /* Secundaire glazen knop */
@@ -679,11 +683,11 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 
 /* Onboarding: puntjes onder de kaart + stap-animatie */
 .onboarding-punten { display: flex; gap: 7px; margin-top: 20px; }
-.onboarding-punten span { width: 7px; height: 7px; border-radius: 999px; background: rgba(255, 255, 255, 0.18); transition: all 0.3s ease; }
-.onboarding-punten span.actief { width: 22px; background: var(--goud); box-shadow: 0 0 8px rgba(232, 200, 116, 0.6); }
+.onboarding-punten span { width: 7px; height: 7px; border-radius: 999px; background: rgba(255, 255, 255, 0.18); transition: width 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease; }
+.onboarding-punten span.actief { width: 22px; background: var(--goud); box-shadow: 0 0 8px rgba(var(--goud-rgb), 0.6); }
 .onboarding-stap { animation: fadeUp 0.4s cubic-bezier(0.22, 0.9, 0.28, 1) both; }
-.onboarding-stap h2 { font-family: var(--serif); font-size: calc(24px * var(--tekst-schaal)); margin-bottom: 10px; }
-.onboarding-stap p { color: var(--sec); font-size: calc(14px * var(--tekst-schaal)); line-height: 1.55; margin-bottom: 18px; text-align: left; }
+.onboarding-stap h2 { font-family: var(--serif); font-size: calc(1.5rem * var(--tekst-schaal)); margin-bottom: 10px; }
+.onboarding-stap p { color: var(--sec); font-size: calc(0.875rem * var(--tekst-schaal)); line-height: 1.55; margin-bottom: 18px; text-align: left; }
 .onboarding-stap .slot-titel, .onboarding-stap h2 { text-align: center; }
 .onboarding-klaar-ster { display: inline-block; font-size: 46px; margin-bottom: 10px; animation: twinkel 2s ease-in-out infinite; }
 
@@ -709,10 +713,10 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   -webkit-tap-highlight-color: transparent;
 }
 .terug svg { width: 20px; height: 20px; }
-.terug:active { transform: scale(0.88); background: rgba(232, 200, 116, 0.12); }
-.sub-kicker { color: var(--sec); font-size: calc(11px * var(--tekst-schaal)); font-weight: 600; text-transform: uppercase; letter-spacing: 0.10em; }
-.sub-titel { font-family: var(--serif); font-size: calc(25px * var(--tekst-schaal)); font-weight: 600; line-height: 1.15; letter-spacing: -0.012em; font-variation-settings: "opsz" 72; }
-.sub-uitleg { color: var(--sec); font-size: calc(13px * var(--tekst-schaal)); margin-top: 5px; line-height: 1.4; max-width: 30ch; }
+.terug:active { transform: scale(0.96); background: rgba(var(--goud-rgb), 0.12); }
+.sub-kicker { color: var(--sec); font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 600; text-transform: uppercase; letter-spacing: 0.10em; }
+.sub-titel { font-family: var(--serif); font-size: calc(1.5625rem * var(--tekst-schaal)); font-weight: 600; line-height: 1.15; letter-spacing: -0.012em; }
+.sub-uitleg { color: var(--sec); font-size: calc(0.8125rem * var(--tekst-schaal)); margin-top: 5px; line-height: 1.4; max-width: 30ch; }
 
 /* Push/pop navigatie-animaties (iOS-stijl) */
 .scherm.pop-out { animation: popOut 0.28s ease both; }
@@ -729,8 +733,8 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 16px 40px rgba(0, 0, 0, 0.35);
   animation: fadeUp 0.4s cubic-bezier(0.22, 0.9, 0.28, 1) both;
 }
-.vraag-label { display: block; font-family: var(--serif); font-size: calc(19px * var(--tekst-schaal)); margin-bottom: 12px; }
-.optioneel { color: var(--sec); font-family: var(--sans); font-size: calc(13px * var(--tekst-schaal)); }
+.vraag-label { display: block; font-family: var(--serif); font-size: calc(1.1875rem * var(--tekst-schaal)); margin-bottom: 12px; }
+.optioneel { color: var(--sec); font-family: var(--sans); font-size: calc(0.8125rem * var(--tekst-schaal)); }
 .vraag-acties { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; animation: fadeUp 0.4s cubic-bezier(0.22, 0.9, 0.28, 1) 0.08s both; }
 
 /* Sheet met voorbeeldvragen (schuift van onderen omhoog) */
@@ -750,14 +754,14 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   transition: transform 0.38s cubic-bezier(0.3, 0.85, 0.3, 1);
 }
 .sheet.open { transform: translateY(0); }
-.sheet h3 { font-family: var(--serif); font-size: calc(21px * var(--tekst-schaal)); margin-bottom: 4px; }
-.sheet > p { color: var(--sec); font-size: calc(13px * var(--tekst-schaal)); margin-bottom: 14px; }
+.sheet h3 { font-family: var(--serif); font-size: calc(1.3125rem * var(--tekst-schaal)); margin-bottom: 4px; }
+.sheet > p { color: var(--sec); font-size: calc(0.8125rem * var(--tekst-schaal)); margin-bottom: 14px; }
 .sheet-vraag {
   display: block;
   width: 100%;
   text-align: left;
   font-family: var(--sans);
-  font-size: calc(15px * var(--tekst-schaal));
+  font-size: calc(0.9375rem * var(--tekst-schaal));
   color: var(--tekst);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.09);
@@ -768,12 +772,12 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.sheet-vraag:active { transform: scale(0.98); border-color: rgba(232, 200, 116, 0.5); background: rgba(232, 200, 116, 0.08); }
+.sheet-vraag:active { transform: scale(0.96); border-color: rgba(var(--goud-rgb), 0.5); background: rgba(var(--goud-rgb), 0.08); }
 
 /* ---------- 13. KAARTEN-GRID ---------- */
 .grid-sectie {
   font-family: var(--serif);
-  font-size: calc(18px * var(--tekst-schaal));
+  font-size: calc(1.125rem * var(--tekst-schaal));
   color: var(--lav);
   margin: 24px 4px 10px;
   display: flex; align-items: center; gap: 8px;
@@ -799,15 +803,15 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   animation-delay: calc(var(--i) * 14ms);
   min-height: 44px;
 }
-.kaart-chip:active { transform: scale(0.93); }
+.kaart-chip:active { transform: scale(0.96); }
 .chip-nummer { font-size: 10px; color: var(--sec); letter-spacing: 0.06em; }
 .chip-symbool { font-size: 21px; line-height: 1.2; }
 .chip-naam { font-size: 10.5px; font-weight: 500; text-align: center; line-height: 1.15; }
 
 /* Gekozen kaart: gouden gloed + positie-badge */
 .kaart-chip.gekozen {
-  border-color: rgba(232, 200, 116, 0.65);
-  box-shadow: 0 0 0 1px rgba(232, 200, 116, 0.40), 0 0 20px rgba(232, 200, 116, 0.28);
+  border-color: rgba(var(--goud-rgb), 0.65);
+  box-shadow: 0 0 0 1px rgba(var(--goud-rgb), 0.40), 0 0 20px rgba(var(--goud-rgb), 0.28);
 }
 /* als een kaart gekozen is schuift de EN-pill naar rechtsboven, zodat de
    positienummer-badge linksboven vrij ligt */
@@ -845,11 +849,11 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 40px rgba(0, 0, 0, 0.5);
 }
 .gekozen-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-#gekozen-teller { font-size: calc(13px * var(--tekst-schaal)); color: var(--sec); font-weight: 600; letter-spacing: 0.03em; }
+#gekozen-teller { font-size: calc(0.8125rem * var(--tekst-schaal)); color: var(--sec); font-weight: 600; letter-spacing: 0.03em; }
 .wis-knop {
   background: none; border: none;
   color: var(--sec); font-family: var(--sans);
-  font-size: calc(13px * var(--tekst-schaal));
+  font-size: calc(0.8125rem * var(--tekst-schaal));
   cursor: pointer; padding: 6px 8px;
   border-radius: var(--r-s);
   transition: color 0.15s ease;
@@ -872,18 +876,18 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   padding: 8px 5px;
   background: linear-gradient(165deg, rgba(58, 48, 110, 0.9), rgba(24, 20, 50, 0.95));
-  border: 1px solid rgba(232, 200, 116, 0.55);
+  border: 1px solid rgba(var(--goud-rgb), 0.55);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 6px 16px rgba(0, 0, 0, 0.4);
 }
-.chip-face.back { transform: rotateY(180deg); border-color: rgba(232, 139, 139, 0.55); background: linear-gradient(165deg, rgba(96, 48, 66, 0.85), rgba(30, 20, 44, 0.95)); }
+.chip-face.back { transform: rotateY(180deg); border-color: rgba(var(--lav-rgb), 0.55); background: linear-gradient(165deg, rgba(96, 48, 66, 0.85), rgba(30, 20, 44, 0.95)); }
 .chip-face .chip-symbool { font-size: 24px; }
 .stand { font-size: 9px; font-weight: 700; letter-spacing: 0.04em; padding: 3px 7px; border-radius: 999px; margin-top: 2px; }
-.stand.rechtop { color: var(--goud); background: rgba(232, 200, 116, 0.14); border: 1px solid rgba(232, 200, 116, 0.4); }
-.stand.omgekeerd { color: var(--roze); background: rgba(232, 139, 139, 0.14); border: 1px solid rgba(232, 139, 139, 0.45); }
+.stand.rechtop { color: var(--goud); background: rgba(var(--goud-rgb), 0.14); border: 1px solid rgba(var(--goud-rgb), 0.4); }
+.stand.omgekeerd { color: var(--lav); background: rgba(var(--lav-rgb), 0.14); border: 1px solid rgba(var(--lav-rgb), 0.45); }
 .chip-positie { position: absolute; top: 4px; left: 4px; z-index: 4; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: linear-gradient(135deg, #F0D48A, var(--goud)); color: #2A2140; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(0,0,0,.45); }
 .chip-verwijder {
   position: absolute; top: 3px; right: 3px; z-index: 5;
-  width: 22px; height: 22px; border-radius: 50%;
+  width: 24px; height: 24px; border-radius: 50%;
   background: #2A2140; color: var(--sec);
   border: 1px solid rgba(255, 255, 255, 0.22);
   font-size: 14px; line-height: 1;
@@ -900,11 +904,11 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   color: #2A2140; border: none;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45), 0 0 12px rgba(232, 200, 116, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45), 0 0 12px rgba(var(--goud-rgb), 0.35);
   transition: transform 0.15s cubic-bezier(0.34, 1.45, 0.64, 1);
   -webkit-tap-highlight-color: transparent;
 }
-.chip-flip:active { transform: translateX(-50%) scale(0.88); }
+.chip-flip:active { transform: translateX(-50%) scale(0.96); }
 .chip-flip svg { width: 15px; height: 15px; }
 
 /* ---------- 15. UITLEG-SCHERM ---------- */
@@ -922,7 +926,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   -webkit-tap-highlight-color: transparent;
 }
 .deel-knop svg { width: 19px; height: 19px; }
-.deel-knop:active { transform: scale(0.88); background: rgba(232, 200, 116, 0.12); }
+.deel-knop:active { transform: scale(0.96); background: rgba(var(--goud-rgb), 0.12); }
 
 /* Per-positie blok: verschijnt één voor één (staggered) */
 .positie-blok {
@@ -935,32 +939,32 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   animation: fadeUp 0.5s cubic-bezier(0.22, 0.9, 0.28, 1) both;
   animation-delay: calc(var(--i) * 90ms);
 }
-.positie-label { color: var(--lav); font-size: calc(11.5px * var(--tekst-schaal)); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }
+.positie-label { color: var(--lav); font-size: calc(0.7188rem * var(--tekst-schaal)); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }
 .positie-kaart-rij { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .kaart-naam-klik {
   font-family: var(--serif);
-  font-size: calc(21px * var(--tekst-schaal));
+  font-size: calc(1.3125rem * var(--tekst-schaal));
   font-weight: 600;
   cursor: pointer;
-  text-decoration: underline dotted rgba(232, 200, 116, 0.45);
+  text-decoration: underline dotted rgba(var(--goud-rgb), 0.45);
   text-underline-offset: 5px;
   transition: color 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
 .kaart-naam-klik:active { color: var(--goud); }
-.stand { font-size: calc(11px * var(--tekst-schaal)); font-weight: 700; letter-spacing: 0.04em; padding: 4px 10px; border-radius: 999px; }
-.stand.rechtop { color: var(--goud); background: rgba(232, 200, 116, 0.13); border: 1px solid rgba(232, 200, 116, 0.45); }
-.stand.omgekeerd { color: var(--roze); background: rgba(232, 139, 139, 0.13); border: 1px solid rgba(232, 139, 139, 0.5); }
-.kernwoord { color: var(--goud); font-weight: 600; margin-top: 12px; font-size: calc(15px * var(--tekst-schaal)); }
-.vertaling { color: var(--sec); font-style: italic; margin-top: 3px; font-size: calc(14px * var(--tekst-schaal)); }
-.betekenis { margin-top: 10px; line-height: 1.55; font-size: calc(15px * var(--tekst-schaal)); }
-.context-lijn { margin-top: 10px; color: var(--lav); font-style: italic; font-size: calc(13.5px * var(--tekst-schaal)); line-height: 1.5; border-left: 2px solid rgba(122, 90, 248, .45); padding-left: 10px; }
-.reflectie { margin-top: 12px; color: var(--lav); display: flex; gap: 9px; align-items: flex-start; font-size: calc(14px * var(--tekst-schaal)); line-height: 1.45; }
+.stand { font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700; letter-spacing: 0.04em; padding: 4px 10px; border-radius: 999px; }
+.stand.rechtop { color: var(--goud); background: rgba(var(--goud-rgb), 0.13); border: 1px solid rgba(var(--goud-rgb), 0.45); }
+.stand.omgekeerd { color: var(--lav); background: rgba(var(--lav-rgb), 0.13); border: 1px solid rgba(var(--lav-rgb), 0.5); }
+.kernwoord { color: var(--goud); font-weight: 600; margin-top: 12px; font-size: calc(0.9375rem * var(--tekst-schaal)); }
+.vertaling { color: var(--sec); font-style: italic; margin-top: 3px; font-size: calc(0.875rem * var(--tekst-schaal)); }
+.betekenis { margin-top: 10px; line-height: 1.55; font-size: calc(0.9375rem * var(--tekst-schaal)); }
+.context-lijn { margin-top: 10px; color: var(--lav); font-style: italic; font-size: calc(0.8438rem * var(--tekst-schaal)); line-height: 1.5; border-left: 2px solid rgba(122, 90, 248, .45); padding-left: 10px; }
+.reflectie { margin-top: 12px; color: var(--lav); display: flex; gap: 9px; align-items: flex-start; font-size: calc(0.875rem * var(--tekst-schaal)); line-height: 1.45; }
 .reflectie-vraagteken {
   flex-shrink: 0;
   width: 20px; height: 20px; margin-top: 1px;
   border-radius: 50%;
-  border: 1px solid rgba(185, 167, 232, 0.55);
+  border: 1px solid rgba(var(--lav-rgb), 0.55);
   color: var(--lav);
   font-size: 12px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
@@ -987,35 +991,35 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 
 /* Secties: verbintenis + neem mee */
 .uitleg-sectie { animation: fadeUp 0.5s cubic-bezier(0.22, 0.9, 0.28, 1) 0.35s both; }
-.sectie-titel { font-family: var(--serif); font-size: calc(22px * var(--tekst-schaal)); font-weight: 600; margin: 28px 4px 14px; }
+.sectie-titel { font-family: var(--serif); font-size: calc(1.375rem * var(--tekst-schaal)); font-weight: 600; margin: 28px 4px 14px; }
 .element-chip {
   display: inline-flex; align-items: center; gap: 7px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.10);
   padding: 8px 13px;
   border-radius: 999px;
-  font-size: calc(13px * var(--tekst-schaal));
+  font-size: calc(0.8125rem * var(--tekst-schaal));
   margin: 0 8px 9px 0;
 }
 .element-chip .el-naam { color: var(--lav); font-weight: 600; }
-.mix-uitleg { color: var(--sec); font-size: calc(14px * var(--tekst-schaal)); line-height: 1.55; margin: 4px 0 14px; }
+.mix-uitleg { color: var(--sec); font-size: calc(0.875rem * var(--tekst-schaal)); line-height: 1.55; margin: 4px 0 14px; }
 .patronen { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 14px; }
 .verhaal {
   font-family: var(--serif);
-  font-size: calc(17.5px * var(--tekst-schaal));
+  font-size: calc(1.0938rem * var(--tekst-schaal));
   line-height: 1.6;
-  background: linear-gradient(135deg, rgba(232, 200, 116, 0.10), rgba(122, 90, 248, 0.10)), rgba(32, 28, 66, 0.6);
-  border: 1px solid rgba(232, 200, 116, 0.25);
+  background: linear-gradient(135deg, rgba(var(--goud-rgb), 0.10), rgba(122, 90, 248, 0.10)), rgba(32, 28, 66, 0.6);
+  border: 1px solid rgba(var(--goud-rgb), 0.25);
   border-radius: var(--r-m);
   padding: 18px;
 }
 .ja-nee-uitslag {
   text-align: center;
   font-family: var(--serif);
-  font-size: calc(20px * var(--tekst-schaal));
+  font-size: calc(1.25rem * var(--tekst-schaal));
   color: var(--goud);
-  background: rgba(232, 200, 116, 0.08);
-  border: 1px solid rgba(232, 200, 116, 0.3);
+  background: rgba(var(--goud-rgb), 0.08);
+  border: 1px solid rgba(var(--goud-rgb), 0.3);
   border-radius: var(--r-m);
   padding: 14px;
   margin-bottom: 14px;
@@ -1023,7 +1027,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 
 /* Notitie + tags + opslaan */
 .notitie { min-height: 110px; resize: vertical; line-height: 1.5; }
-.opgeslagen { color: var(--goud); font-size: calc(12.5px * var(--tekst-schaal)); margin: -6px 0 10px 4px; animation: fadeUp 0.3s ease both; }
+.opgeslagen { color: var(--goud); font-size: calc(0.7812rem * var(--tekst-schaal)); margin: -6px 0 10px 4px; animation: fadeUp 0.3s ease both; }
 .tags-rij { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 18px; }
 .tag-chip {
   padding: 8px 15px;
@@ -1032,12 +1036,12 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   background: rgba(255, 255, 255, 0.05);
   color: var(--sec);
   font-family: var(--sans);
-  font-size: calc(13px * var(--tekst-schaal));
+  font-size: calc(0.8125rem * var(--tekst-schaal));
   cursor: pointer;
-  transition: all 0.16s ease;
+  transition: color 0.16s ease, background-color 0.16s ease, border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.tag-chip:active { transform: scale(0.94); }
+.tag-chip:active { transform: scale(0.96); }
 .tag-chip.actief { color: #2A2140; background: linear-gradient(135deg, #F0D48A, var(--goud)); border-color: transparent; font-weight: 700; }
 
 /* Popup met extra kaart-info */
@@ -1058,14 +1062,14 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   border-radius: var(--r-l);
   padding: 26px 24px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 30px 70px rgba(0, 0, 0, 0.6);
-  animation: popIn 0.35s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  animation: popIn 0.38s cubic-bezier(0, 0, 0.58, 1) both;
 }
-@keyframes popIn { from { transform: scale(0.85) translateY(16px); opacity: 0; } }
-.popup-kaart h3 { font-family: var(--serif); font-size: calc(24px * var(--tekst-schaal)); }
+@keyframes popIn { from { transform: scale(0.98) translateY(12px); opacity: 0; } }
+.popup-kaart h3 { font-family: var(--serif); font-size: calc(1.5rem * var(--tekst-schaal)); }
 .popup-kaart .popup-kernwoord { color: var(--goud); font-weight: 600; margin: 4px 0 14px; }
 .popup-kaart .popup-rij { margin-bottom: 12px; }
-.popup-kaart .popup-rij .popup-label { color: var(--lav); font-size: calc(11px * var(--tekst-schaal)); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 3px; }
-.popup-kaart .popup-rij p { font-size: calc(14px * var(--tekst-schaal)); line-height: 1.5; color: var(--tekst); }
+.popup-kaart .popup-rij .popup-label { color: var(--lav); font-size: calc(0.6875rem * var(--tekst-schaal)); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 3px; }
+.popup-kaart .popup-rij p { font-size: calc(0.875rem * var(--tekst-schaal)); line-height: 1.5; color: var(--tekst); }
 .popup-sluit { width: 100%; margin-top: 8px; }
 
 /* Sterren-confetti bij opslaan */
@@ -1075,7 +1079,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   left: 50%; top: 38%;
   color: var(--goud);
   font-size: 15px;
-  text-shadow: 0 0 10px rgba(232, 200, 116, 0.8);
+  text-shadow: 0 0 10px rgba(var(--goud-rgb), 0.8);
   animation: sterBurst 1s ease-out forwards;
 }
 @keyframes sterBurst {
@@ -1109,10 +1113,10 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   animation-delay: calc(var(--i) * 60ms);
   -webkit-tap-highlight-color: transparent;
 }
-.hist-item:active { transform: scale(0.98); border-color: rgba(232, 200, 116, 0.4); }
+.hist-item:active { transform: scale(0.96); border-color: rgba(var(--goud-rgb), 0.4); }
 .hist-kop { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
-.hist-datum { color: var(--sec); font-size: calc(12px * var(--tekst-schaal)); }
-.hist-legging { font-family: var(--serif); font-weight: 600; font-size: calc(16px * var(--tekst-schaal)); flex: 1; }
+.hist-datum { color: var(--sec); font-size: calc(0.75rem * var(--tekst-schaal)); }
+.hist-legging { font-family: var(--serif); font-weight: 600; font-size: calc(1.0rem * var(--tekst-schaal)); flex: 1; }
 .hist-verwijder {
   width: 32px; height: 32px; border-radius: 50%;
   background: none; border: none; color: var(--sec);
@@ -1123,7 +1127,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .hist-verwijder svg { width: 17px; height: 17px; }
 .hist-verwijder:active { color: var(--roze); transform: scale(1.15); }
 .hist-verwijder.bevestig { color: var(--roze); font-size: 10px; font-weight: 700; width: auto; padding: 0 6px; }
-.hist-vraag { color: var(--lav); font-size: calc(13.5px * var(--tekst-schaal)); font-style: italic; margin-bottom: 9px; }
+.hist-vraag { color: var(--lav); font-size: calc(0.8438rem * var(--tekst-schaal)); font-style: italic; margin-bottom: 9px; }
 .hist-kaarten { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 9px; }
 .hist-kaart-chip {
   display: inline-flex; align-items: center; gap: 5px;
@@ -1131,21 +1135,21 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 999px;
   padding: 5px 11px;
-  font-size: calc(12px * var(--tekst-schaal));
+  font-size: calc(0.75rem * var(--tekst-schaal));
 }
-.hist-kaart-chip .omg { color: var(--roze); font-weight: 700; }
-.hist-notitie { color: var(--sec); font-size: calc(13.5px * var(--tekst-schaal)); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.hist-kaart-chip .omg { color: var(--lav); font-weight: 700; }
+.hist-notitie { color: var(--sec); font-size: calc(0.8438rem * var(--tekst-schaal)); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .hist-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
-.hist-tag { font-size: 11px; color: var(--goud); background: rgba(232, 200, 116, 0.10); border: 1px solid rgba(232, 200, 116, 0.30); border-radius: 999px; padding: 3px 10px; }
+.hist-tag { font-size: 11px; color: var(--goud); background: rgba(var(--goud-rgb), 0.10); border: 1px solid rgba(var(--goud-rgb), 0.30); border-radius: 999px; padding: 3px 10px; }
 .hist-leeg { text-align: center; color: var(--sec); padding: 40px 20px; }
 
 /* ---------- 17. BIBLIOTHEEK & KAART-DETAIL ---------- */
-#kd-ster.actief { color: var(--goud); border-color: rgba(232, 200, 116, 0.5); box-shadow: 0 0 16px rgba(232, 200, 116, 0.3); }
+#kd-ster.actief { color: var(--goud); border-color: rgba(var(--goud-rgb), 0.5); box-shadow: 0 0 16px rgba(var(--goud-rgb), 0.3); }
 #kd-ster.actief .ster-pad { fill: currentColor; }
 .kd-hero { text-align: center; padding: 10px 0 20px; animation: fadeUp 0.4s ease both; }
-.kd-symbool { font-size: 58px; filter: drop-shadow(0 0 18px rgba(232, 200, 116, 0.35)); }
-.kd-kernwoord { color: var(--goud); font-weight: 700; font-size: calc(17px * var(--tekst-schaal)); margin-top: 10px; }
-.kd-vertaling { color: var(--sec); font-style: italic; margin-top: 4px; font-size: calc(14px * var(--tekst-schaal)); }
+.kd-symbool { font-size: 58px; filter: drop-shadow(0 0 18px rgba(var(--goud-rgb), 0.35)); }
+.kd-kernwoord { color: var(--goud); font-weight: 700; font-size: calc(1.0625rem * var(--tekst-schaal)); margin-top: 10px; }
+.kd-vertaling { color: var(--sec); font-style: italic; margin-top: 4px; font-size: calc(0.875rem * var(--tekst-schaal)); }
 .kd-blok {
   background: rgba(32, 28, 66, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.09);
@@ -1155,14 +1159,14 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   animation: fadeUp 0.45s cubic-bezier(0.22, 0.9, 0.28, 1) both;
   animation-delay: calc(var(--i) * 70ms);
 }
-.kd-label { color: var(--lav); font-size: calc(11px * var(--tekst-schaal)); text-transform: uppercase; letter-spacing: 0.13em; margin-bottom: 6px; }
-.kd-blok p { font-size: calc(14.5px * var(--tekst-schaal)); line-height: 1.55; }
+.kd-label { color: var(--lav); font-size: calc(0.6875rem * var(--tekst-schaal)); text-transform: uppercase; letter-spacing: 0.13em; margin-bottom: 6px; }
+.kd-blok p { font-size: calc(0.9062rem * var(--tekst-schaal)); line-height: 1.55; }
 .kd-blok.rechtop { border-left: 3px solid var(--goud); }
-.kd-blok.omgekeerd { border-left: 3px solid var(--roze); }
+.kd-blok.omgekeerd { border-left: 3px solid var(--lav); }
 
 /* ---------- 18. MEER (instellingen) ---------- */
 .meer-groep { margin-bottom: 26px; }
-.meer-groep-titel { color: var(--lav); font-size: calc(11.5px * var(--tekst-schaal)); text-transform: uppercase; letter-spacing: 0.13em; margin: 0 6px 10px; }
+.meer-groep-titel { color: var(--lav); font-size: calc(0.7188rem * var(--tekst-schaal)); text-transform: uppercase; letter-spacing: 0.13em; margin: 0 6px 10px; }
 .meer-rij {
   width: 100%;
   display: flex; align-items: center; gap: 10px;
@@ -1173,30 +1177,30 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   margin-bottom: 10px;
   color: var(--tekst);
   font-family: var(--sans);
-  font-size: calc(15px * var(--tekst-schaal));
+  font-size: calc(0.9375rem * var(--tekst-schaal));
   text-align: left;
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 6px 16px rgba(0, 0, 0, 0.25);
   transition: transform 0.16s cubic-bezier(0.34, 1.45, 0.64, 1), border-color 0.16s ease;
   -webkit-tap-highlight-color: transparent;
 }
-button.meer-rij:active { transform: scale(0.98); border-color: rgba(232, 200, 116, 0.4); }
-.meer-waarde { margin-left: auto; color: var(--sec); font-size: calc(13.5px * var(--tekst-schaal)); }
+button.meer-rij:active { transform: scale(0.96); border-color: rgba(var(--goud-rgb), 0.4); }
+.meer-waarde { margin-left: auto; color: var(--sec); font-size: calc(0.8438rem * var(--tekst-schaal)); }
 .meer-pijl { width: 16px; height: 16px; color: var(--sec); flex-shrink: 0; }
 .gevaar-rij { color: var(--roze); }
-.gevaar-rij.bevestig { border-color: rgba(232, 139, 139, 0.6); font-weight: 700; }
+.gevaar-rij.bevestig { border-color: rgba(var(--roze-rgb), 0.6); font-weight: 700; }
 .seg { margin-left: auto; display: flex; background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 999px; padding: 3px; }
-.seg button { border: none; background: none; color: var(--sec); font-family: var(--sans); font-size: calc(13px * var(--tekst-schaal)); padding: 6px 14px; border-radius: 999px; cursor: pointer; transition: all 0.18s ease; -webkit-tap-highlight-color: transparent; }
+.seg button { border: none; background: none; color: var(--sec); font-family: var(--sans); font-size: calc(0.8125rem * var(--tekst-schaal)); padding: 6px 14px; border-radius: 999px; cursor: pointer; transition: all 0.18s ease; -webkit-tap-highlight-color: transparent; }
 .seg button.actief { background: linear-gradient(135deg, #F0D48A, var(--goud)); color: #2A2140; font-weight: 700; }
-.meer-versie { text-align: center; color: var(--sec); font-size: calc(12px * var(--tekst-schaal)); margin-top: 10px; opacity: 0.7; }
+.meer-versie { text-align: center; color: var(--sec); font-size: calc(0.75rem * var(--tekst-schaal)); margin-top: 10px; opacity: 0.7; }
 
 /* ---------- 19. NICE-FEATURES: streak, eigen leggingen, licht thema ---------- */
 .streak-chip {
   display: inline-flex; align-items: center; gap: 6px;
   margin-left: 9px; padding: 4px 11px;
   border-radius: 999px;
-  background: rgba(232, 200, 116, 0.13);
-  border: 1px solid rgba(232, 200, 116, 0.4);
+  background: rgba(var(--goud-rgb), 0.13);
+  border: 1px solid rgba(var(--goud-rgb), 0.4);
   color: var(--goud);
   font-size: 12px; font-weight: 700;
   vertical-align: 2px;
@@ -1204,53 +1208,91 @@ button.meer-rij:active { transform: scale(0.98); border-color: rgba(232, 200, 11
 .streak-chip svg { width: 11px; height: 11px; }
 .legging-eigen {
   border-style: dashed;
-  border-color: rgba(232, 200, 116, 0.45);
-  background: rgba(232, 200, 116, 0.06);
+  border-color: rgba(var(--goud-rgb), 0.45);
+  background: rgba(var(--goud-rgb), 0.06);
   justify-content: center;
   color: var(--goud);
   font-weight: 600;
-  font-size: calc(15px * var(--tekst-schaal));
+  font-size: calc(0.9375rem * var(--tekst-schaal));
 }
-.eigen-rij { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--r-s); padding: 10px 14px; margin-bottom: 8px; font-size: calc(14px * var(--tekst-schaal)); }
+.eigen-rij { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--r-s); padding: 10px 14px; margin-bottom: 8px; font-size: calc(0.875rem * var(--tekst-schaal)); }
 .gekozen-chip.trekken .flip-inner { animation: kaartTrek 0.9s cubic-bezier(0.3, 0.8, 0.3, 1) both; }
 @keyframes kaartTrek { from { transform: rotateY(720deg) scale(0.5); } to { transform: rotateY(0deg) scale(1); } }
 body.geen-omgekeerd .chip-flip { display: none !important; }
 
-/* Ochtend-modus (licht thema): alle变量 meekleuren */
+/* ---------- AURORA-STIJL (licht, standaard): ivoor + roze + goud ----------
+   De cleane, lichte huistijl: warm ivoor-papier, inktpruim-tekst,
+   dusty-rose accenten voor de girl-pop touch, antiek goud voor de tarot-glans.
+   De nacht-stijl (donker indigo + goud) blijft als optie in Meer. */
 body.licht {
-  color-scheme: light;                 /* lichte scrollbalken/formulieren in ochtendmodus */
-  --bg: #F4F1EA;
-  --glow: #EAE2F8;
-  --vlak: rgba(255, 255, 255, 0.78);
-  --rand: rgba(42, 36, 64, 0.10);
-  --tekst: #2A2440;
-  --sec: #6E6890;
-  --goud: #B98A2E;
-  --lav: #7A5FD0;
+  color-scheme: light;                 /* lichte scrollbalken/formuliervelden */
+  --bg: #F8F4EC;
+  --glow: #F3E4EC;
+  --vlak: rgba(255, 255, 255, 0.85);
+  --rand: rgba(51, 36, 60, 0.09);
+  --tekst: #33283F;                   /* inktpruim: warm, chic, leesbaar */
+  --sec: #6E6278;                     /* mauve-grijs — gemeten 5.2:1 op ivoor */
+  --goud: #8A6420;                    /* antiek goud donker genoeg — gemeten 4.9:1 */
+  --lav: #8A5AA0;                     /* lavendel — gemeten 4.7:1 */
+  --roze: #B23A48;                    /* gevaar/fout: echt rood (onderscheidend van accent) */
+  --roze-rgb: 178, 58, 72;
+  --goud-rgb: 138, 100, 32;
+  --lav-rgb: 138, 90, 160;
+  --accent: #B04A66;                  /* DUSTY ROSE berry — gemeten 4.8:1 op ivoor én wit erop 4.9:1 */
+  --accent-deep: #8F4358;
+  --accent-rgb: 176, 74, 102;
   background:
-    radial-gradient(120% 70% at 50% -10%, #EFE7FA, transparent 65%),
-    radial-gradient(90% 55% at 88% 112%, rgba(185, 167, 232, 0.30), transparent 60%),
+    radial-gradient(120% 70% at 50% -10%, #F6E4EC, transparent 64%),
+    radial-gradient(95% 55% at 90% 112%, rgba(233, 213, 186, 0.60), transparent 58%),
     var(--bg);
 }
+/* Kaarten/vlakken: wit-crème papier met zachte warme schaduw */
 body.licht .legging, body.licht .hist-item, body.licht .positie-blok, body.licht .kd-blok,
-body.licht .meer-rij, body.licht .kaart-chip, body.licht .sheet-vraag, body.licht .dag-melding {
-  background: rgba(255, 255, 255, 0.72);
-  border-color: rgba(42, 36, 64, 0.10);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 6px 16px rgba(42, 36, 64, 0.10);
+body.licht .meer-rij, body.licht .kaart-chip, body.licht .sheet-vraag, body.licht .dag-melding,
+body.licht .leeg-midden, body.licht .journaal-leeg {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(51, 36, 60, 0.09);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 8px 22px rgba(51, 36, 63, 0.08);
   color: var(--tekst);
 }
 body.licht .chip-naam { color: var(--tekst); }
 body.licht .chip-nummer { color: var(--sec); }
-body.licht #tabbalk, body.licht .gekozen-balk { background: rgba(255, 255, 255, 0.62); }
-body.licht .slot-kaart, body.licht .popup-kaart, body.licht .sheet { background: rgba(255, 255, 255, 0.92); }
-body.licht .invoer { background: rgba(42, 36, 64, 0.05); border-color: rgba(42, 36, 64, 0.16); color: var(--tekst); }
-body.licht .invoer::placeholder { color: var(--sec); }
-body.licht .terug, body.licht .deel-knop { background: rgba(255, 255, 255, 0.6); }
-body.licht .verhaal { background: linear-gradient(135deg, rgba(185,138,46,0.12), rgba(122,95,208,0.12)), rgba(255,255,255,0.6); border-color: rgba(185,138,46,0.35); }
+/* Balken: ivoor-glas */
+body.licht #tabbalk, body.licht .gekozen-balk {
+  background: rgba(253, 249, 241, 0.78);
+  border-color: rgba(51, 36, 60, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 14px 34px rgba(51, 36, 63, 0.14);
+}
+body.licht .tab.actief { color: var(--accent); }   /* actieve tab in dusty rose */
+body.licht .slot-kaart, body.licht .popup-kaart, body.licht .sheet { background: rgba(255, 255, 254, 0.96); }
+body.licht .invoer { background: rgba(255, 255, 255, 0.9); border-color: rgba(51, 36, 63, 0.16); color: var(--tekst); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8); }
+body.licht .invoer::placeholder { color: #A99FB2; }
+body.licht .terug, body.licht .deel-knop { background: rgba(255, 255, 255, 0.75); border-color: rgba(51, 36, 63, 0.10); color: var(--tekst); }
+body.licht .terug svg, body.licht .deel-knop svg { color: var(--tekst); }
+body.licht .verhaal {
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.10), rgba(var(--goud-rgb), 0.10)), rgba(255, 255, 255, 0.85);
+  border-color: rgba(var(--accent-rgb), 0.35);
+}
 body.licht .mix-uitleg, body.licht .home-ondertitel, body.licht .sub-uitleg { color: var(--sec); }
-/* titels waren wit-naar-goud (onzichtbaar op licht) — nu donker-naar-goud */
+/* Primaire knop: VOL inktpruim (Apple-stijl filled button) met crème-tekst */
+body.licht .knop {
+  color: #FBF7EE;
+  background: linear-gradient(180deg, #3E3050, #33283F);
+  border: none;
+  box-shadow: 0 10px 26px rgba(46, 32, 56, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+body.licht .knop:active { background: linear-gradient(180deg, #33283F, #2A2033); box-shadow: 0 6px 18px rgba(46, 32, 56, 0.32); }
+body.licht .knop:disabled { background: rgba(51, 40, 64, 0.35); }
+/* Secundaire knop: zacht glas met inkt-tekst */
+body.licht .knop-secundair {
+  color: var(--tekst);
+  background: rgba(51, 36, 63, 0.05);
+  border: 1px solid rgba(51, 36, 63, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+/* Titels: inktpruim naar goud (chique editorial gradient) */
 body.licht .splash-naam, body.licht .home-titel {
-  background: linear-gradient(115deg, #2A2440 28%, #B98A2E 85%);
+  background: linear-gradient(115deg, #33283F 30%, var(--goud) 88%);
   -webkit-background-clip: text;
   background-clip: text;
 }
@@ -1277,7 +1319,7 @@ body.licht .dag-melding { color: var(--tekst); }
 body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
 
 /* ---------- 20. VERBINDINGEN (kaart ↔ kaart) ---------- */
-.verbinding-kop { font-family: var(--serif); font-size: calc(17px * var(--tekst-schaal)); margin: 16px 4px 10px; }
+.verbinding-kop { font-family: var(--serif); font-size: calc(1.0625rem * var(--tekst-schaal)); margin: 16px 4px 10px; }
 .verband-rij {
   background: rgba(32, 28, 66, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1287,9 +1329,9 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
   animation: fadeUp 0.4s cubic-bezier(0.22, 0.9, 0.28, 1) both;
   animation-delay: calc(var(--i, 0) * 70ms);
 }
-.verband-pos { color: var(--lav); font-size: calc(11px * var(--tekst-schaal)); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; display: block; margin-bottom: 4px; }
-.verband-rij p { font-size: calc(14px * var(--tekst-schaal)); line-height: 1.5; }
-.verband-rij.rode-draad { border-color: rgba(232, 200, 116, 0.35); background: linear-gradient(135deg, rgba(232,200,116,0.10), rgba(122,90,248,0.10)); }
+.verband-pos { color: var(--lav); font-size: calc(0.6875rem * var(--tekst-schaal)); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; display: block; margin-bottom: 4px; }
+.verband-rij p { font-size: calc(0.875rem * var(--tekst-schaal)); line-height: 1.5; }
+.verband-rij.rode-draad { border-color: rgba(var(--goud-rgb), 0.35); background: linear-gradient(135deg, rgba(232,200,116,0.10), rgba(122,90,248,0.10)); }
 
 /* ---------- 21. iPad / grote schermen: content gecentreerd, niet uitgerekt ---------- */
 /* iPad / breder scherm: content ruimer en gecentreerd, 3 grote kaarten per rij */
@@ -1333,7 +1375,7 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
 .kaart-chip .chip-naam, .chip-face .chip-naam, .card3d .chip-naam {
   display: block; position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
   padding: 18px 4px 6px; text-align: center; color: #F4DE9E;
-  font-size: calc(10.5px * var(--tekst-schaal)); font-weight: 600;
+  font-size: calc(0.6562rem * var(--tekst-schaal)); font-weight: 600;
   background: linear-gradient(transparent, rgba(10, 8, 30, .9));
 }
 .card3d .chip-naam { border-radius: 0 0 var(--r-m) var(--r-m); }
@@ -1341,17 +1383,19 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
 /* fijn goud randje om elke kaart-foto — uniform kader */
 .kaart-chip .chip-symbool::after, .chip-face .chip-symbool::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
-  box-shadow: inset 0 0 0 1px rgba(232, 200, 116, .30);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
 }
+body.licht .kaart-chip .chip-symbool::after, body.licht .chip-face .chip-symbool::after { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
 .card3d::after {
   content: ""; position: absolute; inset: 0; border-radius: var(--r-m); pointer-events: none;
-  box-shadow: inset 0 0 0 1px rgba(232, 200, 116, .30);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
 }
+body.licht .card3d::after { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
 .chip-en {
   position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 3;
   max-width: 96%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  font-size: calc(8px * var(--tekst-schaal)); letter-spacing: .03em; text-transform: uppercase;
-  color: #F4DE9E; background: rgba(12, 10, 34, .55); border: 1px solid rgba(232, 200, 116, .35);
+  font-size: calc(0.5rem * var(--tekst-schaal)); letter-spacing: .03em; text-transform: uppercase;
+  color: #F4DE9E; background: rgba(12, 10, 34, .55); border: 1px solid rgba(var(--goud-rgb), .35);
   padding: 2px 6px; border-radius: 999px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
 }
 .chip-face { padding: 0; overflow: hidden; aspect-ratio: 3 / 5; }
@@ -1367,8 +1411,8 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
 .chip-face .chip-naam {
   bottom: auto; top: 26px; left: 50%; right: auto; transform: translateX(-50%);
   max-width: 88%; padding: 2px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  font-size: calc(8.5px * var(--tekst-schaal)); border-radius: 999px;
-  background: rgba(12, 10, 34, .55); border: 1px solid rgba(232, 200, 116, .25);
+  font-size: calc(0.5312rem * var(--tekst-schaal)); border-radius: 999px;
+  background: rgba(12, 10, 34, .55); border: 1px solid rgba(var(--goud-rgb), .25);
 }
 .scene3d { perspective: 900px; display: flex; justify-content: center; touch-action: none; }
 .card3d { position: relative; transform-style: preserve-3d; transition: transform .18s ease-out; border-radius: var(--r-m); }
@@ -1383,11 +1427,11 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
 }
 .kd-kaart { width: min(240px, 64vw); aspect-ratio: 3 / 5; margin: 6px auto 10px; filter: drop-shadow(0 24px 40px rgba(0,0,0,.55)); }
 .popup-kaart3d { width: 150px; aspect-ratio: 3 / 5; margin: 0 auto 12px; filter: drop-shadow(0 16px 30px rgba(0,0,0,.5)); }
-.kd-tilt-hint { text-align: center; color: var(--sec); font-size: calc(11px * var(--tekst-schaal)); margin: -6px 0 12px; }
+.kd-tilt-hint { text-align: center; color: var(--sec); font-size: calc(0.6875rem * var(--tekst-schaal)); margin: -6px 0 12px; }
 @media (prefers-reduced-motion: reduce) { .card3d { transition: none; } }
 
 /* tip bij de legging op het vraag-scherm */
-.vraag-tip { color: var(--sec); font-size: calc(13.5px * var(--tekst-schaal)); line-height: 1.55; margin: -6px 4px 14px; font-style: italic; }
+.vraag-tip { color: var(--sec); font-size: calc(0.8438rem * var(--tekst-schaal)); line-height: 1.55; margin: -6px 4px 14px; font-style: italic; }
 
 /* ---------- SPREAD-DIAGRAM (visuele vorm van de legging in de uitleg) ---------- */
 .spread-diagram { position: relative; margin: 4px 0 18px; }
@@ -1414,7 +1458,7 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
 /* ---------- DAGSPREUK op het startscherm ---------- */
 .dagspreuk {
   margin: 10px 2px 0; font-family: var(--serif); font-style: italic;
-  font-size: calc(15px * var(--tekst-schaal)); color: var(--goud); line-height: 1.4;
+  font-size: calc(0.9375rem * var(--tekst-schaal)); color: var(--goud); line-height: 1.4;
 }
 
 
@@ -1428,7 +1472,7 @@ body.licht .veil { background: rgba(42, 33, 10, 0.28); }
 
 
 /* ---------- JOURNAAL ---------- */
-.journaal-maand { font-family: var(--serif); font-size: calc(15px * var(--tekst-schaal)); color: var(--lav); margin: 22px 2px 8px; letter-spacing: .02em; }
+.journaal-maand { font-family: var(--serif); font-size: calc(0.9375rem * var(--tekst-schaal)); color: var(--lav); margin: 22px 2px 8px; letter-spacing: .02em; }
 .journaal-item {
   background: linear-gradient(165deg, rgba(58, 48, 110, 0.32), rgba(24, 20, 50, 0.4));
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1436,10 +1480,10 @@ body.licht .veil { background: rgba(42, 33, 10, 0.28); }
 }
 .journaal-kop { display: flex; align-items: center; gap: 10px; }
 .journaal-stemming { font-size: 22px; line-height: 1; }
-.journaal-dag { font-family: var(--serif); font-size: calc(15px * var(--tekst-schaal)); color: var(--tekst); }
-.journaal-humeur { font-size: calc(11.5px * var(--tekst-schaal)); color: var(--sec); }
+.journaal-dag { font-family: var(--serif); font-size: calc(0.9375rem * var(--tekst-schaal)); color: var(--tekst); }
+.journaal-humeur { font-size: calc(0.7188rem * var(--tekst-schaal)); color: var(--sec); }
 .journaal-kop .wis-knop { margin-left: auto; }
-.journaal-tekst { color: var(--tekst); font-size: calc(14px * var(--tekst-schaal)); line-height: 1.5; margin-top: 8px; white-space: pre-wrap; }
+.journaal-tekst { color: var(--tekst); font-size: calc(0.875rem * var(--tekst-schaal)); line-height: 1.5; margin-top: 8px; white-space: pre-wrap; }
 .journaal-stemmingen { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 12px; justify-content: center; }
 .stemming-keuze {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
@@ -1450,7 +1494,7 @@ body.licht .veil { background: rgba(42, 33, 10, 0.28); }
 }
 .stemming-keuze span { font-size: 20px; }
 .stemming-keuze em { font-style: normal; font-size: 11px; color: var(--sec); }
-.stemming-keuze.actief { border-color: rgba(232, 200, 116, 0.65); background: rgba(232, 200, 116, 0.10); transform: scale(1.04); }
+.stemming-keuze.actief { border-color: rgba(var(--goud-rgb), 0.65); background: rgba(var(--goud-rgb), 0.10); transform: scale(1.04); }
 .stemming-keuze.actief em { color: var(--goud); }
 body.licht .journaal-item { background: rgba(255, 255, 255, 0.72); border-color: rgba(42, 36, 64, 0.10); }
 
@@ -1458,25 +1502,110 @@ body.licht .journaal-item { background: rgba(255, 255, 255, 0.72); border-color:
 .leer-open-knop { margin: 4px 0 14px; }
 .leer-kaart-scene { display: flex; justify-content: center; margin: 10px 0 6px; }
 .leer-kaart { width: min(190px, 52vw); aspect-ratio: 3 / 5; border-radius: var(--r-s); overflow: hidden;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(232, 200, 116, 0.35); }
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(var(--goud-rgb), 0.35); }
 .leer-kaart .kaart-foto { width: 100%; height: 100%; object-fit: cover; display: block; }
-.leer-stand { text-align: center; color: var(--sec); font-size: calc(12px * var(--tekst-schaal)); margin-bottom: 14px; }
+.leer-stand { text-align: center; color: var(--sec); font-size: calc(0.75rem * var(--tekst-schaal)); margin-bottom: 14px; }
 .leer-opties { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .leer-optie {
   min-height: 52px; border-radius: var(--r-s); cursor: pointer;
   background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.10);
-  color: var(--tekst); font-family: var(--sans); font-size: calc(14px * var(--tekst-schaal)); font-weight: 600;
+  color: var(--tekst); font-family: var(--sans); font-size: calc(0.875rem * var(--tekst-schaal)); font-weight: 600;
   transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation; padding: 8px 10px;
 }
 .leer-optie:active { transform: scale(0.96); }
 .leer-optie.goed { border-color: rgba(139, 217, 156, 0.8); background: rgba(139, 217, 156, 0.12); color: #C9EDD2; }
-.leer-optie.fout { border-color: rgba(232, 139, 139, 0.8); background: rgba(232, 139, 139, 0.12); color: #F2C4C4; }
+.leer-optie.fout { border-color: rgba(var(--roze-rgb), 0.8); background: rgba(var(--roze-rgb), 0.12); color: #F2C4C4; }
 .leer-optie:disabled { opacity: 0.75; }
-.leer-feedback { text-align: center; margin-top: 14px; font-size: calc(14px * var(--tekst-schaal)); color: var(--tekst); }
+.leer-feedback { text-align: center; margin-top: 14px; font-size: calc(0.875rem * var(--tekst-schaal)); color: var(--tekst); }
 body.licht .leer-optie { background: rgba(42, 36, 64, 0.05); border-color: rgba(42, 36, 64, 0.12); color: var(--tekst); }
 body.licht .leer-optie.goed { background: rgba(74, 143, 96, 0.12); color: #2E6B44; }
 body.licht .leer-optie.fout { background: rgba(178, 74, 74, 0.12); color: #8C3A3A; }
+
+/* ---------- 27. JOURNAAL: LEGE STAAT ALS KAART MET CTA ERIN ---------- */
+.journaal-leeg {
+  text-align: center;
+  padding: 42px 26px 26px;
+  border-radius: var(--r-l);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0) 40%), var(--vlak);
+  border: 1px solid var(--rand);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 14px 34px rgba(0, 0, 0, 0.28);
+}
+.journaal-leeg-icoon {
+  width: 56px; height: 56px; margin: 0 auto 16px;
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-rgb), 0.38);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 18px rgba(var(--accent-rgb), 0.16);
+}
+.journaal-leeg-icoon svg { width: 26px; height: 26px; }
+.journaal-leeg h2 {
+  font-family: var(--serif);
+  font-size: calc(1.375rem * var(--tekst-schaal));
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+  color: var(--tekst);
+}
+.journaal-leeg p { color: var(--sec); font-size: calc(0.875rem * var(--tekst-schaal)); line-height: 1.55; max-width: 32ch; margin: 0 auto 22px; }
+.journaal-leeg .knop { width: auto; display: inline-flex; align-items: center; justify-content: center; padding-left: 26px; padding-right: 26px; }
+.journaal-nieuw-knop { margin-bottom: 16px; }
+
+/* ---------- 28. AURORA-DETAILLAAG (light) — de laatste laag wint ---------- */
+body.licht .titel-ster, body.licht .home-datum svg, body.licht .sub-kicker,
+body.licht .splash-groet, body.licht .leeg-icoon, body.licht .journaal-leeg-icoon {
+  color: var(--accent);
+}
+body.licht .journaal-leeg-icoon { border-color: rgba(var(--accent-rgb), 0.4); background: rgba(var(--accent-rgb), 0.10); box-shadow: none; }
+body.licht .titel-ster { filter: drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.5)); }
+body.licht .home-datum, body.licht .zoek-balk {
+  background: rgba(255, 255, 255, 0.78); border-color: rgba(51, 36, 63, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 12px rgba(51, 36, 63, 0.06);
+}
+body.licht .toast { background: rgba(255, 255, 255, 0.95); color: var(--tekst); border-color: rgba(51, 36, 63, 0.12); box-shadow: 0 12px 30px rgba(51, 36, 63, 0.16); }
+body.licht .tag-chip { background: rgba(255, 255, 255, 0.78); border-color: rgba(51, 36, 63, 0.14); color: var(--sec); }
+body.licht .tag-chip.actief { background: linear-gradient(135deg, var(--accent), var(--accent-deep)); border-color: transparent; color: #FFF6F0; box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.35); }
+body.licht .seg { background: rgba(51, 36, 63, 0.05); border-color: rgba(51, 36, 63, 0.10); }
+body.licht .seg button { color: var(--sec); }
+body.licht .seg button.actief { background: linear-gradient(135deg, var(--accent), var(--accent-deep)); color: #FFF6F0; box-shadow: 0 3px 12px rgba(var(--accent-rgb), 0.35); }
+body.licht .dag-melding {
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.12), rgba(var(--goud-rgb), 0.10)), rgba(255, 255, 255, 0.88);
+  border-color: rgba(var(--accent-rgb), 0.38);
+}
+body.licht .dag-ster { color: var(--accent); }
+body.licht .onboarding-punten span.actief { background: var(--accent); box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6); }
+body.licht #kd-ster.actief { color: var(--accent); border-color: rgba(var(--accent-rgb), 0.5); box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.35); }
+body.licht .stemming-keuze { background: rgba(255, 255, 255, 0.8); border-color: rgba(51, 36, 63, 0.12); }
+body.licht .stemming-keuze.actief { border-color: rgba(var(--accent-rgb), 0.65); background: rgba(var(--accent-rgb), 0.10); }
+body.licht .stemming-keuze.actief em { color: var(--accent); }
+body.licht .element-chip, body.licht .hist-kaart-chip { background: rgba(255, 255, 255, 0.8); border-color: rgba(51, 36, 63, 0.12); }
+body.licht .legging-badge { color: var(--goud); border-color: rgba(var(--goud-rgb), 0.5); background: rgba(var(--goud-rgb), 0.10); }
+body.licht .stand.rechtop { color: var(--goud); background: rgba(var(--goud-rgb), 0.12); border-color: rgba(var(--goud-rgb), 0.5); }
+body.licht .stand.omgekeerd { color: var(--lav); background: rgba(var(--lav-rgb), 0.12); border-color: rgba(var(--lav-rgb), 0.5); }
+body.licht .splash-tip { background: rgba(255, 255, 255, 0.7); border-color: rgba(51, 36, 63, 0.08); color: var(--sec); }
+body.licht .dagspreuk { color: var(--goud); }
+body.licht .streak-chip { color: var(--goud); border-color: rgba(var(--goud-rgb), 0.45); background: rgba(var(--goud-rgb), 0.10); }
+
+/* ---------- 29. DETAILLAAG (uit de design-skills): focus, typografie, leesbaarheid ---------- */
+html, body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+:focus-visible { outline: 2px solid var(--goud); outline-offset: 2px; }
+body.licht :focus-visible { outline-color: var(--accent); }
+::selection { background: rgba(var(--roze-rgb), 0.35); color: var(--tekst); }
+body.licht ::selection { background: rgba(var(--accent-rgb), 0.25); }
+.home-titel, .sub-titel, .leeg-midden h2, .journaal-leeg h2, .slot-kaart h3, .popup-kaart h3 { text-wrap: balance; }
+p, h2, h3, .mix-uitleg, .sub-uitleg, .home-ondertitel, .legging-wanneer { overflow-wrap: break-word; }
+.knop:disabled:active { transform: none; }
+.meer-waarde, .streak-chip, #gekozen-teller, .chip-nummer { font-variant-numeric: tabular-nums; }
+/* knop met icoon links: icoon-kant 2px compacter (optische uitlijning) */
+.knop-met-icoon { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.knop-met-icoon svg { flex-shrink: 0; }
+
+/* overlays scrollen niet door naar de pagina erachter */
+.sheet, .popup-kaart, .slot-kaart, .gekozen-chips, #bib-lijst, #kaarten-grid { overscroll-behavior: contain; }
+
+/* typografie-details: paragrafenmooi gewrapt, koppen gebalanceerd */
+p, .mix-uitleg, .sub-uitleg, .journaal-tekst, .verhaal { text-wrap: pretty; }
 
 </style>
   <script>
@@ -1564,7 +1693,7 @@ body.licht .leer-optie.fout { background: rgba(178, 74, 74, 0.12); color: #8C3A3
         </header>
         <div class="zoek-balk">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <input type="search" id="bib-zoek" class="invoer zoek-invoer" placeholder="Zoek op NL/EN naam of kernwoord...">
+          <input type="search" id="bib-zoek" class="invoer zoek-invoer" aria-label="Zoek in de bibliotheek" placeholder="Zoek op NL/EN naam of kernwoord…">
         </div>
         <div class="tags-rij" id="bib-filters"></div>
         <button class="knop knop-secundair leer-open-knop" id="leer-knop">Leer de kaarten — quiz</button>
@@ -1607,9 +1736,8 @@ body.licht .leer-optie.fout { background: rgba(178, 74, 74, 0.12); color: #8C3A3
         <header class="home-kop">
           <p class="home-datum" id="journaal-datum"></p>
           <h1 class="home-titel">Journaal</h1>
-          <p class="home-ondertitel">Jouw dagelijkse spiegel — stemming en korte notitie</p>
+        <p class="home-ondertitel">Jouw dagelijkse spiegel — stemming en korte notitie</p>
         </header>
-        <button class="knop" id="journaal-nieuw">+ Vandaag een invoer schrijven</button>
         <div id="journaal-lijst"></div>
       </section>
 
@@ -1621,7 +1749,7 @@ body.licht .leer-optie.fout { background: rgba(178, 74, 74, 0.12); color: #8C3A3
         </header>
         <div class="zoek-balk">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <input type="search" id="hist-zoek" class="invoer zoek-invoer" placeholder="Zoek op notitie of kaartnaam...">
+          <input type="search" id="hist-zoek" class="invoer zoek-invoer" aria-label="Zoek in je geschiedenis" placeholder="Zoek op notitie of kaartnaam…">
         </div>
         <div class="tags-rij" id="hist-tags"></div>
         <div id="hist-lijst"></div>
@@ -1650,8 +1778,8 @@ body.licht .leer-optie.fout { background: rgba(178, 74, 74, 0.12); color: #8C3A3
           <div class="meer-rij">
             <span>Thema</span>
             <span class="seg" id="inst-thema">
-              <button data-thema="donker">Donker</button>
-              <button data-thema="licht">Ochtend</button>
+              <button data-thema="aurora">Aurora</button>
+              <button data-thema="nacht">Nacht</button>
             </span>
           </div>
           <div class="meer-rij">
@@ -1717,7 +1845,7 @@ body.licht .leer-optie.fout { background: rgba(178, 74, 74, 0.12); color: #8C3A3
         <p class="vraag-tip" id="vraag-tip"></p>
         <div class="vraag-kaart">
           <label class="vraag-label" for="voorwie-invoer">Voor wie is deze reading? <span class="optioneel">(optioneel)</span></label>
-          <input type="text" id="voorwie-invoer" class="invoer" placeholder="Naam van de persoon..." maxlength="40">
+          <input type="text" id="voorwie-invoer" class="invoer" placeholder="Naam van de persoon…" maxlength="40">
           <label class="vraag-label" for="vraag-invoer" style="margin-top:14px">Wat is je vraag? <span class="optioneel">(optioneel)</span></label>
           <input type="text" id="vraag-invoer" class="invoer" placeholder="Bijv. ‘Wat moet ik deze week loslaten?’" maxlength="140">
           <button class="knop knop-secundair" id="voorbeeldvragen-knop">Toon voorbeeldvragen</button>
@@ -1729,7 +1857,7 @@ body.licht .leer-optie.fout { background: rgba(178, 74, 74, 0.12); color: #8C3A3
         <!-- Dim-sluier achter de sheet -->
         <div class="veil" id="veil" hidden></div>
         <!-- Sheet met voorbeeldvragen (schuift omhoog) -->
-        <div class="sheet" id="sheet-vragen" hidden>
+        <div class="sheet" id="sheet-vragen" role="dialog" aria-modal="true" aria-label="Voorbeeldvragen" hidden>
           <h3>Waar wil je een antwoord op?</h3>
           <p>Tik een voorbeeldvraag aan — je mag hem daarna altijd nog aanpassen.</p>
           <div id="sheet-vragen-lijst"></div>
@@ -1786,7 +1914,7 @@ body.licht .leer-optie.fout { background: rgba(178, 74, 74, 0.12); color: #8C3A3
         <!-- Wat neem ik mee? -->
         <section class="uitleg-sectie" id="neemmee-sectie">
           <h2 class="sectie-titel">Wat neem ik mee?</h2>
-          <textarea id="notitie-vak" class="invoer notitie" placeholder="Schrijf hier wat je wilt onthouden van deze reading..."></textarea>
+          <textarea id="notitie-vak" class="invoer notitie" aria-label="Notitie bij deze reading" placeholder="Schrijf hier wat je wilt onthouden van deze reading…"></textarea>
           <p class="opgeslagen" id="opgeslagen-melding" hidden>✓ opgeslagen</p>
           <div class="tags-rij" id="tags-rij"></div>
           <button class="knop" id="opslaan-knop">Sla deze reading op</button>
@@ -1799,7 +1927,7 @@ body.licht .leer-optie.fout { background: rgba(178, 74, 74, 0.12); color: #8C3A3
     </main>
 
     <!-- Popup met extra kaart-info (bij tikken op een kaartnaam) -->
-    <div class="popup-achtergrond" id="kaart-popup" hidden>
+    <div class="popup-achtergrond" id="kaart-popup" role="dialog" aria-modal="true" aria-label="Kaartdetails" hidden>
       <div class="popup-kaart" id="kaart-popup-kaart"></div>
     </div>
 
@@ -3950,7 +4078,7 @@ function tekenSterren(t) {
   const h = window.innerHeight;
   // Parallax: sterren schuiven vertraagd mee met het scrollen (diepte!), met wrap-around
   const off = MINDER_BEWEGING ? 0 : ((((huidigeScroll * 0.18) % (h + 4)) + (h + 4)) % (h + 4)) - 2;
-  const sterKleur = document.body.classList.contains("licht") ? "#8B84A8" : "#F5F3FF";
+  const sterKleur = document.body.classList.contains("licht") ? "#C9AABD" : "#F5F3FF";
   ctx.fillStyle = sterKleur;
   // twinkelende sterren: helderheid zwelt zacht heen en weer
   for (const s of sterren) {
@@ -4264,7 +4392,7 @@ const TAB_NAAR_SCHERM = {
   meer: "scherm-meer"
 };
 
-function toonTab(tabNaam) {
+function toonTab(tabNaam, viaToetsenbord) {
   // subschermen + stack altijd sluiten bij tab-wissel (anders bleef er ooit content onder hangen)
   schermStack.length = 0;
   ["scherm-vraag", "scherm-kaarten", "scherm-uitleg", "scherm-kaartdetail"].forEach(id => {
@@ -4282,6 +4410,9 @@ function toonTab(tabNaam) {
   if (tabNaam === "journaal") renderJournaal();
   if (tabNaam === "bibliotheek") renderBibliotheek();
   if (tabNaam === "meer") renderMeer();
+  // Titel mee + focus naar de titel van de nieuwe view (schermlezer/keyboard)
+  const titelNamen = { nieuw: "Nieuw", bibliotheek: "Bibliotheek", journaal: "Journaal", geschiedenis: "Geschiedenis", meer: "Meer" };
+  document.title = (titelNamen[tabNaam] || "Tarot") + " — Tarot van Samir";
   // Alle schermen: alleen het gevraagde tonen, met een kleine fade-in
   Object.entries(TAB_NAAR_SCHERM).forEach(([naam, id]) => {
     const scherm = document.getElementById(id);
@@ -4292,6 +4423,11 @@ function toonTab(tabNaam) {
       scherm.classList.add("tab-in");
       scherm.scrollTop = 0;
       huidigeScroll = 0;
+      // focus naar de h1 alleen bij toetsenbordnavigatie (anders een ring op touch)
+      if (viaToetsenbord) {
+        const h1 = scherm.querySelector("h1");
+        if (h1) { h1.setAttribute("tabindex", "-1"); h1.focus({ preventScroll: true }); }
+      }
     } else {
       scherm.hidden = true;
     }
@@ -4299,7 +4435,7 @@ function toonTab(tabNaam) {
 }
 
 document.querySelectorAll(".tab").forEach(t => {
-  t.addEventListener("click", () => { tril(8); toonTab(t.dataset.tab); });
+  t.addEventListener("click", (e) => { tril(8); toonTab(t.dataset.tab, e.detail === 0); });
 });
 
 // Scroll-gevoel: scrollpositie bijhouden voor de parallax-sterren (rAF-ge-throttled,
@@ -4332,6 +4468,7 @@ function toast(bericht) {
   if (bestaand) bestaand.remove();
   const el = document.createElement("div");
   el.className = "toast";
+  el.setAttribute("role", "status");           // screen-reader kondigt toasts netjes aan
   el.textContent = bericht;
   document.body.appendChild(el);
   clearTimeout(toastTimer);
@@ -4619,7 +4756,7 @@ function renderKaartenScherm() {
   wisKnop.onclick = () => {
     if (!bevestiging) {
       bevestiging = true;
-      wisKnop.textContent = "Zeker? Tik nogmaals";
+      wisKnop.textContent = "Tik nogmaals om álle kaarten te wissen";
       wisKnop.classList.add("gevaar");
       clearTimeout(timer);
       timer = setTimeout(() => { bevestiging = false; wisKnop.textContent = "Wis alles"; wisKnop.classList.remove("gevaar"); }, 3000);
@@ -5147,6 +5284,8 @@ function toonKaartPopup(id) {
   bindTilt(document.getElementById("popup-scene"), document.getElementById("popup-kaart3d"), document.getElementById("popup-glare"));
   document.getElementById("popup-sluit").onclick = () => { popup.hidden = true; };
   popup.onclick = e => { if (e.target === popup) popup.hidden = true; };
+  // focus naar binnen bij openen (toetsenbord/screenreader), Escape sluit overal
+  setTimeout(() => { const s = document.getElementById("popup-sluit"); if (s) s.focus({ preventScroll: true }); }, 60);
 }
 
 // Sla de hele reading op in de geschiedenis + confetti
@@ -5348,7 +5487,7 @@ function journaalNieuwBewerken() {
         '<button type="button" class="stemming-keuze' + (bestaand && bestaand.s === i ? " actief" : "") + '" data-stemming="' + i + '"><span>' + st[0] + "</span><em>" + st[1] + "</em></button>"
       ).join("") +
     "</div>" +
-    '<textarea id="journaal-tekst" class="invoer" rows="4" maxlength="300" placeholder="Kort en eerlijk — drie zinnen is genoeg...">' + (bestaand ? (bestaand.t || "").replace(/</g, "&lt;") : "") + "</textarea>" +
+    '<textarea id="journaal-tekst" class="invoer" aria-label="Je notitie van vandaag" rows="4" maxlength="300" placeholder="Kort en eerlijk — drie zinnen is genoeg…">' + (bestaand ? (bestaand.t || "").replace(/</g, "&lt;") : "") + "</textarea>" +
     '<button class="knop" id="journaal-opslaan">' + (bestaand ? "Invoer van vandaag bijwerken" : "Opslaan in journaal") + "</button>"
   );
   let stemming = bestaand ? bestaand.s : 0;
@@ -5378,10 +5517,20 @@ function renderJournaal() {
   const lijst = laadJournaal();
   const el = document.getElementById("journaal-lijst");
   if (!lijst.length) {
-    el.innerHTML = '<div class="leeg-midden"><div class="leeg-icoon"><svg viewBox="0 0 24 24"><path d="M7 3.5h10A1.5 1.5 0 0 1 18.5 5v15.2L12 16.9l-6.5 3.3V5A1.5 1.5 0 0 1 7 3.5z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></div><h2>Nog niks geschreven</h2><p>Eén dingetje per dag — hoe klein ook — en je hebt binnenkort een mooie spiegel van jezelf.</p></div>';
+    // Lege staat = één mooi kaart mét de CTA-knop erin (geen losse knop boven de kaart)
+    el.innerHTML =
+      '<div class="journaal-leeg">' +
+        '<div class="journaal-leeg-icoon"><svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></div>' +
+        "<h2>Nog niks geschreven</h2>" +
+        "<p>Eén dingetje per dag — hoe klein ook — en je hebt binnenkort een mooie spiegel van jezelf.</p>" +
+        '<button class="knop" id="journaal-nieuw">Schrijf van vandaag los</button>' +
+      "</div>";
+    document.getElementById("journaal-nieuw").onclick = journaalNieuwBewerken;
     return;
   }
-  el.innerHTML = "";
+  // Met invoeren: de knop staat compact boven de lijst
+  el.innerHTML = '<button class="knop journaal-nieuw-knop" id="journaal-nieuw">+ Invoer van vandaag</button>';
+  document.getElementById("journaal-nieuw").onclick = journaalNieuwBewerken;
   let vorigeMaand = "";
   lijst.forEach((e, i) => {
     const d = new Date(e.d + "T12:00:00");
@@ -5414,7 +5563,7 @@ function renderJournaal() {
   });
 }
 
-document.getElementById("journaal-nieuw").addEventListener("click", journaalNieuwBewerken);
+// Journaal-knop zit in de lege-staat-kaart en boven de lijst (wiren gebeurt in renderJournaal)
 
 /* ---------- 7j. LEER-MODUS (flashcards over alle 78 kaarten) ---------- */
 
@@ -5716,12 +5865,12 @@ bibZoekVeld.addEventListener("input", () => { bibZoek = bibZoekVeld.value.trim()
 function applyInstellingen() {
   const grootte = lees("tarot_tekstgrootte", "normaal");
   document.documentElement.style.setProperty("--tekst-schaal", grootte === "groot" ? "1.22" : "1");
-  const licht = lees("tarot_thema", "donker") === "licht";
+  const licht = lees("tarot_stijl", "aurora") !== "nacht";   // Aurora (ivoor) is de nieuwe standaard
   document.body.classList.toggle("licht", licht);
   document.body.classList.toggle("geen-omgekeerd", lees("tarot_lees_omgekeerd", true) === false);
   // Safari-statusbalk + browser-UI mee laten kleuren met het gekozen thema
   const metaThema = document.querySelector('meta[name="theme-color"]#meta-thema');
-  if (metaThema) metaThema.setAttribute("content", licht ? "#F4F1EA" : "#0B0A1E");
+  if (metaThema) metaThema.setAttribute("content", licht ? "#F8F4EC" : "#0B0A1E");
   document.documentElement.style.colorScheme = licht ? "light" : "dark";
 }
 
@@ -5758,20 +5907,20 @@ function renderMeer() {
     b.classList.toggle("actief", b.dataset.grootte === lees("tarot_tekstgrootte", "normaal"));
   });
   document.querySelectorAll("#inst-thema button").forEach(b => {
-    b.classList.toggle("actief", b.dataset.thema === lees("tarot_thema", "donker"));
+    b.classList.toggle("actief", b.dataset.thema === lees("tarot_stijl", "aurora"));
   });
   document.querySelectorAll("#inst-omgekeerd button").forEach(b => {
     b.classList.toggle("actief", b.dataset.omg === (lees("tarot_lees_omgekeerd", true) ? "ja" : "nee"));
   });
 }
 
-// Thema (donker / ochtend-licht)
+// Thema (Aurora = lichte ivoor-stijl, Nacht = donker indigo)
 document.querySelectorAll("#inst-thema button").forEach(b => {
   b.addEventListener("click", () => {
-    schrijf("tarot_thema", b.dataset.thema);
+    schrijf("tarot_stijl", b.dataset.thema);
     applyInstellingen();
     renderMeer();
-    toast(b.dataset.thema === "licht" ? "Ochtend-modus aan" : "Donkere nacht-modus aan");
+    toast(b.dataset.thema === "aurora" ? "Aurora-stijl aan" : "Nacht-stijl aan");
   });
 });
 
@@ -5820,7 +5969,7 @@ function maakExportData() {
     tarot_concept: lees("tarot_concept", null),
     tarot_tekstgrootte: lees("tarot_tekstgrootte", "normaal"),
     tarot_lees_omgekeerd: lees("tarot_lees_omgekeerd", true),
-    tarot_thema: lees("tarot_thema", "donker")
+    tarot_stijl: lees("tarot_stijl", "aurora")
   };
 }
 function exportBestandsnaam() {
@@ -5867,8 +6016,8 @@ document.getElementById("import-bestand").addEventListener("change", e => {
       if ("tarot_geschiedenis" in data) {
         const bestaand = lees("tarot_geschiedenis", []);
         const ids = new Set(bestaand.map(r => r.id));
-        const 尺 = data.tarot_geschiedenis.filter(r => r && r.id && !ids.has(r.id));
-        schrijf("tarot_geschiedenis", bestaand.concat(尺).sort((a, b) => new Date(b.datum) - new Date(a.datum)));
+        const nieuwe = data.tarot_geschiedenis.filter(r => r && r.id && !ids.has(r.id));
+        schrijf("tarot_geschiedenis", bestaand.concat(nieuwe).sort((a, b) => new Date(b.datum) - new Date(a.datum)));
       }
       if ("tarot_favorieten" in data) schrijf("tarot_favorieten", [...new Set([...lees("tarot_favorieten", []), ...data.tarot_favorieten])]);
       if ("tarot_journaal" in data) {
@@ -5881,7 +6030,11 @@ document.getElementById("import-bestand").addEventListener("change", e => {
         const ids = new Set(bestaand.map(l => l.id));
         schrijf("tarot_eigen_leggingen", bestaand.concat(data.tarot_eigen_leggingen.filter(l => l && l.id && !ids.has(l.id))));
       }
-      ["tarot_naam", "tarot_tekstgrootte", "tarot_lees_omgekeerd", "tarot_thema"].forEach(k => { if (k in data) schrijf(k, data[k]); });
+      // oude back-ups (v43 en eerder) gebruikten tarot_thema — vertaal naar de nieuwe sleutel
+      if ("tarot_thema" in data && !("tarot_stijl" in data)) {
+        schrijf("tarot_stijl", data.tarot_thema === "licht" ? "aurora" : "nacht");
+      }
+      ["tarot_naam", "tarot_tekstgrootte", "tarot_lees_omgekeerd", "tarot_stijl"].forEach(k => { if (k in data) schrijf(k, data[k]); });
       toast("Samengevoegd met je back-up — de app herlaadt");
       setTimeout(() => location.reload(), 900);
     } catch (err) {
@@ -5901,7 +6054,7 @@ document.getElementById("import-bestand").addEventListener("change", e => {
     if (!knop.dataset.bevestig) {
       knop.dataset.bevestig = "1";
       knop.classList.add("bevestig");
-      tekst.textContent = "Zeker? Álle data wordt gewist!";
+      tekst.textContent = "Alles wissen? Dit kan niet ongedaan worden.";
       timer = setTimeout(() => { delete knop.dataset.bevestig; knop.classList.remove("bevestig"); tekst.textContent = "App resetten (wist álle data)"; }, 4000);
       return;
     }
@@ -5923,7 +6076,7 @@ function openEigenLeggingenModal() {
     ).join("");
   }
   html +=
-    '<input id="el-naam" class="invoer" placeholder="Naam (bv. Mijn drieluik)" maxlength="40">' +
+    '<input id="el-naam" class="invoer" aria-label="Naam van de legging" placeholder="Naam (Bijv. Mijn drieluik)" maxlength="40">' +
     '<input id="el-aantal" class="invoer" type="number" min="2" max="10" value="3">' +
     '<div id="el-labels"></div>' +
     '<button class="knop" id="el-opslaan">Legging aanmaken</button>';
@@ -5934,7 +6087,7 @@ function openEigenLeggingenModal() {
   function bouwLabelVelden() {
     const n = Math.min(10, Math.max(2, parseInt(aantalVeld.value) || 3));
     labelsVeld.innerHTML = Array.from({ length: n }, (_, i) =>
-      '<input class="invoer el-label" placeholder="Positie ' + (i + 1) + ' (bv. Kwestie)" maxlength="40">'
+      '<input class="invoer el-label" aria-label="Naam van deze positie" placeholder="Positie ' + (i + 1) + ' (Bijv. Kwestie)" maxlength="40">'
     ).join("");
   }
   bouwLabelVelden();
@@ -5984,6 +6137,19 @@ applyInstellingen();
 startSplash();
 
 // Service worker registreren zodat de app offline werkt na het eerste bezoek
+// Escape-toets sluit overlays (popup + sheet) — toetsenbordtoegankelijkheid
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  const popup = document.getElementById("kaart-popup");
+  if (popup && !popup.hidden) { popup.hidden = true; return; }
+  const sheet = document.getElementById("sheet-vragen");
+  if (sheet && !sheet.hidden) {
+    sheet.classList.remove("open");
+    document.getElementById("veil").classList.remove("open");
+    setTimeout(() => { sheet.hidden = true; document.getElementById("veil").hidden = true; }, 380);
+  }
+});
+
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(() => { /* offline niet kritisch hier */ });
 }

@@ -1,43 +1,47 @@
-v43 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
+v45 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
   - index.html
   - sw.js
 
-v43 = knoppen & badge-fix + update-bescherming tegen wit scherm:
+v45 = POLISH-RONDE via de design-skills (jakubkrehel/skills, nu als
+project-skills op de laptop in .vibe/skills/):
 
-1. ALLE PRIMAIRE KNOPPEN NU "GLAZEN GOUD" (was een vol goudblok dat afviel
-   tegen de donkere vlakken — o.a. in Journaal):
-   - transparante goudtint + 1px goudrand + goudkleurige tekst + zachte gloed
-   - bij indrukken: vult ie vol goud op met een glow (lekker tactiel)
-   - geldt overal: Journaal, "Naar kaarten kiezen", "Naar de uitleg",
-     "Sla deze reading op", opslaan-sheets, onboarding
-   - ook in de lichte (ochtend)modus goed afgesteld
-   - kleine badges (positienummer, "rechtop/omgekeerd", actieve chips) blijven
-     juist WEL vol goud — dat zijn accenten, geen knoppen
+1. KLEUREN (better-colors + better-ui), ALLEMAAL GEMETEN (WCAG):
+   - alle rgb-literals vervangen door tokens (--goud-rgb, --lav-rgb,
+     --roze-rgb, --accent-rgb) — themes wisselen nu schoon
+   - contrast gemeten in beide thema's; light theme aangepast (lightness
+     only): --sec 5.2:1, --goud 4.9:1, --lav 4.7:1, --accent 4.8:1 op ivoor
+   - één kleur = één betekenis: roze = gevaar/fout, lavendel = omgekeerde
+     kaart, goud = tarot-accent, berry-roze = decoratief accent (Aurora)
+   - foto-randjes nu neutraal (wit/10 donker, zwart/8 licht) ipv goud —
+     geen kleur-fringe meer op de kaarten (gouden gloed blijft ALLEEN op
+     de geselecteerde kaart)
 
-2. SELECTIENUMMER OP KAARTEN KIEZEN GEFIXT:
-   - de gouden volgnummer-badge zat half BUITEN de kaart en werd afgekapt
-     tot een raar goud hoekje (overflow:hidden). Nu staat ie netjes binnen
-     linksboven als rondje met het nummer; de EN-naam-pill schuift dan
-     automatisch naar rechtsboven zodat niets overlapt.
+2. TYPOGRAFIE (better-typography):
+   - alle geschaalde tekst nu in rem (browser-tekstgrootte werkt mee)
+   - opsz alleen nog op de échte display-titels (hero/splash)
+   - text-wrap: balance op koppen, pretty op paragrafen, break-word op body
+   - tabular-nums op tellers/nummers, antialiased op root, …-ellipsis in
+     placeholders, typografische quotes
 
-3. WIT SCHERM BIJ UPDATE VOORKOMEN (v42 gaf heel even wit):
-   - service worker cachet nu bij installatie meteen de kernbestanden
-     (per bestand, mag missing zijn) — zo is de nieuwe versie AL offline
-     compleet vóórdat hij actief wordt
-   - ?v=N wordt bij cache-match genegeerd, dus oude cache entries matchen
-     nog steeds goed
-   - navigaties: netwerk met 4-seconden time-out, anders cache (nooit wit)
-   - missende bestanden (kaartfoto offline) geven een lege 504 terug ipv
-     per ongeluk HTML — de ingebouwde SVG-fallback van de kaart verschijnt
-   - automatische herlaad na een update nu bewaakt via sessionStorage:
-     geen herlaad-lus meer mogelijk
+3. MOTION (better-motion):
+   - ÉÉN press-scale overal: 0.96 (was 0.88-0.98 Mixed)
+   - popup/modal enters vanaf scale 0.98, 380ms ease-out (was 0.85 spring)
+   - toast-exit 180ms (korter dan enter), geen transition: all meer
+   - reduced-motion gate bleef behouden
 
-4. REBRAND WEER EEN STAP SCHERPER (v42-lettertypes nu echt zichtbaar):
-   - hero-titels groter (37px) met strakkere letterspacing en Fraunces
-     display-cut (opsz 144) — de serif glanst nu echt
-   - titel-gradient meer goud (26% wit -> 82% goud)
-   - legging-namen 19.5px in Fraunces, sub-titels met opsz 72
+4. LAYOUT & TOEGANKELIJKHEID (better-layout + better-accessibility):
+   - zoom weer toegestaan (maximum-scale/user-scalable uit de viewport —
+     WCAG 1.4.4); inputs waren al 16px dus iOS zoomt niet meer
+   - 320px reflow getest: geen horizontale scroll
+   - tabs 44px hoog, Escape sluit popup/sheet, role=dialog + aria-modal,
+     focus naar binnen bij popup, focus naar h1 ALLEEN bij toetsenbord,
+     document.title wisselt mee per tab, aria-labels op alle invoervelden,
+     toast = role=status, chip-verwijder 24px
+   - copy-check (better-writing): "Bijv." overal consistent, destructieve
+     bevestiging zonder "!", wis-knop actuatorischer
 
-Getest: alle 15 leggingen end-to-end OK (0 errors), badges 1..6 correct,
-journaal-knop + sheet + grid + balk in screenshots gecheckt (iPhone-formaat).
-Na upload: app openen → auto-reload → Meer moet "v43" tonen.
+Getest: 15/15 leggingen end-to-end OK, 0 errors; contrast-scan beide
+thema's: 0 echte failures; screenshots Aurora + Nacht gecheckd.
+
+Upload: app opent in Aurora (licht). Nacht: Meer > Stijl > Nacht.
+Check Meer onderaan: "Versie v45".
