@@ -1,28 +1,26 @@
-v36 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app
-(Add file → Upload files → index.html + sw.js → commit):
-  - index.html  (complete single-file app; kaartfoto's staan al online sinds v30)
+v37 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
+  - index.html
   - sw.js
+(Add file → Upload files → commit. De 78 kaartfoto's staan al online.)
 
-BELANGRIJK (waarom je telefoon soms een oude balk liet zien):
-- sw.js haalt de app-pagina (index.html) nu ALTIJD eerst vers van het netwerk
-  (network-first), ipv uit de cache. Na een upload landt een nieuwe versie dus
-  meteen bij de éérste herlaad.
-- De ingebouwde auto-reload (controllerchange) laadt de app daarna zelf nog
-  één keer door, zodat je zeker de nieuwe versie ziet.
-- Check na upload: Meer-tabblad → daar staat het versienummer (nu "v36").
-  Zie je een lager nummer? Sluit de app/Safari-tab HELEMAAL en open opnieuw.
-  Blijft het oud: Instellingen → Safari → "Wis geschiedenis en websitegegevens".
+v37 = LIQUID GLASS TERUG:
+- De tabbalk is WEER een zwevende glass-pil: alle hoeken rond (24px), blur 26px,
+  goud-haarlijn + gloed, 12px van de randen, en 10px boven de onderrand —
+  dus laag zwevend met een klein randje lucht onder, zoals het nieuwe iOS-design.
+  Was even een "platte balk" geworden — dat is bewust teruggedraaid.
+- De gekozen-kaartenbalk (onderin bij kaarten kiezen) heeft nu dezelfde
+  zwevende glass-stijl.
+- Compact gebleven: tabbalk 58px hoog (kleine iconen), paddings strak.
 
-WAT ZIT IN v36 (aboveop v35):
-1. Gekozen-kaartjes in de onderbalk opgeruimd: EN-pill eruit (was afgekapt),
-   positienummer linksboven ín de kaart, × rechtsboven ín de kaart, flip-knop
-   kleiner en ín de kaart, NL-naam als klein pill, stand alleen zichtbaar bij
-   ondersteboven (↧).
-2. EN-naam-pill op de kaarten in het grid kleiner (8px) → "THE HIGH PRIESTESS"
-   en "STRENGTH" passen nu helemaal.
-3. Tab-wissel (toonTab) verbergt nu álle subschermen + reset de navigatiestack —
-   er kan nooit meer content van een oud scherm onder een tab blijven hangen.
-4. sw.js network-first voor navigaties (zie boven).
+NA DE UPLOAD — BELANGRIJK:
+1. Open de app, hij herlaadt zichzelf automatisch naar de nieuwe versie.
+2. Check: Meer-tab → onderaan staat het versienummer. Nu moet er "v37" staan.
+3. Zie je een lager nummer of nog de oude platte balk?
+   → sluit de Safari-tab/app HELEMAAL en open opnieuw.
+   → nog steeds oud? Instellingen → Safari → "Wis geschiedenis en websitegegevens"
+     (daarmee cache weg; je readings/geschiedenis in de app blijft, die staat
+     apart in "local storage" — dat blijft bewaard).
 
-Getest: alle 12 leggingen end-to-end met gesimuleerde iPhone-taps, 0 errors,
-balk 58px en klevend onderaan, gekozen-balk 212px.
+Eerdere eisen die er allemaal al inzitten (v35/v36): 12 leggingen, spread-
+diagram (kruis/klok vormen), dagspreuk, naam vast "Samir", versienummer in
+Meer, alle klik-paden getest, auto-update, contact-kaartjes opgeruimd.

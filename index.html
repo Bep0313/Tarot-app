@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="36">
+<html lang="nl" data-versie="37">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=36 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=37 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    TAROT VAN SAMIR — style.css
@@ -142,7 +142,7 @@ body::before {
   inset: 0;
   overflow-y: auto;
   overscroll-behavior-y: contain;      /* geen bounce-doorgeef naar de pagina erachter */
-  padding: calc(env(safe-area-inset-top) + 24px) 16px calc(env(safe-area-inset-bottom) + 78px);
+  padding: calc(env(safe-area-inset-top) + 24px) 16px calc(env(safe-area-inset-bottom) + 96px);
   scrollbar-width: none;               /* geen scrollbalk in de app */
   /* NB: géén mask-image hier — een mask op een scroll-container forceert op iOS
      een volledige herpaint per scroll-frame en maakt scrollen stroef */
@@ -482,12 +482,12 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 /* Zwevende liquid-glass pil: zit los van de schermrand, met blur over de sterren */
 #tabbalk {
   position: fixed;
-  left: 0; right: 0;
-  bottom: 0;                                   /* klevend aan de onderkant: geen dode ruimte onder de home-indicator */
+  left: 12px; right: 12px;
+  bottom: calc(env(safe-area-inset-bottom) + 10px);  /* zwevende pil: kleine ademruimte tot de rand */
   z-index: 40;
   display: flex;
-  padding: 6px 10px calc(8px + env(safe-area-inset-bottom));
-  border-radius: 20px 20px 0 0;
+  padding: 7px 10px;
+  border-radius: 24px;
   background: rgba(26, 22, 54, 0.55);
   backdrop-filter: blur(26px) saturate(1.5);   /* het "liquid glass"-effect */
   -webkit-backdrop-filter: blur(26px) saturate(1.5);
@@ -647,10 +647,10 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 
 /* ---------- 11. SUBSCHERMEN (vraag / kaarten / uitleg) ---------- */
 .scherm-sub.heeft-balk {
-  padding-bottom: calc(env(safe-area-inset-bottom) + 230px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 240px);
   /* content fadet eerder weg, zodat de kaartjes niet achter de balk door scrollen */
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 250px), transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 250px), transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 258px), transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 258px), transparent 100%);
 }
 
 .sub-kop { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
@@ -786,15 +786,15 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 /* ---------- 14. GEKOZEN-KAARTEN-BALK ONDERIN ---------- */
 .gekozen-balk {
   position: fixed;
-  left: 0; right: 0;
-  bottom: 0;
+  left: 12px; right: 12px;
+  bottom: calc(env(safe-area-inset-bottom) + 10px);
   z-index: 42;
   background: rgba(26, 22, 54, 0.78);
   backdrop-filter: blur(24px) saturate(1.4);
   -webkit-backdrop-filter: blur(24px) saturate(1.4);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 20px 20px 0 0;
-  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  border-radius: 24px;
+  padding: 10px 12px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 40px rgba(0, 0, 0, 0.5);
 }
 .gekozen-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
@@ -1245,12 +1245,11 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
   #tabbalk, .gekozen-balk {
     left: 50%;
     right: auto;
-    bottom: 12px;                    /* op iPad mag de balk zweven */
+    bottom: calc(env(safe-area-inset-bottom) + 12px);
     transform: translateX(-50%);
     width: calc(100% - 32px);
     max-width: 748px;
     border-radius: 26px;
-    padding-bottom: 9px;
   }
   .sheet { max-width: 780px; margin: 0 auto; }
 }
