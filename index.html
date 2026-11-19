@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="37">
+<html lang="nl" data-versie="38">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=37 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=38 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    TAROT VAN SAMIR — style.css
@@ -152,7 +152,7 @@ body::before {
   content: ""; position: fixed; left: 0; right: 0; height: 26px; z-index: 30; pointer-events: none;
 }
 #schermen::before { top: 0; background: linear-gradient(var(--bg), transparent); }
-#schermen::after { bottom: 0; height: 40px; background: linear-gradient(transparent, var(--bg)); }
+#schermen::after { bottom: 0; height: 72px; background: linear-gradient(transparent, var(--bg)); }
 /* tikken zonder 300ms vertraging / dubbel-tap zoom */
 button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipulation; }
 .scherm::-webkit-scrollbar { display: none; }
@@ -483,7 +483,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 #tabbalk {
   position: fixed;
   left: 12px; right: 12px;
-  bottom: calc(env(safe-area-inset-bottom) + 10px);  /* zwevende pil: kleine ademruimte tot de rand */
+  bottom: calc(env(safe-area-inset-bottom) + 5px);   /* zwevende pil: net boven de home-indicator */
   z-index: 40;
   display: flex;
   padding: 7px 10px;
@@ -648,9 +648,8 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 /* ---------- 11. SUBSCHERMEN (vraag / kaarten / uitleg) ---------- */
 .scherm-sub.heeft-balk {
   padding-bottom: calc(env(safe-area-inset-bottom) + 240px);
-  /* content fadet eerder weg, zodat de kaartjes niet achter de balk door scrollen */
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 258px), transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 258px), transparent 100%);
+  /* geen mask hier: een mask op een scroll-container dwingt iOS tot een volledige
+     herpaint per scroll-frame (haperen). De zwevende glass-balk doet het werk nu zelf. */
 }
 
 .sub-kop { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
@@ -787,11 +786,11 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .gekozen-balk {
   position: fixed;
   left: 12px; right: 12px;
-  bottom: calc(env(safe-area-inset-bottom) + 10px);
+  bottom: calc(env(safe-area-inset-bottom) + 5px);
   z-index: 42;
-  background: rgba(26, 22, 54, 0.78);
-  backdrop-filter: blur(24px) saturate(1.4);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  background: rgba(26, 22, 54, 0.82);
+  backdrop-filter: blur(18px) saturate(1.35);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
   border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 24px;
   padding: 10px 12px;
@@ -1245,7 +1244,7 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
   #tabbalk, .gekozen-balk {
     left: 50%;
     right: auto;
-    bottom: calc(env(safe-area-inset-bottom) + 12px);
+    bottom: calc(env(safe-area-inset-bottom) + 8px);
     transform: translateX(-50%);
     width: calc(100% - 32px);
     max-width: 748px;
@@ -1270,7 +1269,8 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
 }
 
 /* ---------- 23. KAART-ART: eigen SVG-illustratie per kaart + 3D ----------- */
-.kaart-chip { position: relative; padding: 0; overflow: hidden; aspect-ratio: 3 / 5; }
+.kaart-chip { position: relative; padding: 0; overflow: hidden; aspect-ratio: 3 / 5;
+  content-visibility: auto; contain-intrinsic-size: auto 187px; }
 .kaart-chip .chip-symbool { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; font-size: 0; }
 .kaart-chip .chip-symbool svg { width: 100%; height: 100%; border-radius: 0; box-shadow: none; }
 .kaart-chip .chip-symbool .kaart-foto { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -1361,6 +1361,15 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
   margin: 10px 2px 0; font-family: var(--serif); font-style: italic;
   font-size: calc(15px * var(--tekst-schaal)); color: var(--goud); line-height: 1.4;
 }
+
+
+/* ---------- VEIL (dim-sluier achter de sheet, focus op de inhoud) ---------- */
+.veil {
+  position: fixed; inset: 0; z-index: 55; background: rgba(6, 5, 18, 0.45);
+  opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
+}
+.veil.open { opacity: 1; }
+body.licht .veil { background: rgba(42, 33, 10, 0.28); }
 
 </style>
   <script>
@@ -1576,6 +1585,8 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
           <button class="knop knop-secundair" id="zonder-vraag-knop">Verder zonder vraag</button>
           <button class="knop" id="naar-kaarten-knop">Naar kaarten kiezen →</button>
         </div>
+        <!-- Dim-sluier achter de sheet -->
+        <div class="veil" id="veil" hidden></div>
         <!-- Sheet met voorbeeldvragen (schuift omhoog) -->
         <div class="sheet" id="sheet-vragen" hidden>
           <h3>Waar wil je een antwoord op?</h3>
@@ -4162,10 +4173,12 @@ function bouwVraagScherm() {
   lijst.innerHTML = "";
   // Sluit de sheet direct qua clicks (anders vangt hij taps op de knoppen eronder
   // tijdens de 380ms sluit-animatie), visueel mag hij nog weggleiden
+  const veil = document.getElementById("veil");
   const sluitSheet = () => {
     sheet.style.pointerEvents = "none";
     sheet.classList.remove("open");
-    setTimeout(() => { sheet.hidden = true; sheet.style.pointerEvents = ""; }, 380);
+    veil.classList.remove("open");
+    setTimeout(() => { sheet.hidden = true; sheet.style.pointerEvents = ""; veil.hidden = true; }, 380);
   };
   VOORBEELDVRAGEN.forEach(v => {
     const b = document.createElement("button");
@@ -4176,8 +4189,10 @@ function bouwVraagScherm() {
   });
   document.getElementById("voorbeeldvragen-knop").onclick = () => {
     sheet.hidden = false;
+    veil.hidden = false;
     void sheet.offsetWidth;
     sheet.classList.add("open");
+    requestAnimationFrame(() => veil.classList.add("open"));
   };
   sheet.onclick = e => { if (e.target === sheet) sluitSheet(); };
 

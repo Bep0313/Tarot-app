@@ -1,26 +1,23 @@
-v37 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
+v38 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
   - index.html
   - sw.js
-(Add file → Upload files → commit. De 78 kaartfoto's staan al online.)
 
-v37 = LIQUID GLASS TERUG:
-- De tabbalk is WEER een zwevende glass-pil: alle hoeken rond (24px), blur 26px,
-  goud-haarlijn + gloed, 12px van de randen, en 10px boven de onderrand —
-  dus laag zwevend met een klein randje lucht onder, zoals het nieuwe iOS-design.
-  Was even een "platte balk" geworden — dat is bewust teruggedraaid.
-- De gekozen-kaartenbalk (onderin bij kaarten kiezen) heeft nu dezelfde
-  zwevende glass-stijl.
-- Compact gebleven: tabbalk 58px hoog (kleine iconen), paddings strak.
+v38 = "veel beter, maar pill iets lager" + POLISH- & SMOUTH-PASS:
 
-NA DE UPLOAD — BELANGRIJK:
-1. Open de app, hij herlaadt zichzelf automatisch naar de nieuwe versie.
-2. Check: Meer-tab → onderaan staat het versienummer. Nu moet er "v37" staan.
-3. Zie je een lager nummer of nog de oude platte balk?
-   → sluit de Safari-tab/app HELEMAAL en open opnieuw.
-   → nog steeds oud? Instellingen → Safari → "Wis geschiedenis en websitegegevens"
-     (daarmee cache weg; je readings/geschiedenis in de app blijft, die staat
-     apart in "local storage" — dat blijft bewaard).
+1. TABBALK PIL LAGER: zweeft nu 5px boven de home-indicator (was 10px) —
+   dichter bij de onderrand, zelfde liquid-glass look. iPad: 8px.
+2. SCROLL-HAPEREN AANGEPAKT:
+   - De mask bovenop het kaartenscherm is ERAF (een mask op een scroll-container
+     dwingt iOS elke frame tot volledige herpaint = haperen op het scherm met
+     78 kaarten). De zwevende glass-balk beneemt het werk nu vanzelf.
+   - Gekozen-balk: iets minder blur (18px i.p.v. 24px, onmerkbaar maar sneller).
+   - Kaart-grid: content-visibility: auto — Safari rendert alleen de kaarten
+     die op het scherm liggen; sneller scrollen en minder geheugen.
+3. AFGEWERKT:
+   - Voorbeeldvragen-sheet heeft nu een zachte dim-sluier (veil) erachter —
+     Netjes iOS-modal gevoel, ook in ochtendmodus.
+   - Onderrand-fade ruimer (72px), zodat content mooi onder de zwevende pill
+     wegzakt.
 
-Eerdere eisen die er allemaal al inzitten (v35/v36): 12 leggingen, spread-
-diagram (kruis/klok vormen), dagspreuk, naam vast "Samir", versienummer in
-Meer, alle klik-paden getest, auto-update, contact-kaartjes opgeruimd.
+Alle 12 leggingen opnieuw end-to-end getest met gesimuleerde iPhone-taps:
+0 errors. Na upload: app openen → auto-reload → Meer moet "v38" tonen.
