@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="42">
+<html lang="nl" data-versie="43">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=42 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=43 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    LETTERTYPES (ingebed — de app blijft 100% offline)
@@ -298,9 +298,11 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .splash-naam {
   font-family: var(--serif);
   font-weight: 600;
-  font-size: calc(31px * var(--tekst-schaal));
+  font-size: calc(34px * var(--tekst-schaal));
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 144;
   margin-top: 8px;
-  background: linear-gradient(120deg, #F5F3FF 30%, var(--goud));
+  background: linear-gradient(115deg, #F5F3FF 24%, var(--goud) 84%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -360,13 +362,14 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .home-datum svg { width: 12px; height: 12px; color: var(--goud); }
 .home-titel {
   font-family: var(--serif);
-  font-size: calc(33px * var(--tekst-schaal));
+  font-size: calc(37px * var(--tekst-schaal));
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.022em;
+  font-variation-settings: "opsz" 144;   /* Fraunces display-cut: eleganter op groot formaat */
   transform-origin: left center;
   transition: transform 0.3s cubic-bezier(0.3, 0.7, 0.3, 1);
   /* Zachte wit-naar-goud gradient op de titel, net als op het opstartscherm */
-  background: linear-gradient(120deg, #F5F3FF 40%, var(--goud));
+  background: linear-gradient(115deg, #F5F3FF 26%, var(--goud) 82%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -465,7 +468,9 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .legging-info { flex: 1; min-width: 0; }
 .legging-naam {
   font-family: var(--serif);
-  font-size: calc(18px * var(--tekst-schaal));
+  font-size: calc(19.5px * var(--tekst-schaal));
+  font-variation-settings: "opsz" 40;
+  letter-spacing: -0.01em;
   display: block;
   line-height: 1.2;
 }
@@ -639,26 +644,31 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 .slot-fout { color: var(--roze); font-size: calc(13px * var(--tekst-schaal)); margin: -4px 0 12px; }
 
-/* Primaire gouden knop */
+/* Primaire knop: glazen goud — goudkleurige rand + tekst op een zachte gloed.
+   (Een volgekleurd goudblok viel te veel op tussen de donkere vlakken.) */
 .knop {
   width: 100%;
-  min-height: 48px;
+  min-height: 50px;
   font-family: var(--sans);
   font-size: calc(15.5px * var(--tekst-schaal));
   font-weight: 700;
-  letter-spacing: 0.015em;
-  color: #2A2140;
-  background: linear-gradient(135deg, #F0D48A, var(--goud) 55%, #D9AE5F);
-  border: none;
+  letter-spacing: 0.02em;
+  color: var(--goud);
+  background: linear-gradient(135deg, rgba(232, 200, 116, 0.16), rgba(232, 200, 116, 0.07) 60%);
+  border: 1px solid rgba(232, 200, 116, 0.55);
   border-radius: var(--r-s);
   padding: 13px 18px;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(232, 200, 116, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  transition: transform 0.18s cubic-bezier(0.34, 1.45, 0.64, 1), box-shadow 0.18s ease, filter 0.18s ease;
+  box-shadow: 0 8px 22px rgba(232, 200, 116, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  transition: transform 0.18s cubic-bezier(0.34, 1.45, 0.64, 1), background 0.18s ease, box-shadow 0.18s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.knop:active { transform: scale(0.97); filter: brightness(1.06); }
-.knop:disabled { opacity: 0.45; }
+.knop:active {
+  transform: scale(0.97);
+  background: linear-gradient(135deg, rgba(232, 200, 116, 0.30), rgba(232, 200, 116, 0.16) 60%);
+  box-shadow: 0 0 26px rgba(232, 200, 116, 0.38);
+}
+.knop:disabled { opacity: 0.4; }
 /* Secundaire glazen knop */
 .knop-secundair {
   background: rgba(255, 255, 255, 0.07);
@@ -701,7 +711,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .terug svg { width: 20px; height: 20px; }
 .terug:active { transform: scale(0.88); background: rgba(232, 200, 116, 0.12); }
 .sub-kicker { color: var(--sec); font-size: calc(11px * var(--tekst-schaal)); font-weight: 600; text-transform: uppercase; letter-spacing: 0.10em; }
-.sub-titel { font-family: var(--serif); font-size: calc(24px * var(--tekst-schaal)); font-weight: 600; line-height: 1.15; }
+.sub-titel { font-family: var(--serif); font-size: calc(25px * var(--tekst-schaal)); font-weight: 600; line-height: 1.15; letter-spacing: -0.012em; font-variation-settings: "opsz" 72; }
 .sub-uitleg { color: var(--sec); font-size: calc(13px * var(--tekst-schaal)); margin-top: 5px; line-height: 1.4; max-width: 30ch; }
 
 /* Push/pop navigatie-animaties (iOS-stijl) */
@@ -799,9 +809,15 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   border-color: rgba(232, 200, 116, 0.65);
   box-shadow: 0 0 0 1px rgba(232, 200, 116, 0.40), 0 0 20px rgba(232, 200, 116, 0.28);
 }
+/* als een kaart gekozen is schuift de EN-pill naar rechtsboven, zodat de
+   positienummer-badge linksboven vrij ligt */
+.kaart-chip.gekozen .chip-en { left: auto; right: 5px; transform: none; max-width: 72%; }
+/* Badge zit BINNEN de kaart (top/left 5px): de kaart-chip heeft overflow:hidden,
+   dus een negatieve offset werd afgekapt tot een raar goud hoekje. */
 .positie-badge {
   position: absolute;
-  top: -8px; left: -8px;
+  top: 5px; left: 5px;
+  z-index: 4;
   min-width: 23px; height: 23px;
   padding: 0 6px;
   border-radius: 999px;
@@ -1234,7 +1250,7 @@ body.licht .verhaal { background: linear-gradient(135deg, rgba(185,138,46,0.12),
 body.licht .mix-uitleg, body.licht .home-ondertitel, body.licht .sub-uitleg { color: var(--sec); }
 /* titels waren wit-naar-goud (onzichtbaar op licht) — nu donker-naar-goud */
 body.licht .splash-naam, body.licht .home-titel {
-  background: linear-gradient(120deg, #2A2440 45%, #B98A2E);
+  background: linear-gradient(115deg, #2A2440 28%, #B98A2E 85%);
   -webkit-background-clip: text;
   background-clip: text;
 }
@@ -1249,6 +1265,13 @@ body.licht .splash-tip { background: rgba(255, 255, 255, 0.65); }
 body.licht .element-chip, body.licht .hist-kaart-chip { background: rgba(42, 36, 64, 0.05); border-color: rgba(42, 36, 64, 0.12); }
 body.licht .kaart-chip.gekozen { border-color: rgba(185, 138, 46, 0.65); box-shadow: 0 0 0 1px rgba(185, 138, 46, 0.45), 0 0 20px rgba(185, 138, 46, 0.25); }
 body.licht .positie-badge, body.licht .chip-positie { color: #FFF8E7; }
+body.licht .knop {
+  color: #8A6420;
+  background: linear-gradient(135deg, rgba(185, 138, 46, 0.15), rgba(185, 138, 46, 0.06) 60%);
+  border-color: rgba(185, 138, 46, 0.6);
+  box-shadow: 0 6px 16px rgba(185, 138, 46, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+body.licht .knop:active { background: rgba(185, 138, 46, 0.26); box-shadow: 0 0 20px rgba(185, 138, 46, 0.3); }
 body.licht .splash-groet { color: var(--lav); }
 body.licht .dag-melding { color: var(--tekst); }
 body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
@@ -1459,9 +1482,17 @@ body.licht .leer-optie.fout { background: rgba(178, 74, 74, 0.12); color: #8C3A3
   <script>
     // Komt er een NIEUWE service worker (na een update van de app)? Dan één keer
     // automatisch herladen, zodat je meteen de nieuwste versie ziet zonder zelf te verversen.
+    // sessionStorage (i.p.v. een window-vlag) voorkomt een herlaad-lus over pagina's heen.
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!window.__tarotHerladen) { window.__tarotHerladen = true; location.reload(); }
+        try {
+          if (sessionStorage.getItem('tarot-herladen')) return;
+          sessionStorage.setItem('tarot-herladen', '1');
+        } catch (e) {}
+        location.reload();
+      });
+      window.addEventListener('load', () => {
+        try { setTimeout(() => sessionStorage.removeItem('tarot-herladen'), 3000); } catch (e) {}
       });
     }
   </script>
