@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="35">
+<html lang="nl" data-versie="36">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=35 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=36 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    TAROT VAN SAMIR — style.css
@@ -810,7 +810,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 }
 .wis-knop:active { color: var(--roze); }
 .wis-knop.gevaar { color: var(--roze); font-weight: 600; }
-.gekozen-chips { display: flex; gap: 10px; overflow-x: auto; padding: 8px 4px 10px; margin-bottom: 4px; scrollbar-width: none; }
+.gekozen-chips { display: flex; gap: 10px; overflow-x: auto; padding: 6px 4px 8px; margin-bottom: 4px; scrollbar-width: none; }
 .gekozen-chips::-webkit-scrollbar { display: none; }
 
 /* Gekozen kaart als mini-kaartje met echte 3D-flip */
@@ -835,11 +835,11 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .stand.omgekeerd { color: var(--roze); background: rgba(232, 139, 139, 0.14); border: 1px solid rgba(232, 139, 139, 0.45); }
 .chip-positie { position: absolute; top: 4px; left: 4px; z-index: 4; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: linear-gradient(135deg, #F0D48A, var(--goud)); color: #2A2140; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(0,0,0,.45); }
 .chip-verwijder {
-  position: absolute; top: -8px; right: -8px; z-index: 2;
-  width: 24px; height: 24px; border-radius: 50%;
+  position: absolute; top: 3px; right: 3px; z-index: 5;
+  width: 22px; height: 22px; border-radius: 50%;
   background: #2A2140; color: var(--sec);
   border: 1px solid rgba(255, 255, 255, 0.22);
-  font-size: 15px; line-height: 1;
+  font-size: 14px; line-height: 1;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: color 0.15s ease, transform 0.15s ease;
@@ -847,8 +847,8 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 }
 .chip-verwijder:active { color: var(--roze); transform: scale(1.12); }
 .chip-flip {
-  position: absolute; bottom: -13px; left: 50%; transform: translateX(-50%); z-index: 2;
-  width: 30px; height: 30px; border-radius: 50%;
+  position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); z-index: 5;
+  width: 26px; height: 26px; border-radius: 50%;
   background: linear-gradient(135deg, #F0D48A, var(--goud));
   color: #2A2140; border: none;
   display: flex; align-items: center; justify-content: center;
@@ -1295,10 +1295,10 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
 }
 .chip-en {
   position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 3;
-  max-width: 92%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  font-size: calc(8.5px * var(--tekst-schaal)); letter-spacing: .05em; text-transform: uppercase;
+  max-width: 96%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: calc(8px * var(--tekst-schaal)); letter-spacing: .03em; text-transform: uppercase;
   color: #F4DE9E; background: rgba(12, 10, 34, .55); border: 1px solid rgba(232, 200, 116, .35);
-  padding: 2px 8px; border-radius: 999px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  padding: 2px 6px; border-radius: 999px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
 }
 .chip-face { padding: 0; overflow: hidden; aspect-ratio: 3 / 5; }
 .chip-face .chip-symbool { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; font-size: 0; }
@@ -1307,11 +1307,12 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
 /* in de kleine gekozen-chip: stand-badge in de rechteronderhoek (linksboven zit het positienummer,
    rechtsboven de verwijder-knop), naam onderaan vrij van de flip-knop */
 /* kleine gekozen-chip: EN-pill + NL-pill onder elkaar bovenaan, onderkant vrij voor de flip-knop */
-.chip-face .stand { position: absolute; top: auto; bottom: -6px; right: -6px; left: auto; transform: none; margin: 0; padding: 2px 5px; font-size: 8px; }
+.chip-face .stand { position: absolute; top: 3px; left: 50%; bottom: auto; right: auto; transform: translateX(-50%); margin: 0; padding: 2px 6px; font-size: 9px; }
+.chip-face .stand.rechtop { display: none; }
 .chip-face .chip-en { top: 4px; max-width: 84%; }
 .chip-face .chip-naam {
-  bottom: auto; top: 25px; left: 50%; right: auto; transform: translateX(-50%);
-  max-width: 76%; padding: 2px 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  bottom: auto; top: 26px; left: 50%; right: auto; transform: translateX(-50%);
+  max-width: 88%; padding: 2px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   font-size: calc(8.5px * var(--tekst-schaal)); border-radius: 999px;
   background: rgba(12, 10, 34, .55); border: 1px solid rgba(232, 200, 116, .25);
 }
@@ -3955,6 +3956,12 @@ const TAB_NAAR_SCHERM = {
 };
 
 function toonTab(tabNaam) {
+  // subschermen + stack altijd sluiten bij tab-wissel (anders bleef er ooit content onder hangen)
+  schermStack.length = 0;
+  ["scherm-vraag", "scherm-kaarten", "scherm-uitleg", "scherm-kaartdetail"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.hidden = true;
+  });
   // Alle tabknoppen: actief of niet
   document.querySelectorAll(".tab").forEach(t => {
     t.classList.toggle("actief", t.dataset.tab === tabNaam);
@@ -4326,17 +4333,15 @@ function bouwGekozenChip(c, index) {
     '<div class="flip-inner">' +
       '<div class="chip-face front">' +
         '<span class="chip-positie">' + (index + 1) + "</span>" +
-        '<span class="chip-en">' + kaart.naam_en + "</span>" +
         '<span class="chip-symbool">' + kaartBeeld(kaart) + "</span>" +
         '<span class="chip-naam">' + kaart.naam_nl + "</span>" +
-        '<span class="stand rechtop">Rechtop</span>' +
+        '<span class="stand rechtop"></span>' +
       "</div>" +
       '<div class="chip-face back">' +
         '<span class="chip-positie">' + (index + 1) + "</span>" +
-        '<span class="chip-en">' + kaart.naam_en + "</span>" +
         '<span class="chip-symbool">' + kaartBeeld(kaart) + "</span>" +
         '<span class="chip-naam">' + kaart.naam_nl + "</span>" +
-        '<span class="stand omgekeerd">↧ Ondersteboven</span>' +
+        '<span class="stand omgekeerd">↧</span>' +
       "</div>" +
     "</div>" +
     '<button class="chip-verwijder" aria-label="Verwijder kaart">×</button>' +
