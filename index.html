@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl">
+<html lang="nl" data-versie="34">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=33 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=34 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    TAROT VAN SAMIR — style.css
@@ -1335,6 +1335,15 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
 .vraag-tip { color: var(--sec); font-size: calc(13.5px * var(--tekst-schaal)); line-height: 1.55; margin: -6px 4px 14px; font-style: italic; }
 
 </style>
+  <script>
+    // Komt er een NIEUWE service worker (na een update van de app)? Dan één keer
+    // automatisch herladen, zodat je meteen de nieuwste versie ziet zonder zelf te verversen.
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!window.__tarotHerladen) { window.__tarotHerladen = true; location.reload(); }
+      });
+    }
+  </script>
 </head>
 <body>
 
@@ -1506,7 +1515,7 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
           </button>
         </div>
 
-        <p class="meer-versie">Tarot van Samir · lokaal, offline, zonder accounts of AI</p>
+        <p class="meer-versie">Tarot van Samir · <span id="versie-nr">v34</span> · lokaal, offline, zonder accounts of AI</p>
       </section>
 
       <!-- ================= ONBOARDING (alleen de eerste keer) ================= -->
@@ -1824,6 +1833,49 @@ const LEGGINGEN = [
       { label: "De uitkomst",        uitleg: "waar dit naartoe leidt" }
     ],
     template: "Het verhaal begint bij {1} en {4}, staat onder druk van {2}, krijgt lucht van {5} en {6}, en landt bij {10}.",
+    speciaal: null,
+    gegroepeerd: true
+  },
+  {
+    id: "jaaroverzicht",
+    naam: "Jaaroverzicht",
+    aantal: 12,
+    wanneer: "Rond Oud & Nieuw: het hele jaar in één legging.",
+    tip: "Lees dit als maandenergie, niet als voorspelling: elke kaart is het thema van die maand. Begin in januari en kijk elke maand even terug: herkende je het?",
+    posities: [
+      { label: "Januari",   uitleg: "fris begin en nieuwe intentie" },
+      { label: "Februari",  uitleg: "liefde en verbinding" },
+      { label: "Maart",     uitleg: "actie en doorzetten" },
+      { label: "April",     uitleg: "groei en nieuwe plannen" },
+      { label: "Mei",       uitleg: "volheid en genieten" },
+      { label: "Juni",      uitleg: "balans in het midden van het jaar" },
+      { label: "Juli",      uitleg: "hoogzomer: zichtbaar worden" },
+      { label: "Augustus",  uitleg: "oogsten wat je hebt gezaaid" },
+      { label: "September", uitleg: "ordenen en opruimen" },
+      { label: "Oktober",   uitleg: "loslaten en transformeren" },
+      { label: "November",  uitleg: "diepte en reflectie" },
+      { label: "December",  uitleg: "afsluiten en dankbaarheid" }
+    ],
+    template: "Dit jaar start met {1}, staat in het midden bij {6}, oogst in {8} en sluit af met {12}.",
+    speciaal: null,
+    gegroepeerd: true
+  },
+  {
+    id: "de-brug",
+    naam: "De Brug",
+    aantal: 7,
+    wanneer: "Als je van iets ouds naar iets nieuws wilt: verhuizing, nieuwe baan, een relatie die verandert.",
+    tip: "Kaart 4 is de brug zelf: wat de overgang van je vraagt. Kaart 5 is de eerste concrete stap. Lees 1 t/m 7 als één pad.",
+    posities: [
+      { label: "Waar ik nu sta",  uitleg: "de huidige situatie" },
+      { label: "Wat ik achterlaat", uitleg: "afscheid en loslaten" },
+      { label: "Wat ik meeneem",  uitleg: "bagage én les" },
+      { label: "De brug",         uitleg: "het pad zelf: wat de overgang vraagt" },
+      { label: "Eerste stap",     uitleg: "de eerste concrete actie" },
+      { label: "Hulp onderweg",   uitleg: "mensen of energie die je steunen" },
+      { label: "Waar ik aankom",  uitleg: "het nieuwe begin" }
+    ],
+    template: "Ik sta nu bij {1}, laat {2} achter en neem {3} mee. De brug is {4}: de eerste stap is {5}, onderweg gesteund door {6}, en ik kom aan bij {7}.",
     speciaal: null,
     gegroepeerd: true
   }
@@ -3846,6 +3898,7 @@ function toonTab(tabNaam) {
   document.querySelectorAll(".tab").forEach(t => {
     t.classList.toggle("actief", t.dataset.tab === tabNaam);
   });
+  document.getElementById("tabbalk").style.visibility = "visible"; // op tabpagina's altijd tonen
   document.getElementById("gekozen-balk").hidden = true;
   if (tabNaam === "nieuw") { updateConceptMelding(); updateDagMelding(); }
   if (tabNaam === "geschiedenis") renderGeschiedenis();
@@ -3978,7 +4031,22 @@ const VOORBEELDVRAGEN = [
   "Wat mag ik nu loslaten?",
   "Wat komt er op mijn pad?",
   "Hoe kan ik deze maand groeien?",
-  "Wat is de les in deze situatie?"
+  "Wat is de les in deze situatie?",
+  "Hoe voel ik me nu echt over mijn werk?",
+  "Wat belemmert mijn creativiteit?",
+  "Hoe zit het met mijn geld deze maand?",
+  "Wat is mijn grootste angst op dit moment?",
+  "Hoe maak ik mijn relatie sterker?",
+  "Waar heb ik deze maand passie voor?",
+  "Hoe zorg ik goed voor mezelf?",
+  "Welke keuze staat er nu voor?",
+  "Hoe kan ik mezelf meer vertrouwen?",
+  "Hoe ga ik om met mijn stress?",
+  "Wat is mijn grootste droom?",
+  "Wat verandert er in mijn werkleven?",
+  "Wat zit mijn carrière nu in de weg?",
+  "Hoe krijg ik meer energie?",
+  "Hoe bereid ik me voor op verandering?"
 ];
 
 function openLegging(leggingId) {
@@ -4953,6 +5021,10 @@ function renderStats() {
 }
 
 function renderMeer() {
+  // versienummer uit <html data-versie=".."> — zo zie je in de app welke build live staat
+  const v = document.documentElement.dataset.versie || "?";
+  const vn = document.getElementById("versie-nr");
+  if (vn) vn.textContent = "v" + v;
   document.getElementById("meer-datum").innerHTML = datumNL(new Date()) + " " + sterSvg();
   document.getElementById("meer-naam-waarde").textContent = lees("tarot_naam", "Samir");
   renderStats();
