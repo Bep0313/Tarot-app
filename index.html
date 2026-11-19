@@ -16,8 +16,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door -->
-  <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door.
+  <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
        interactive-widget=resizes-content: op iOS duwt het toetsenbord de hele app omhoog ipv eroverheen (anders valt je notitieveld onder het toetsenbord) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <!-- Safari-statusbalk kleurt mee: donker-indigo in nachtmodus, crème in ochtendmodus.
@@ -38,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=30 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=33 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    TAROT VAN SAMIR — style.css
@@ -142,13 +141,20 @@ body::before {
   position: absolute;
   inset: 0;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;   /* Amerikaans scrollen op iPhone (momentum) */
+  overscroll-behavior-y: contain;      /* geen bounce-doorgeef naar de pagina erachter */
   padding: calc(env(safe-area-inset-top) + 24px) 16px calc(env(safe-area-inset-bottom) + 96px);
   scrollbar-width: none;               /* geen scrollbalk in de app */
-  /* Content fadet zacht weg aan de randen (iOS-gevoel) */
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 36px), transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 36px), transparent 100%);
+  /* NB: géén mask-image hier — een mask op een scroll-container forceert op iOS
+     een volledige herpaint per scroll-frame en maakt scrollen stroef */
 }
+/* Content fadet zacht weg aan de randen (iOS-gevoel) — als vaste overlay ipv mask */
+#schermen::before, #schermen::after {
+  content: ""; position: fixed; left: 0; right: 0; height: 26px; z-index: 30; pointer-events: none;
+}
+#schermen::before { top: 0; background: linear-gradient(var(--bg), transparent); }
+#schermen::after { bottom: 0; height: 40px; background: linear-gradient(transparent, var(--bg)); }
+/* tikken zonder 300ms vertraging / dubbel-tap zoom */
+button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipulation; }
 .scherm::-webkit-scrollbar { display: none; }
 .scherm[hidden] { display: none; }
 
@@ -476,12 +482,12 @@ body::before {
 /* Zwevende liquid-glass pil: zit los van de schermrand, met blur over de sterren */
 #tabbalk {
   position: fixed;
-  left: 12px; right: 12px;
-  bottom: calc(12px + env(safe-area-inset-bottom));
+  left: 0; right: 0;
+  bottom: 0;                                   /* klevend aan de onderkant: geen dode ruimte onder de home-indicator */
   z-index: 40;
   display: flex;
-  padding: 8px;
-  border-radius: 26px;
+  padding: 9px 12px calc(10px + env(safe-area-inset-bottom));
+  border-radius: 24px 24px 0 0;
   background: rgba(26, 22, 54, 0.55);
   backdrop-filter: blur(26px) saturate(1.5);   /* het "liquid glass"-effect */
   -webkit-backdrop-filter: blur(26px) saturate(1.5);
@@ -780,15 +786,15 @@ body::before {
 /* ---------- 14. GEKOZEN-KAARTEN-BALK ONDERIN ---------- */
 .gekozen-balk {
   position: fixed;
-  left: 12px; right: 12px;
-  bottom: calc(12px + env(safe-area-inset-bottom));
+  left: 0; right: 0;
+  bottom: 0;
   z-index: 42;
   background: rgba(26, 22, 54, 0.78);
   backdrop-filter: blur(24px) saturate(1.4);
   -webkit-backdrop-filter: blur(24px) saturate(1.4);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 24px;
-  padding: 12px 14px;
+  border-radius: 24px 24px 0 0;
+  padding: 12px 14px calc(14px + env(safe-area-inset-bottom));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 40px rgba(0, 0, 0, 0.5);
 }
 .gekozen-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
@@ -804,11 +810,11 @@ body::before {
 }
 .wis-knop:active { color: var(--roze); }
 .wis-knop.gevaar { color: var(--roze); font-weight: 600; }
-.gekozen-chips { display: flex; gap: 12px; overflow-x: auto; padding: 10px 4px 14px; margin-bottom: 6px; scrollbar-width: none; }
+.gekozen-chips { display: flex; gap: 14px; overflow-x: auto; padding: 12px 6px 18px; margin-bottom: 6px; scrollbar-width: none; }
 .gekozen-chips::-webkit-scrollbar { display: none; }
 
 /* Gekozen kaart als mini-kaartje met echte 3D-flip */
-.gekozen-chip { position: relative; flex-shrink: 0; width: 78px; height: 110px; perspective: 700px; }
+.gekozen-chip { position: relative; flex-shrink: 0; width: 84px; height: 118px; perspective: 700px; }
 .flip-inner { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.45s cubic-bezier(0.3, 0.8, 0.3, 1.05); }
 .gekozen-chip.flip .flip-inner { transform: rotateY(180deg); }
 .chip-face {
@@ -841,7 +847,7 @@ body::before {
 }
 .chip-verwijder:active { color: var(--roze); transform: scale(1.12); }
 .chip-flip {
-  position: absolute; bottom: -11px; left: 50%; transform: translateX(-50%); z-index: 2;
+  position: absolute; bottom: -13px; left: 50%; transform: translateX(-50%); z-index: 2;
   width: 30px; height: 30px; border-radius: 50%;
   background: linear-gradient(135deg, #F0D48A, var(--goud));
   color: #2A2140; border: none;
@@ -901,6 +907,7 @@ body::before {
 .kernwoord { color: var(--goud); font-weight: 600; margin-top: 12px; font-size: calc(15px * var(--tekst-schaal)); }
 .vertaling { color: var(--sec); font-style: italic; margin-top: 3px; font-size: calc(14px * var(--tekst-schaal)); }
 .betekenis { margin-top: 10px; line-height: 1.55; font-size: calc(15px * var(--tekst-schaal)); }
+.context-lijn { margin-top: 10px; color: var(--lav); font-style: italic; font-size: calc(13.5px * var(--tekst-schaal)); line-height: 1.5; border-left: 2px solid rgba(122, 90, 248, .45); padding-left: 10px; }
 .reflectie { margin-top: 12px; color: var(--lav); display: flex; gap: 9px; align-items: flex-start; font-size: calc(14px * var(--tekst-schaal)); line-height: 1.45; }
 .reflectie-vraagteken {
   flex-shrink: 0;
@@ -1238,9 +1245,12 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
   #tabbalk, .gekozen-balk {
     left: 50%;
     right: auto;
+    bottom: 12px;                    /* op iPad mag de balk zweven */
     transform: translateX(-50%);
     width: calc(100% - 32px);
     max-width: 748px;
+    border-radius: 26px;
+    padding-bottom: 9px;
   }
   .sheet { max-width: 780px; margin: 0 auto; }
 }
@@ -1294,7 +1304,17 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
 .chip-face .chip-symbool { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; font-size: 0; }
 .chip-face .chip-symbool svg { width: 100%; height: 100%; border-radius: 13px; }
 .chip-face .chip-symbool .kaart-foto { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 13px; }
-.chip-face .stand { position: absolute; top: 27px; bottom: auto; left: 50%; transform: translateX(-50%); margin: 0; }
+/* in de kleine gekozen-chip: stand-badge in de rechteronderhoek (linksboven zit het positienummer,
+   rechtsboven de verwijder-knop), naam onderaan vrij van de flip-knop */
+/* kleine gekozen-chip: EN-pill + NL-pill onder elkaar bovenaan, onderkant vrij voor de flip-knop */
+.chip-face .stand { position: absolute; top: auto; bottom: -6px; right: -6px; left: auto; transform: none; margin: 0; padding: 2px 5px; font-size: 8px; }
+.chip-face .chip-en { top: 4px; max-width: 70%; }
+.chip-face .chip-naam {
+  bottom: auto; top: 25px; left: 50%; right: auto; transform: translateX(-50%);
+  max-width: 76%; padding: 2px 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: calc(8.5px * var(--tekst-schaal)); border-radius: 999px;
+  background: rgba(12, 10, 34, .55); border: 1px solid rgba(232, 200, 116, .25);
+}
 .scene3d { perspective: 900px; display: flex; justify-content: center; touch-action: none; }
 .card3d { position: relative; transform-style: preserve-3d; transition: transform .18s ease-out; border-radius: 16px; }
 .card3d svg { display: block; width: 100%; height: 100%; border-radius: 16px; }
@@ -1512,12 +1532,12 @@ body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht 
           <label class="vraag-label" for="voorwie-invoer">Voor wie is deze reading? <span class="optioneel">(optioneel)</span></label>
           <input type="text" id="voorwie-invoer" class="invoer" placeholder="Naam van de persoon..." maxlength="40">
           <label class="vraag-label" for="vraag-invoer" style="margin-top:14px">Wat is je vraag? <span class="optioneel">(optioneel)</span></label>
-          <input type="text" id="vraag-invoer" class="invoer" placeholder="Wat moet ik nu weten over...?" maxlength="140">
-          <button class="knop knop-secundair" id="voorbeeldvragen-knop">Ik weet niet wat ik moet vragen</button>
+          <input type="text" id="vraag-invoer" class="invoer" placeholder="Bijv. ‘Wat moet ik deze week loslaten?’" maxlength="140">
+          <button class="knop knop-secundair" id="voorbeeldvragen-knop">Toon voorbeeldvragen</button>
         </div>
         <div class="vraag-acties">
           <button class="knop knop-secundair" id="zonder-vraag-knop">Verder zonder vraag</button>
-          <button class="knop" id="naar-kaarten-knop">Naar kaarten kiezen</button>
+          <button class="knop" id="naar-kaarten-knop">Naar kaarten kiezen →</button>
         </div>
         <!-- Sheet met voorbeeldvragen (schuift omhoog) -->
         <div class="sheet" id="sheet-vragen" hidden>
@@ -3538,6 +3558,8 @@ function tekenSterren(t) {
   const h = window.innerHeight;
   // Parallax: sterren schuiven vertraagd mee met het scrollen (diepte!), met wrap-around
   const off = MINDER_BEWEGING ? 0 : ((((huidigeScroll * 0.18) % (h + 4)) + (h + 4)) % (h + 4)) - 2;
+  const sterKleur = document.body.classList.contains("licht") ? "#8B84A8" : "#F5F3FF";
+  ctx.fillStyle = sterKleur;
   // twinkelende sterren: helderheid zwelt zacht heen en weer
   for (const s of sterren) {
     // Heel langzaam "stof" naar beneden laten dwarrelen, met wrap-around
@@ -3548,7 +3570,6 @@ function tekenSterren(t) {
     const yy = ((((s.y + off) % (h + 4)) + (h + 4)) % (h + 4)) - 2;
     const a = 0.30 + 0.70 * (0.5 + 0.5 * Math.sin(t / 1000 * s.snelheid + s.fase));
     ctx.globalAlpha = a;
-    ctx.fillStyle = document.body.classList.contains("licht") ? "#8B84A8" : "#F5F3FF";
     ctx.beginPath();
     ctx.arc(s.x, yy, s.r, 0, Math.PI * 2);
     ctx.fill();
@@ -3850,14 +3871,20 @@ document.querySelectorAll(".tab").forEach(t => {
   t.addEventListener("click", () => { tril(8); toonTab(t.dataset.tab); });
 });
 
-// Scroll-gevoel: vodes de scrollpositie bij voor de parallax-sterren,
-// en laat de kop van het startscherm krimpen zodra je scrolt
+// Scroll-gevoel: scrollpositie bijhouden voor de parallax-sterren (rAF-ge-throttled,
+// zodat scrollen smooth blijft), en de kop van het startscherm krimpen bij scrollen
+let scrollTick = false;
 document.querySelectorAll(".scherm").forEach(scherm => {
   scherm.addEventListener("scroll", () => {
-    if (scherm.hidden) return;
-    huidigeScroll = scherm.scrollTop;
-    const kop = scherm.querySelector(".home-kop");
-    if (kop) kop.classList.toggle("compact", scherm.scrollTop > 30);
+    if (scrollTick) return;
+    scrollTick = true;
+    requestAnimationFrame(() => {
+      scrollTick = false;
+      if (scherm.hidden) return;
+      huidigeScroll = scherm.scrollTop;
+      const kop = scherm.querySelector(".home-kop");
+      if (kop) kop.classList.toggle("compact", scherm.scrollTop > 30);
+    });
   }, { passive: true });
 });
 
@@ -3889,12 +3916,14 @@ const schermStack = [];
 
 function pushScherm(id) {
   const huidig = document.querySelector(".scherm:not([hidden])");
+  const nieuw = document.getElementById(id);
+  if (!nieuw) return;
+  if (huidig === nieuw) return; // dubbelklik: al op dit scherm → niets doen
   schermStack.push(huidig ? huidig.id : null);
   if (huidig) {
     huidig.classList.add("push-out");
     setTimeout(() => { huidig.hidden = true; huidig.classList.remove("push-out"); }, 300);
   }
-  const nieuw = document.getElementById(id);
   nieuw.hidden = false;
   nieuw.classList.remove("push-in");
   void nieuw.offsetWidth;
@@ -3907,6 +3936,7 @@ function pushScherm(id) {
 
 function popScherm() {
   const vorigeId = schermStack.pop();
+  if (!vorigeId) { toonTab("nieuw"); return; } // stack leeg/onbekend → naar home
   const huidig = document.querySelector(".scherm:not([hidden])");
   if (huidig) {
     huidig.classList.add("pop-out");
@@ -3965,7 +3995,8 @@ function openLegging(leggingId) {
 }
 
 function bouwVraagScherm() {
-  const legging = leggingVind(concept.leggingId);
+  const legging = leggingVind(concept ? concept.leggingId : null);
+  if (!legging) { concept = null; slaConceptOp(); toonTab("nieuw"); return; }
   document.getElementById("vraag-kicker").textContent = legging.aantal + (legging.aantal === 1 ? " kaart" : " kaarten") + " · " + legging.wanneer;
   document.getElementById("vraag-titel").textContent = legging.naam;
   document.getElementById("vraag-tip").textContent = legging.tip || "";
@@ -3994,11 +4025,18 @@ function bouwVraagScherm() {
   const sheet = document.getElementById("sheet-vragen");
   const lijst = document.getElementById("sheet-vragen-lijst");
   lijst.innerHTML = "";
+  // Sluit de sheet direct qua clicks (anders vangt hij taps op de knoppen eronder
+  // tijdens de 380ms sluit-animatie), visueel mag hij nog weggleiden
+  const sluitSheet = () => {
+    sheet.style.pointerEvents = "none";
+    sheet.classList.remove("open");
+    setTimeout(() => { sheet.hidden = true; sheet.style.pointerEvents = ""; }, 380);
+  };
   VOORBEELDVRAGEN.forEach(v => {
     const b = document.createElement("button");
     b.className = "sheet-vraag";
     b.textContent = v;
-    b.onclick = () => { invoer.value = v; sheet.classList.remove("open"); setTimeout(() => sheet.hidden = true, 380); };
+    b.onclick = () => { invoer.value = v; sluitSheet(); };
     lijst.appendChild(b);
   });
   document.getElementById("voorbeeldvragen-knop").onclick = () => {
@@ -4006,15 +4044,21 @@ function bouwVraagScherm() {
     void sheet.offsetWidth;
     sheet.classList.add("open");
   };
-  sheet.addEventListener("click", e => {
-    if (e.target === sheet) { sheet.classList.remove("open"); setTimeout(() => sheet.hidden = true, 380); }
+  sheet.onclick = e => { if (e.target === sheet) sluitSheet(); };
+
+  // Enter in een invoerveld = door naar kaarten kiezen
+  [invoer, voorWie].forEach(veld => {
+    veld.addEventListener("keydown", e => {
+      if (e.key === "Enter") { e.preventDefault(); document.getElementById("naar-kaarten-knop").click(); }
+    });
   });
 }
 
 /* ---------- 7e. KAARTEN KIEZEN ---------- */
 
 function bouwKaartenScherm() {
-  const legging = leggingVind(concept.leggingId);
+  const legging = leggingVind(concept ? concept.leggingId : null);
+  if (!legging) { concept = null; slaConceptOp(); toonTab("nieuw"); return; }
   document.getElementById("kaarten-titel").textContent = legging.naam;
   bouwKaartenGrid();
   renderKaartenScherm();
@@ -4059,7 +4103,8 @@ function bouwKaartenGrid() {
 
 // Tik op een kaart in het grid: vult de volgende vrije positie
 function tikKaart(id) {
-  const legging = leggingVind(concept.leggingId);
+  const legging = leggingVind(concept ? concept.leggingId : null);
+  if (!legging || !concept) { concept = null; slaConceptOp(); toonTab("nieuw"); return; }
   if (concept.kaarten.length >= legging.aantal) { toast("Alle posities zijn al gevuld — verwijder er eerst een"); return; }
   if (concept.kaarten.some(c => c.id === id)) { toast("Deze kaart is al gekozen"); return; }
   concept.kaarten.push({ id, omgekeerd: false });
@@ -4071,6 +4116,7 @@ function tikKaart(id) {
 // Alles opnieuw tekenen: grid-states, teller, chips, knopstatus
 function renderKaartenScherm() {
   const legging = leggingVind(concept.leggingId);
+  if (!legging || !concept) { concept = null; slaConceptOp(); toonTab("nieuw"); return; }
   document.getElementById("gekozen-teller").textContent =
     concept.kaarten.length + " van " + legging.aantal + " gekozen";
 
@@ -4084,10 +4130,12 @@ function renderKaartenScherm() {
     uitlegEl.textContent = "Alle posities zijn gevuld — check de balk hieronder en ga naar de uitleg.";
   }
 
-  document.querySelectorAll(".kaart-chip").forEach(chip => {
+  // alleen chips in het kaarten-grid (de Bibliotheek gebruikt ook .kaart-chip!)
+  document.querySelectorAll("#kaarten-grid .kaart-chip").forEach(chip => {
     const idx = concept.kaarten.findIndex(c => c.id === chip.dataset.id);
     chip.classList.toggle("gekozen", idx !== -1);
     const badge = chip.querySelector(".positie-badge");
+    if (!badge) return;
     if (idx !== -1) { badge.hidden = false; badge.textContent = idx + 1; }
     else badge.hidden = true;
   });
@@ -4213,6 +4261,7 @@ function bouwUitleg(reading, alleenLezen) {
     const inhoud =
       '<p class="kernwoord">' + kaart.kernwoord + "</p>" +
       '<p class="vertaling">“' + kaart.vertaling + "”</p>" +
+      '<p class="context-lijn">' + contextRegel(legging, reading, i) + "</p>" +
       '<p class="betekenis">' + betekenis + "</p>" +
       '<p class="reflectie"><span class="reflectie-vraagteken">?</span><span>' + kaart.reflectievraag + "</span></p>";
 
@@ -4311,6 +4360,33 @@ function bouwUitleg(reading, alleenLezen) {
   };
 }
 
+// Context-regel per kaart: wat ligt er vóór en ná in de legging, en wat doet de stand damit?
+function contextRegel(legging, reading, i) {
+  const c = reading.kaarten[i];
+  if (!c) return "";
+  const k = kaartVind(c.id);
+  if (!k) return "";
+  const pos = legging.posities[i] || { label: "positie " + (i + 1) };
+  const delen = [];
+  const prev = i > 0 ? reading.kaarten[i - 1] : null;
+  const next = i < reading.kaarten.length - 1 ? reading.kaarten[i + 1] : null;
+  const pk = prev ? kaartVind(prev.id) : null;
+  const nk = next ? kaartVind(next.id) : null;
+  const na = pk ? "na " + pk.naam_nl + (prev.omgekeerd ? " (ondersteboven)" : "") + " schuift " + k.naam_nl + " naar voren" : "";
+  const nr = nk ? "het verhaal loopt door naar " + nk.naam_nl + (next.omgekeerd ? " (ondersteboven)" : "") : "";
+  if (na && nr) delen.push(na + " en " + nr);
+  else if (na) delen.push(na);
+  else if (nr) delen.push(nr);
+  if (!delen.length) return "";
+  let z = "In de context van “" + pos.label + "” (" + delen.join(" ") + "). ";
+  if (c.omgekeerd) {
+    z += "Omdat " + k.naam_nl + " ondersteboven ligt, landt die energie hier vertraagd, geblokkeerd of vanbinnenuit in plaats van voluit.";
+  } else {
+    z += "Rechtop gelegen zet " + k.naam_nl + " hier zijn volle energie neer in deze positie.";
+  }
+  return z;
+}
+
 // Elementen-mix + kaart↔kaart-verbanden + rode draad + template + ja/nee-telling
 function bouwVerbintenis(legging, reading) {
   const mixEl = document.getElementById("elementen-mix");
@@ -4345,7 +4421,17 @@ function bouwVerbintenis(legging, reading) {
     const posB = legging.posities[i + 1].label;
     vHtml += '<div class="verband-rij" style="--i:' + i + '">' +
       '<span class="verband-pos">' + posA + " → " + posB + "</span>" +
-      "<p>" + verbandTussen(A, reading.kaarten[i].omgekeerd, B, reading.kaarten[i + 1].omgekeerd) + "</p></div>";
+      "<p>" + verbandTussen(A, reading.kaarten[i].omgekeerd, B, reading.kaarten[i + 1].omgekeerd, posA, posB) + "</p></div>";
+  }
+  // openingskaart → slotkaart: de boog van de hele legging (bij 3+ kaarten)
+  if (reading.kaarten.length >= 3) {
+    const E = kaartVind(reading.kaarten[0].id);
+    const S = kaartVind(reading.kaarten[reading.kaarten.length - 1].id);
+    const posE = legging.posities[0].label;
+    const posS = legging.posities[legging.posities.length - 1].label;
+    vHtml += '<div class="verband-rij" style="--i:' + reading.kaarten.length + '">' +
+      '<span class="verband-pos">' + posE + " ⇒ " + posS + " (open → slot)</span>" +
+      "<p>" + verbandTussen(E, reading.kaarten[0].omgekeerd, S, reading.kaarten[reading.kaarten.length - 1].omgekeerd, posE, posS) + "</p></div>";
   }
   vHtml += '<div class="verband-rij rode-draad" style="--i:' + reading.kaarten.length + '">' +
     '<span class="verband-pos">De rode draad</span><p>' + rodeDraad(legging, reading) + "</p></div>";
@@ -4394,6 +4480,23 @@ function patronenHtml(legging, reading) {
     const fase = min <= 4 ? "beginnen" : min <= 7 ? "het midden van" : "het einde van";
     chips.push("🔢 Cijferkaarten " + min + " t/m " + max + " — je zit in de fase van " + fase + " de cyclus");
   }
+  // herhaalde nummers: energie die expres terugkomt
+  const freq = {};
+  nummers.forEach(n => { freq[n] = (freq[n] || 0) + 1; });
+  const herhaald = Object.keys(freq).filter(n => freq[n] >= 2);
+  if (herhaald.length) chips.push("🔁 Nummer " + herhaald.join(", ") + " komt vaker voor — die energie keert expres terug in deze reading");
+  // aaneengesloten blok ondersteboven
+  let run = 0, runMax = 0, runEind = -1;
+  reading.kaarten.forEach((c, i) => {
+    if (c.omgekeerd) { run++; if (run > runMax) { runMax = run; runEind = i; } }
+    else run = 0;
+  });
+  if (runMax >= 2) chips.push("↧↧ " + runMax + " kaarten achter elkaar ondersteboven (t/m positie " + (runEind + 1) + ") — dit stuk van het verhaal zit op slot");
+  // hofkaarten bij naam noemen: de 'spelers' in het verhaal
+  const hofNamen = kaarten.filter(k => k.type === "klein" && k.nummer >= 11).map(k => k.naam_nl + " (“" + k.kernwoord + "”)");
+  if (hofNamen.length) chips.push("🂠 De spelers in dit verhaal: " + hofNamen.join(", "));
+  // alle vier de kleuren?
+  if (Object.keys(kleuren).length === 4) chips.push("🌈 Alle vier de kleuren zijn aanwezig — werk, gevoel, actie én tastbaar resultaat spelen tegelijk");
   if (!chips.length) return "";
   return '<div class="patronen">' + chips.map(c => '<span class="element-chip">' + c + "</span>").join("") + "</div>";
 }
@@ -4415,15 +4518,25 @@ function mixTekst(els, namen) {
   if (tel[dominant] === els.length && enkel[dominant]) {
     tekst += "Alles ademt " + enkel[dominant] + " — dit is een eensluidende, versterkte energie.";
   }
+  // duiding van het dominante element
+  const domDuiding = {
+    vuur: "Deze reading is actie-gedreven: er moet iets gebeuren, nu.",
+    water: "Deze reading is emotioneel: het gaat om voelen, stromen en loslaten.",
+    lucht: "Deze reading is mentaal: gedachten, communicatie en nieuwe perspectieven.",
+    aarde: "Deze reading is praktisch: wat werkt, bouwt en blijft."
+  };
+  if (enkel[dominant] && tel[dominant] >= Math.ceil(els.length / 2)) tekst += domDuiding[dominant] + " ";
   const aantalVerschillend = Object.keys(tel).filter(e => enkel[e]).length;
   if (aantalVerschillend >= 3) tekst += "Drie of meer elementen samen: alle facetten van het leven spelen tegelijk — dit is een complete, veelzijdige reading. ";
   if (tel.thema && tel.thema >= 2) tekst += "Meerdere Grote Arcana: dit is een heavy reading met een duidelijke lots-energie. ";
   return tekst;
 }
 
-// Verband tussen twee kaarten (met posities en standen meegewogen)
-function verbandTussen(a, aOmg, b, bOmg) {
-  const stand = (naam, omg) => omg ? " " + naam + " ligt ondersteboven, dus die energie keert naar binnen of blokkeert." : "";
+// Verband tussen twee kaarten — volgordergevoelig (A ligt vóór B) + posities + standen
+function verbandTussen(a, aOmg, b, bOmg, posA, posB) {
+  const kop = (posA && posB)
+    ? "Van " + posA + " naar " + posB + ": " + a.naam_nl + " werkt door naar " + b.naam_nl + " — in deze volgorde. "
+    : "";
   let z = "";
   if (a.type === "groot" && b.type === "groot") {
     z = a.naam_nl + " en " + b.naam_nl + " zijn twee Grote Arcana: twee grote levenslessen die nu tegelijk spelen — dit is een zware, allesbepalende combinatie.";
@@ -4451,14 +4564,20 @@ function verbandTussen(a, aOmg, b, bOmg) {
     } else if (combos[pair]) {
       z = combos[pair];
     } else if (a.type === "groot" || b.type === "groot") {
-      const groot = a.type === "groot" ? a : b;
-      const klein = a.type === "groot" ? b : a;
-      z = groot.naam_nl + " (Grote Arcana) kleurt de energie van " + klein.naam_nl + ": de les van het thema landt in " + (klein.kleur || "het leven") + ".";
+      if (a.type === "groot") {
+        z = a.naam_nl + " (Grote Arcana) kleurt wat erná komt: de les van dit thema landt via " + b.naam_nl + " in " + (b.kleur || "het leven") + ".";
+      } else {
+        z = a.naam_nl + " voedt het Grote Arcana dat volgt: de energie van " + (a.kleur || "deze kaart") + " mondt uit in het thema van " + b.naam_nl + ".";
+      }
     } else {
-      z = a.naam_nl + " zet " + b.naam_nl + " in beweging — de een voedt de ander, in deze volgorde.";
+      z = a.naam_nl + " zet " + b.naam_nl + " in beweging — de een voedt de ander.";
     }
   }
-  return z + stand(a.naam_nl, aOmg) + stand(b.naam_nl, bOmg);
+  let staart = "";
+  if (aOmg) staart += " " + a.naam_nl + " ligt ondersteboven: die energie stokt onderweg, vóórdat " + b.naam_nl + " aan bod komt.";
+  if (bOmg) staart += " " + b.naam_nl + " ontvangt het ondersteboven: de uitkomst keert zich naar binnen of is vertraagd.";
+  if (!aOmg && !bOmg) staart += " Beide rechtop: de energie stroomt ongehinderd van " + a.naam_nl + " door naar " + b.naam_nl + ".";
+  return kop + z + staart;
 }
 
 // Samenvatting: de rode draad door de hele legging
@@ -4475,6 +4594,15 @@ function rodeDraad(legging, reading) {
   }
   const omg = reading.kaarten.filter(c => c.omgekeerd).length;
   if (omg) t += omg + (omg === 1 ? " kaart ligt ondersteboven — die energie is geblokkeerd of keert naar binnen. " : omg + " kaarten liggen ondersteboven — er zit spanning in deze reading. ");
+  // openings- → slotkaart: de boog van het verhaal
+  if (reading.kaarten.length >= 2) {
+    const ke = kaartVind(reading.kaarten[0].id);
+    const kl = kaartVind(reading.kaarten[reading.kaarten.length - 1].id);
+    if (ke && kl) {
+      t += "De legging opent met " + ke.naam_nl + " (“" + ke.kernwoord + "”) en sluit af met " + kl.naam_nl + " (“" + kl.kernwoord + "”): " +
+        "de beweging van deze reading loopt van “" + ke.kernwoord + "” naar “" + kl.kernwoord + "”. ";
+    }
+  }
   t += reading.vraag ? "De kernvraag hierbij: “" + reading.vraag + "”." : "Lees de kaarten als één verhaal, van positie 1 naar " + legging.posities[legging.posities.length - 1].label.toLowerCase() + ".";
   return t;
 }

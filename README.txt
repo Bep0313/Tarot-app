@@ -1,28 +1,35 @@
 Upload ALLE 85 bestanden uit deze map naar de root van je GitHub-repo Tarot-app
-(Add file → Upload files; ze overschrijven automatisch).
+(Add file → Upload files). Alleen index.html + sw.js zijn nieuw; de 78 kaartfoto's
+zijn identiek aan v30-v32.
 
-- 7 app-bestanden: index.html, sw.js, manifest.webmanifest, icon.svg, icon-192.png,
-  icon-512.png, apple-touch-icon.png
-- 78 kaart-afbeeldingen: kaart-<naam>.jpg (Rider-Waite, NU genormaliseerd)
+v33 = TABBALK ONDERAAN + ALLE KLIK-PADEN GEFIXT + SCROLL SMOOTH:
 
-v30 = kaarten uniform + namen overal op de kaart:
+1. Tabbalk (en gekozen-balk) kleven nu echt aan de onderkant van het scherm
+   (bottom: 0 + padding voor de home-indicator via env(safe-area-inset-bottom),
+   radius 24px 24px 0 0). Geen dode ruimte meer onder de bar. Op iPad (≥700px)
+   blijft de balk netjes gecentreerd zweven.
+2. Bugfixes uit de volledige click-audit (alles getest met echte taps):
+   - CRASH "Cannot set properties of null" bij kaarten kiezen ná een bezoek aan de
+     Bibliotheek (selector pakte ALLE .kaart-chip's) → nu alleen #kaarten-grid.
+   - Dubbel-tap gaf een BLANCO scherm (pushScherm naar al-zichtbaar scherm) → guard.
+   - Terug-navigatie kon op "geen scherm" uitkomen → valt nu terug naar startscherm.
+   - Voorbeeldvragen-sheet ving taps op onderliggende knoppen tijdens het sluiten
+     → pointer-events direct uit.
+   - Stale legging in concept → crash → nu nette fallback naar home.
+   - Vraag-scherm: "Naar kaarten kiezen →", "Toon voorbeeldvragen", Enter-toets
+     in het veld = door, geen dubbele listeners meer.
+3. Scroll smoothness: mask-image van het scrollende scherm verwijderd (op iOS een
+   herpaint per frame = stroef) — de fade zit nu in vaste overlay-balkjes.
+   + overscroll-behavior: contain, rAF-throttled scroll-handler, touch-action:
+   manipulation op alle knoppen (geen 300ms vertraging), lichtere sterren-loop.
+4. Gekozen kaartjes in de balk strakker: EN-pill + NL-pill onder elkaar bovenaan,
+   positienummer linksboven, × rechtsboven, stand rechtsonder, flip-knop vrij.
+5. Volledige audit gedraaid: home, alle 10 leggingen end-to-end (vraag → kaarten →
+   flip/verwijder/wis → uitleg → terug), bibliotheek (zoek/filters/favoriet/detail),
+   geschiedenis (opslaan/heropenen), meer (thema/tekst/naam-modal), popup open+dicht
+   — 0 JS-fouten, alle knoppen klikbaar.
 
-1. Alle 78 kaart-afbeeldingen zijn genormaliseerd naar exact 630x1050 (3:5): de witte
-   scan-rand is eraf, alles is centrisch bijgesneden/opgevuld. Ze passen nu strak en
-   uniform in elk kader — geen crop meer aan de zijkanten.
-2. Elke kaart heeft nu overal dezelfde overlays:
-   - EN-naam als gouden pill BOVEN op de kaart (The Tower, Five of Swords, ...)
-   - NL-naam als gouden tekst ONDER op de kaart (De Toren, 5 van Zwaarden, ...)
-   Dat geldt voor de Bibliotheek-grid, de kaartenkiezer/gekozen-balk (inclusief de
-   omgedraaide kant), de popup én de grote 3D-kaart op de detailpagina.
-3. Fijn goud randje (hairline) rond elke kaart-foto — alle kaarten zien er hetzelfde uit.
-4. Code gestraktrokken: dode nummerLabel-functie en dode CSS-regels verwijderd,
-   light-mode kleur van de NL-naam-overlay gerepareerd, alle JS gecheckt (geen fouten,
-   geen console.log/TODO leftovers). 3D-tilt + glans blijven werken.
-5. Vangnet blijft: als een kaart-afbeelding ontbreekt → automatische SVG-fallback.
+Geen AI/model toegevoegd ( expres 100% lokaal ); alle "slimme" tekst is rule-based.
 
-Getest (headless): 78/78 afbeeldingen laden (alle 630x1050), grid/detail/gekozen-chip
-met EN+NL overlays OK, 0 JS-fouten.
-
-Uploaden: 85 bestanden in één keer selecteren. Daarna app 2x openen op iPhone/iPad
-(beginscherm-icoon evt. opnieuw toevoegen) voor de v30-cache.
+Uploaden: 85 bestanden in één keer → Add file → Upload files. Daarna app 2x openen
+op iPhone/iPad (beginscherm-icoon evt. opnieuw toevoegen) voor de v33-cache.
