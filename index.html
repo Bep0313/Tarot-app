@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="45">
+<html lang="nl" data-versie="48">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=45 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=48 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    LETTERTYPES (ingebed — de app blijft 100% offline)
@@ -1434,7 +1434,7 @@ body.licht .card3d::after { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
 .vraag-tip { color: var(--sec); font-size: calc(0.8438rem * var(--tekst-schaal)); line-height: 1.55; margin: -6px 4px 14px; font-style: italic; }
 
 /* ---------- SPREAD-DIAGRAM (visuele vorm van de legging in de uitleg) ---------- */
-.spread-diagram { position: relative; margin: 4px 0 18px; }
+.spread-diagram { position: relative; margin: 12px 0 26px; }
 .spread-kaart {
   position: absolute; transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
   aspect-ratio: 3 / 5; border-radius: var(--r-s); overflow: visible;
@@ -1606,6 +1606,26 @@ p, h2, h3, .mix-uitleg, .sub-uitleg, .home-ondertitel, .legging-wanneer { overfl
 
 /* typografie-details: paragrafenmooi gewrapt, koppen gebalanceerd */
 p, .mix-uitleg, .sub-uitleg, .journaal-tekst, .verhaal { text-wrap: pretty; }
+
+/* --- v47: extra contextblokken (kaart-extra.js / legging-extra.js) --- */
+.vraag-context { margin: 0 4px 14px; display: flex; flex-direction: column; gap: 8px; animation: fadeUp 0.4s cubic-bezier(0.22, 0.9, 0.28, 1) 0.05s both; }
+.vraag-context-blok { border: 1px solid rgba(var(--goud-rgb), 0.28); background: rgba(var(--lav-rgb), 0.07); border-radius: var(--r-m); padding: 10px 14px; }
+.vraag-context-label { color: var(--lav); font-size: calc(0.6875rem * var(--tekst-schaal)); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin-bottom: 3px; }
+.vraag-context-blok p:last-child { font-size: calc(0.875rem * var(--tekst-schaal)); line-height: 1.55; color: var(--tekst); }
+.positie-extra { color: var(--sec); font-size: calc(0.8438rem * var(--tekst-schaal)); line-height: 1.55; margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(var(--goud-rgb), 0.3); }
+
+/* --- v48: iPhone 15 Pro Max (430pt) + pro-rules polish --- */
+@media (min-width: 420px) {
+  .scherm { padding-left: 20px; padding-right: 20px; } /* royalere gutters op de grote iPhones */
+}
+.kaart-chip, .legging, .blok-kop, [data-kaart] { cursor: pointer; }
+.kaart-foto, .card3d { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.popup-achtergrond { padding: calc(12px + env(safe-area-inset-top)) 16px calc(12px + env(safe-area-inset-bottom)); }
+.popup-kaart { max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+@media (orientation: landscape) and (max-height: 520px) {
+  .scherm { padding-top: calc(env(safe-area-inset-top) + 12px); }
+  .popup-kaart { max-width: 430px; }
+}
 
 </style>
   <script>
@@ -1843,6 +1863,7 @@ p, .mix-uitleg, .sub-uitleg, .journaal-tekst, .verhaal { text-wrap: pretty; }
           </div>
         </header>
         <p class="vraag-tip" id="vraag-tip"></p>
+        <div class="vraag-context" id="vraag-context"></div>
         <div class="vraag-kaart">
           <label class="vraag-label" for="voorwie-invoer">Voor wie is deze reading? <span class="optioneel">(optioneel)</span></label>
           <input type="text" id="voorwie-invoer" class="invoer" placeholder="Naam van de persoon…" maxlength="40">
@@ -3992,6 +4013,753 @@ const KAART_DIEPTE = {
 </script>
   <script>
 /* ============================================================
+   js/kaart-extra.js — extra context per kaart (uitgebreide duiding)
+   ------------------------------------------------------------
+   KAART_EXTRA[id] vult de basiskaart aan met:
+     herken        2-3 zinnen: zo herken je deze kaart in het echte
+                   leven (concrete everyday-voorbeelden)
+     samen         1-2 zinnen: hoe de kaart werkt naast andere kaarten
+                   (combinaties in een legging)
+     vandaag       1 zin: een kleine actie of journal-vraag voor nu
+     geld          1 zin: geld & praktische zaken
+     familie       1 zin: familie & thuis
+     vriendschap   1 zin: vriendschap & de mensen om je heen
+   Wordt getoond in de kaart-popup, het kaart-detailscherm
+   (Bibliotheek) en de per-positieblokken in de uitleg.
+   ============================================================ */
+
+const KAART_EXTRA = {
+
+  /* ---------- GROTE ARCANA ---------- */
+  "de-dwaas": {
+    herken: "Je zegt ja tegen iets waar je nul plan voor hebt — een match op de datingapp, een appje sturen om 23:00, je aanmelden voor die cursus waar je hele feed over praat, spontaan naar een feest gaan. Soms begint daar iets moois. Soms heb je gewoon honger.",
+    samen: "Na De Magiër betekent dit: beginnen mét intentie in plaats van impuls. Naast De Toren: een sprong waarvan je pas achteraf snapt waarom je hem maakte.",
+    vandaag: "Doe vandaag één klein ding waar je geen plan voor hebt — en kijk eerlijk wat het oproept.",
+    geld: "een impulsieve aankoop: soms een cadeautje waar je blij van wordt, soms spijt morgen",
+    familie: "iemand thuis die iets nieuws wil proberen — en jij mag meedoen",
+    vriendschap: "een uitnodiging accepteren zonder alles eerst te overdenken"
+  },
+  "de-magier": {
+    herken: "Je merkt dat je álles al in huis hebt — skills, netwerk, laptop, AI-tools, lef — en toch blijf je scrollen in plaats van beginnen. De Magiër is het moment waarop je beseft dat “nog niet klaar” een smoes is.",
+    samen: "Na De Dwaas: de sprong met beide benen landen. Naast De Toren: talent dat onder druk openspringt — of instort.",
+    vandaag: "Pak vandaag één ding dat je al kunt en gebruik het écht, in plaats van erover te lezen.",
+    geld: "een kans die je met twee handen kunt aanpakken",
+    familie: "iemand in huis toont een talent waar jij trots op mag zijn",
+    vriendschap: "een vriendin die je aanmoedigt zonder dat je het hoefde te vragen"
+  },
+  "de-hogepriesteres": {
+    herken: "Dat gevoel dat je wéét dat er iets speelt, nog vóór de notificaties binnenkomen. Of een geheim dat je bewaart omdat het nog niet rijp is. Zij vraagt: heb je naar dat eerste gevoel geluisterd?",
+    samen: "Naast De Maan: intuïtie die dwars door de mist heen snijdt. Naast De Kluizenaar: stilte die méér zegt dan woorden.",
+    vandaag: "Schrijf vandaag op wat je allereerste ingeving was — zonder hem daarna te corrigeren.",
+    geld: "een besluit dat je allang weet, maar nog niet hardop zegt",
+    familie: "iets binnen de familie dat stil wordt gehouden — en jij voelt het",
+    vriendschap: "een vriendin die je iets verzwijgt; je merkt het aan hoe ze “prima” zegt"
+  },
+  "de-keizerin": {
+    herken: "Je kookt voor iemand zonder het te vragen, koopt bloemen “gewoon omdat”, of merkt dat je project pas écht groeit als je het rust en aandacht geeft. Verzorging is hier magie.",
+    samen: "Naast Kracht: zachtheid en doorzettingsvermogen in één — de beste combi voor geduld. Naast De Duivel: genieten mag, maar met mate, anders glijdt het af.",
+    vandaag: "Geef vandaag iets of iemand extra aandacht — zonder er iets voor terug te verwachten.",
+    geld: "investeren in iets dat mooi én handig is, zoals een fijne hybride werkplek thuis",
+    familie: "thuis is het even druk; wie zorgt er vandaag voor de sfeer?",
+    vriendschap: "je beste vriendin die “het regelt” — zonder haar was het anders gelopen"
+  },
+  "de-keizer": {
+    herken: "De groepsapp die explodeert en jij die één bericht stuurt: “we plannen het rustig in”. Of de afspraak die je wél nakomt terwijl anderen hem “vergeten”. Structuur is hier geen saaiheid, maar zorg.",
+    samen: "Naast De Hiërofant: regels die ergens op gebaseerd zijn. Naast De Toren: een systeem dat onder druk kraakt — of juist staat.",
+    vandaag: "Maak vandaag die ene belafspraak die je al drie keer hebt uitgesteld.",
+    geld: "een begroting die wél klopt omdat je hem écht bijhoudt",
+    familie: "de ouder die de afspraken regelt — ook als niemand het ziet",
+    vriendschap: "de vriend die de vakantie plant zodat het écht gebeurt"
+  },
+  "de-hierofant": {
+    herken: "Trouwen in het stadhuis, een diploma, een mentor die je de weg wijst — of juist een regel waar je zelf niet aan wilde voldoen en nu dankbaar voor bent.",
+    samen: "Naast De Geliefden: een keuze die officieel wordt. Naast De Keizer: traditie met structuur erachter.",
+    vandaag: "Vraag vandaag advies aan iemand die het pad al gelopen heeft.",
+    geld: "een opleiding of certificaat dat je carrière een duw geeft",
+    familie: "een familietraditie die wordt doorgegeven — mooi of benauwend?",
+    vriendschap: "de vriendengroep met zijn eigen rituelen"
+  },
+  "de-geliefden": {
+    herken: "De “wel of niet”-swipe op de datingapp om 02:00, de keuze tussen twee banen, of het moment dat je merkt dat je hart en je hoofd het oneens zijn.",
+    samen: "Na De Duivel: de keuze die je écht vrij maakt. Naast De Toren: een relatie die door een schok verandert — ten goede of niet.",
+    vandaag: "Maak vandaag één keuze uit jezelf, niet uit angst voor wat anderen denken.",
+    geld: "kies tussen twee opties: kijk welke je energie geeft, niet alleen geld",
+    familie: "een keuze binnen het gezin waar iedereen bij betrokken is",
+    vriendschap: "kies welke vriendschap je deze maand prioriteit geeft"
+  },
+  "de-zegewagen": {
+    herken: "De week waarin alles tegelijk moet: deadline, date en dat ene videogesprek waar je ook nog naartoe wilde. Jij zit achter het stuur — of doe je alsof?",
+    samen: "Na Kracht: zachte kracht wordt vaart. Naast De Dood: een oude ruzie die je eindelijk aflegt.",
+    vandaag: "Zet vandaag één ding in beweging dat al weken “bijna” start.",
+    geld: "een project dat vaart krijgt als jij de teugels pakt",
+    familie: "iemand die het gezin deze week op sleeptouw neemt",
+    vriendschap: "samen op pad — de trein pakken in plaats van “misschien”"
+  },
+  "kracht": {
+    herken: "Het moeilijke gesprek dat je tóch voert (in het videogesprek of aan de keukentafel), de kat die je aait terwijl hij krabt, je eigen stem die kalmer is dan je hoofd. Kracht is geen brullen — het is blijven staan.",
+    samen: "Naast De Keizerin: zorgzaamheid met ruggengraat. Naast De Gehangene: loslaten kost meer kracht dan vasthouden.",
+    vandaag: "Zeg vandaag “nee” op één ding — zacht, zonder excuus.",
+    geld: "een onderhandeling waarin je rustig blijft en wint",
+    familie: "een moment waarop je je grenzen aangeeft binnen de familie",
+    vriendschap: "eerlijk zijn tegen een vriendin, ook als het spannend is"
+  },
+  "de-kluizenaar": {
+    herken: "Je zegt af op een feestje “om bij te komen”, staat ’s ochtends vroeg op om alleen te wandelen, of duikt in een boek waar niemand over praat. Soms heb je gewoon een lantaarn nodig.",
+    samen: "Na De Hogepriesteres: binnenin luisteren. Naast De Ster: hoop die je in stilte vindt.",
+    vandaag: "Neem vandaag tien minuten voor jezelf — zonder telefoon.",
+    geld: "even niet shoppen; uitvogelen wat je écht nodig hebt",
+    familie: "je hebt even afstand nodig van de drukte thuis",
+    vriendschap: "een vriendin die je lang niet hebt gezien — bel haar"
+  },
+  "rad-van-fortuin": {
+    herken: "Het sollicitatiegesprek dat je krijgt zónder ervoor te hoeven leuren, het huis dat opeens beschikbaar is, de ex die app’t. Het rad draait — en soms draait het niet in jouw voordeel.",
+    samen: "Na De Dood: een nieuw hoofdstuk. Naast De Zegewagen: meebewegen in plaats van tegenstribbelen.",
+    vandaag: "Zet vandaag een kleine gok in iets waar je in gelooft — niet met geld.",
+    geld: "een meevaller of juist een tegenvaller — het wiel draait door",
+    familie: "nieuws binnen de familie dat de boel door elkaar schudt",
+    vriendschap: "iemand uit het verleden die opeens app’t"
+  },
+  "gerechtigheid": {
+    herken: "Het eerlijke gesprek waarin je zegt wat je denkt, de afspraak die eerlijk verdeeld wordt, of de uitslag waar je al een week wakker van ligt — en die meevalt.",
+    samen: "Na De Geliefden: de keuze wordt hardop gemaakt. Naast de Zwaarden-kaarten: woorden die wegen.",
+    vandaag: "Weeg vandaag eerlijk af: wat heb ik gegeven en wat heb ik gekregen?",
+    geld: "een rekening die eerlijk wordt vereffend — in geld of in inzet",
+    familie: "een familiesituatie waarin eerlijkheid nodig is",
+    vriendschap: "uitpraten met een vriendin over iets dat je dwarszit"
+  },
+  "de-gehangene": {
+    herken: "Het project dat je “even parkert”, de relatie waarin je wacht tot de ander beweegt, de appjes die onbeantwoord blijven. Soms is stilhangen ook een keuze.",
+    samen: " Naast De Dood: loslaten door het om te keren. Naast De Ster: hoop die je vindt als je stilstaat.",
+    vandaag: "Kijk vandaag eens door de ogen van iemand anders: schrijf zijn of haar kant van het verhaal op.",
+    geld: "een investering die even “park” staat — slim of uitstel?",
+    familie: "iemand in de familie die wacht tot jij de eerste stap zet",
+    vriendschap: "jij bent degene die altijd app’t — deze keer niet"
+  },
+  "de-dood": {
+    herken: "Het gesprek “we moeten praten”, het account dat je verwijdert, de gewoonte die je afleert. Het engste aan De Dood is dat er daarna ruimte is — en dat jij die moet vullen.",
+    samen: "Na De Gehangene: loslaten wordt actief. Naast Rad van Fortuin: een nieuw begin dat vanzelf komt.",
+    vandaag: "Sluit vandaag één klein ding af — een chat, een tabblad, een “straks”.",
+    geld: "iets dat eindigt (abonnement, schuld) zodat er ruimte komt",
+    familie: "een oude ruzie die eindelijk wordt uitgepraat",
+    vriendschap: "een vriendschap die verandert of stopt — en dat mag"
+  },
+  "matigheid": {
+    herken: "De balans tussen hybride werk en privé die je eindelijk vindt, het tempo waarin je iets nieuws leert, de mix van twee mensen die elkaar aanvullen.",
+    samen: "Tussen De Dood en De Ster: transformatie in een rustig tempo. Naast Kracht: geduld wint.",
+    vandaag: "Doe vandaag alles op half tempo — en merk wat er gebeurt.",
+    geld: "inkomen en uitgaven in evenwicht brengen",
+    familie: "de balans in het gezin — wie doet deze week wat?",
+    vriendschap: "twee vrienden die elkaar in balans houden"
+  },
+  "de-duivel": {
+    herken: "De scroll over reels en AI-video's die twee uur duurt “omdat het gezellig is”, de relatie waarin je blijft omdat het “makkelijk” is, de schuldgevoelens die je klein houden. De ketens zitten vaak in je eigen hoofd.",
+    samen: "Vóór De Geliefden: de verleiding waar je nee tegen moet zeggen. Naast De Toren: het moment dat je ziet wat je vasthoudt.",
+    vandaag: "Vraag jezelf af: waar houd ik mezelf mee bezig dat me klein maakt?",
+    geld: "een AI- of streamingabonnement dat stilzwijgend duurder werd",
+    familie: "een oud patroon binnen de familie dat je meedraagt",
+    vriendschap: "een vriendschap waarin je jezelf kleiner maakt"
+  },
+  "de-toren": {
+    herken: "Het bericht in de teamchat dat alles verandert, de app die opeens niet meer werkt, de waarheid die eruit floept. Het kraakt eerst — dan valt het. En gek genoeg: daarna zie je pas hoeveel lucht er was.",
+    samen: "Na De Duivel: de doorbraak die pijnlijk is. Naast De Ster: hoop die direct na de schok komt.",
+    vandaag: "Als er vandaag iets kraakt: laat het kraken — niet alles hoeft heel te blijven.",
+    geld: "een plan dat instort — en de ruimte die daardoor vrijkomt",
+    familie: "iets dat binnen de familie uitkomt na lange tijd",
+    vriendschap: "een vriendengroep die verandert na een eerlijke ruzie"
+  },
+  "de-ster": {
+    herken: "Het moment na de huilbui waarop je merkt dat je het redt, de hoop die terugkomt zonder dat je hem zocht, het kleine lichtje in een donkere week.",
+    samen: "Na De Toren: heling begint. Naast De Zon: dezelfde energie, maar dan in het volle daglicht.",
+    vandaag: "Schrijf vandaag op waar je wél hoop uit haalt — ook als het klein is.",
+    geld: "een kleine meevaller die je moed geeft",
+    familie: "een moment van warmte binnen de familie",
+    vriendschap: "een vriendin die je herinnert aan wie je bent"
+  },
+  "de-maan": {
+    herken: "De nachtelijke piekergolf om 03:00, het spraakberichtje dat de AI-transcriptie verkeerd afneemt, de geruchten in de teamchat. Niet alles is wat het lijkt — en je gevoel is op dit moment troebeler dan normaal.",
+    samen: "Na De Hogepriesteres: luister extra goed naar je intuïtie. Naast de Zwaarden-kaarten: check de feiten voordat je reageert.",
+    vandaag: "Slaap vandaag één nacht over een beslissing waarover je twijfelt.",
+    geld: "een deal die te mooi lijkt om waar te zijn — check het eerst",
+    familie: "iets binnen de familie dat niet wordt uitgesproken",
+    vriendschap: "een misverstand met een vriendin — niet alles is gezegd"
+  },
+  "de-zon": {
+    herken: "De dag waarop alles lukt, het compliment dat binnenkomt, de foto die meteen goed is. De Zon is succes dat je niet hoeft te verbergen.",
+    samen: "Na De Maan: duidelijkheid na verwarring. Naast De Wereld: een periode die je viert.",
+    vandaag: "Vier vandaag één klein succes — hardop, tegen iemand.",
+    geld: "goed nieuws over geld of werk",
+    familie: "een vrolijk moment samen thuis",
+    vriendschap: "een dag met vrienden zonder gedoe"
+  },
+  "het-oordeel": {
+    herken: "De match van iemand uit het verleden, de “we moeten nog eens afspreken” die werkelijkheid wordt, het inzicht dat opeens glashelder is: dit is wat ik wilde horen.",
+    samen: "Na De Dood: wakker worden uit iets ouds. Naast De Wereld: een hoofdstuk dat rond is.",
+    vandaag: "Doe vandaag iets waar je lang tegenop zag — en merk dat het meevalt.",
+    geld: "een oude belofte of schuld die wordt ingelost — in geld of in dank",
+    familie: "contact met familie uit het verleden",
+    vriendschap: "een oude vriendschap die nieuw leven krijgt"
+  },
+  "de-wereld": {
+    herken: "Het diploma, de verhuizing die écht lukte, de relatie die rond voelt. Een hoofdstuk dat af is — en waar je trots op mag zijn.",
+    samen: "Na Het Oordeel: afronding wordt viering. Naast De Dwaas: klaar voor het volgende avontuur.",
+    vandaag: "Maak vandaag iets af waar je al lang mee bezig bent — en wees er trots op.",
+    geld: "een project dat af is en oplevert",
+    familie: "een mijlpaal binnen de familie",
+    vriendschap: "een reis of plan met vrienden dat écht doorging"
+  },
+
+  /* ---------- STAVEN (vuur: actie, werk, passie) ---------- */
+  "aas-van-staven": {
+    herken: "Het idee dat je om 23:00 krijgt en waar je wakker van ligt — of de eerste vonk met iemand die je net leert kennen.",
+    samen: "Na De Dwaas: pure begin-energie. Naast 8-van-staven: die ene vonk wordt vaart.",
+    vandaag: "Schrijf dat ene idee op dat je had — en geef het een naam.",
+    geld: "een nieuwe kans op werk die je energie geeft",
+    familie: "iemand thuis met een nieuw plan",
+    vriendschap: "een nieuwe vriendschap die vonkt"
+  },
+  "2-van-staven": {
+    herken: "Je hebt twee opties op tafel liggen en kijkt naar de horizon — waar wil ik heen? Of: je hebt net iets afgerond en vraagt je af: en nu?",
+    samen: "Na het Aas: van idee naar plan. Naast 3-van-staven: wachten wordt resultaat.",
+    vandaag: "Kies vandaag één van de twee opties — de andere komt later vanzelf.",
+    geld: "kijken naar een kans verder weg: studie, verhuizing, nieuwe baan",
+    familie: "iemand in het gezin dat naar de toekomst kijkt",
+    vriendschap: "plannen maken met vrienden voor over een paar maanden"
+  },
+  "3-van-staven": {
+    herken: "Je hebt de boel geregeld en kijkt nu uit over het water: komt het terug? De eerste schepen zijn onderweg.",
+    samen: "Na 2-van-staven: het plan vaart uit. Naast 10-van-staven: succes dat zwaar weegt.",
+    vandaag: "Check vandaag of er iets terugkomt waar je op wacht.",
+    geld: "een investering die je hebt gedaan — nu afwachten",
+    familie: "nieuws van iemand die ver weg woont",
+    vriendschap: "een plan dat jullie samen maakten — het loopt"
+  },
+  "4-van-staven": {
+    herken: "De housewarming, het examen gehaald, de trouwerij van je zus — viering zonder schuldgevoel.",
+    samen: "Na 3-van-staven: het eerste resultaat is binnen. Naast De Zon: dubbel feest.",
+    vandaag: "Vier vandaag iets kleins — een eigen mijlpaal, hoe klein ook.",
+    geld: "een cadeau of bonus waar je blij van wordt",
+    familie: "een familiefeest of mijlpaal",
+    vriendschap: "samen iets vieren met vrienden"
+  },
+  "5-van-staven": {
+    herken: "De groepsapp waarin iedereen door elkaar praat, de “wie doet de afwas”-discussie, meningsverschillen die groter lijken dan ze zijn.",
+    samen: "Na 4-van-staven: feest dat in gekibbel eindigt — of andersom. Naast 3-van-zwaarden: woorden die harder aankomen dan bedoeld.",
+    vandaag: "Reageer vandaag niet meteen in die ene groepsapp.",
+    geld: "discussie over geld of verdeling — klein, maar voelbaar",
+    familie: "kleine irritaties thuis die je gewoon kunt uitspreken",
+    vriendschap: "een misverstand in de vriendengroep — praat het uit"
+  },
+  "6-van-staven": {
+    herken: "Het appje “we hebben gewonnen”, het project dat live gaat, het compliment in de meeting. Even stralen mag.",
+    samen: "Na 5-van-staven: de ruzie is voorbij, de winst is binnen. Naast De Zegewagen: vaart plus erkenning.",
+    vandaag: "Deel vandaag je succes met iemand — laat het niet onbesproken.",
+    geld: "goed nieuws over werk of een opdracht",
+    familie: "iemand in huis die iets behaalt",
+    vriendschap: "het succes van een vriendin vieren"
+  },
+  "7-van-staven": {
+    herken: "Je idee wordt bevraagd in de meeting, of iemand doet een opmerking over je relatie waar je het niet mee eens bent. Je staat op je plek — zonder te schreeuwen.",
+    samen: "Na 6-van-staven: succes dat verdediging vraagt. Naast Kracht: staande blijven met zachtheid.",
+    vandaag: "Verdedig vandaag één mening — rustig en zonder sorry.",
+    geld: "een onderhandeling waarin je je tarief of idee verdedigt",
+    familie: "jezelf of iemand thuis verdedigen tegen een opmerking",
+    vriendschap: "opkomen voor een vriendin in een gesprek"
+  },
+  "8-van-staven": {
+    herken: "Alles gaat tegelijk: berichten, mails, pushnotificaties van drie apps, een deadline die dichterbij komt. De energie is er — het is chaos mét vaart.",
+    samen: "Na het Aas van Staven: van vonk naar vaart. Naast De Zegewagen: twee keer momentum.",
+    vandaag: "Rond vandaag één taak af die al te lang wacht — snel.",
+    geld: "een spoedklus die binnenkomt",
+    familie: "een drukke dag thuis waarin van alles tegelijk moet",
+    vriendschap: "een berichtje dat je écht vandaag nog beantwoordt"
+  },
+  "9-van-staven": {
+    herken: "De zevende dag op rij, het laatste loodje, de wond die nog even pijnlijk is maar droogt. Je bent er bijna.",
+    samen: "Na 8-van-staven: van vaart naar doorzettingsvermogen. Vóór 10-van-staven: nog één duw.",
+    vandaag: "Doe vandaag het laatste stapje — ook als je moe bent.",
+    geld: "een klus die af moet — je bent er bijna",
+    familie: "de laatste loodjes thuis",
+    vriendschap: "iemand die moe is maar doorzet — waardeer het"
+  },
+  "10-van-staven": {
+    herken: "De week waarin jij álles regelt: de boodschappen, het cadeau, de planning, de appjes. Je kunt veel dragen — maar niet alles tegelijk.",
+    samen: "Na 9-van-staven: doorzetten wordt te zwaar. Naast 4-van-pentakels: vasthouden aan te veel.",
+    vandaag: "Leg vandaag één taak neer bij iemand anders.",
+    geld: "alle abonnementen (streaming, AI-tools, sport) die tegelijk afgerekend worden — schrap er één",
+    familie: "jij bent degene die alles regelt thuis — deel het",
+    vriendschap: "jij plant alles voor de groep — laat iemand anders ook"
+  },
+  "page-van-staven": {
+    herken: "Een appje met nieuws, een cursus waar de hele groepsapp over praat, iemand die een nieuw idee (of AI-workflow) pitcht in de meeting.",
+    samen: "Na 8-van-staven: snel nieuws. Naast Page van Bekers: hoofd en hart samen.",
+    vandaag: "Lees vandaag één bericht dat je hebt laten liggen.",
+    geld: "een kans die je nog niet kent — lees je eens in",
+    familie: "nieuws van iemand in het gezin",
+    vriendschap: "een vriendin die een nieuw plan heeft"
+  },
+  "ridder-van-staven": {
+    herken: "De “ik doe het wel even”-energie, de date die je spontaan plant, het project dat je enthousiast oppakt — en waar je morgen even van moet bijkomen.",
+    samen: "Na Page van Staven: van idee naar actie. Naast Ridder van Zwaarden: twee keer te snel.",
+    vandaag: "Begin vandaag met iets waar je enthousiast over bent — en check morgen of het houdbaar is.",
+    geld: "een impulsieve upgrade of AI-abonnement — denk er één nacht over",
+    familie: "iemand die vol energie thuiskomt met plannen",
+    vriendschap: "een spontane afspraak met een vriend"
+  },
+  "koningin-van-staven": {
+    herken: "De vriendin die de kamer binnenloopt en meteen de sfeer bepaalt — zonder het te forceren. Of jijzelf, op je beste dag.",
+    samen: "Naast Kracht: zelfvertrouwen met zachtheid. Na Ridder van Staven: passie die zich settelt.",
+    vandaag: "Wees vandaag degene die de sfeer maakt — zonder je aan te passen.",
+    geld: "een project waar je van nature goed in bent",
+    familie: "de moeder, zus of vriendin die de boel bij elkaar houdt",
+    vriendschap: "jij bent de lijm van de vriendengroep"
+  },
+  "koning-van-staven": {
+    herken: "De baas die een plan neerzet waar iedereen achter staat, de vriend die de vakantie écht regelt, jijzelf als je een beslissing neemt waar anderen in meegaan.",
+    samen: "Na Koningin van Staven: visie mét warmte. Naast De Keizer: autoriteit met charisma.",
+    vandaag: "Neem vandaag één beslissing waar anderen in meegaan.",
+    geld: "een project dat je leidt en dat groeit",
+    familie: "de figuur in huis die de richting aangeeft",
+    vriendschap: "de vriend die de groep richting geeft"
+  },
+
+  /* ---------- BEKERS (water: gevoel, liefde, vriendschap) ---------- */
+  "aas-van-bekers": {
+    herken: "Het moment dat je hart zich opent — een compliment, een liedje, iemand die je écht ziet. Of verliefdheid die je niet zag aankomen.",
+    samen: "Na 2-van-bekers: van gevoel naar wederkerigheid. Naast De Ster: hoop in de liefde.",
+    vandaag: "Zeg vandaag tegen iemand wat je écht waardeert.",
+    geld: "werk dat uit je hart komt — voel je het verschil?",
+    familie: "een warm moment binnen de familie",
+    vriendschap: "een vriendin die je écht ziet"
+  },
+  "2-van-bekers": {
+    herken: "De koffieafspraak die meteen goed voelt, het eerste appje dat écht wat is, de klik met een nieuwe collega.",
+    samen: "Na het Aas van Bekers: wederkerigheid. Naast De Geliefden: een keuze in de liefde.",
+    vandaag: "Stuur vandaag een appje naar iemand waar je een klik mee hebt.",
+    geld: "een fijne samenwerking op werk",
+    familie: "goed contact met een familielid",
+    vriendschap: "een nieuwe vriendschap die klikt"
+  },
+  "3-van-bekers": {
+    herken: "De avond met je beste vriendinnen, lachen tot je buik pijn doet, het gevoel dat je erbij hoort.",
+    samen: "Na 2-van-bekers: van duo naar groep. Naast 10-van-bekers: klein geluk wordt groot geluk.",
+    vandaag: "Plan vandaag iets leuks met je vriendinnen — ook als het druk is.",
+    geld: "een team dat samen een succes viert",
+    familie: "een gezellige avond thuis",
+    vriendschap: "een avond uit met je hechte vriendinnengroep"
+  },
+  "4-van-bekers": {
+    herken: "Je zit op je kamer en alles is “wel prima”, maar je voelt dat er iets ontbreekt — een appje, aandacht, een gevoel. De beker zit vol, maar niemand schenkt in.",
+    samen: "Na 3-van-bekers: feest waar je aan de kant staat. Vóór 5-van-bekers: het verlies dat zichtbaar wordt.",
+    vandaag: "Kijk vandaag eens écht om je heen — welk aanbod heb je gemist?",
+    geld: "tevreden met je werk, maar er knaagt iets",
+    familie: "je voelt je even niet gezien thuis",
+    vriendschap: "het gevoel dat niemand vraagt hoe het écht met je gaat"
+  },
+  "5-van-bekers": {
+    herken: "De tranen om iets kleins dat eigenlijk groot is, het plan dat niet doorgaat, de vriendschap die verwatert. Twee bekers zijn omgevallen — kijk ook naar de drie die nog staan.",
+    samen: "Na 4-van-bekers: het gemis wordt zichtbaar. Naast 10-van-zwaarden: het pijnlijkste einde.",
+    vandaag: "Noem vandaag hardop wat je kwijt bent — ook als het “maar klein” is.",
+    geld: "een tegenvaller op werk of met geld",
+    familie: "verlies of een oude wond binnen de familie",
+    vriendschap: "een vriendschap die je rustig kwijt raakt — rouw mag er zijn"
+  },
+  "6-van-bekers": {
+    herken: "De geur die je terugbrengt, de oude foto, het liedje dat je aan iemand doet denken. Soms is heimwee mooi.",
+    samen: "Na 5-van-bekers: wat je miste, vind je terug in herinneringen. Naast De Ster: hoop uit het verleden.",
+    vandaag: "Kijk vandaag één foto terug waar je blij van wordt.",
+    geld: "een oude belofte of schuld die wordt ingelost",
+    familie: "herinneringen aan vroeger met familie",
+    vriendschap: "weer contact met een oude vriendin"
+  },
+  "7-van-bekers": {
+    herken: "Drie matches tegelijk, het plan voor een verre reis die nog ver weg is, de “wat als”-gedachten om 03:00. Zeven bekers, zeven mogelijkheden — welke is écht?",
+    samen: "Na 2-van-bekers: van één naar zeven opties. Naast 4-van-bekers: de verleiding die je negeert.",
+    vandaag: "Kies uit je “wat als”-lijstje één ding dat écht realistisch is.",
+    geld: "te veel opties op werk — maak een keuze",
+    familie: "dromen over de toekomst van het gezin",
+    vriendschap: "te veel sociale plannen — kies er twee"
+  },
+  "8-van-bekers": {
+    herken: "De baan die je opzegt zonder nieuw plan, de relatie die je eindigt, de stad die je verlaat. Acht bekers staan er nog — maar jij loopt door.",
+    samen: "Na 7-van-bekers: van fantasie naar actie. Naast De Dood: loslaten met open ogen.",
+    vandaag: "Vraag jezelf af: waar loop ik nu van weg — en waarom?",
+    geld: "je stopt met iets dat je niet meer voedt",
+    familie: "afstand nemen van een familiesituatie",
+    vriendschap: "een vriendschap loslaten die je leegtrekt"
+  },
+  "9-van-bekers": {
+    herken: "De wens die uitkomt zonder dat je hem hardop zei, de avond waarop alles klopt, het gevoel: ik heb genoeg.",
+    samen: "Na 8-van-bekers: wat je zocht, heb je gevonden. Naast De Zon: geluk in het volle licht.",
+    vandaag: "Geniet vandaag bewust van iets waar je blij van bent — zonder het weg te relativeren.",
+    geld: "financiële rust of een wens die uitkomt",
+    familie: "een moment van harmonie thuis",
+    vriendschap: "tevredenheid in een vriendschap"
+  },
+  "10-van-bekers": {
+    herken: "Movie night aan tafel, de lach die door het huis gaat, het gevoel dat dit is waar je thuishoort.",
+    samen: "Na 3-van-bekers: van vriendinnen naar thuis. Naast De Wereld: een vol hoofdstuk.",
+    vandaag: "Maak vandaag thuis iets extra gezelligs.",
+    geld: "financiële stabiliteit of een fijne woonsituatie",
+    familie: "geluk en harmonie binnen het gezin",
+    vriendschap: "een vriendschap die als thuis voelt"
+  },
+  "page-van-bekers": {
+    herken: "Het kaartje van een geheime bewonderaar, de plotselinge tranen bij een reclamespot, het cadeau-idee dat perfect is.",
+    samen: "Na het Aas van Bekers: van gevoel naar bericht. Naast Page van Staven: een idee mét gevoel.",
+    vandaag: "Doe vandaag iets creatiefs — ook als het maar vijf minuten is.",
+    geld: "een creatief project dat ook geld kan opleveren",
+    familie: "een lief bericht of gebaar binnen de familie",
+    vriendschap: "een kleine verrassing voor een vriendin"
+  },
+  "ridder-van-bekers": {
+    herken: "De bloemen op tafel, het bericht “ik denk aan je”, de uitnodiging die te mooi lijkt — het romantische gebaar waar je van droomt.",
+    samen: "Na Page van Bekers: van bericht naar gebaar. Naast De Geliefden: een aanbod in de liefde.",
+    vandaag: "Geef vandaag iemand een lief gebaar — ook als het klein is.",
+    geld: "een gebaar of cadeau dat wederkerigheid vraagt",
+    familie: "een lief gebaar binnen de familie",
+    vriendschap: "een romantisch gebaar voor de persoon om wie je geeft"
+  },
+  "koningin-van-bekers": {
+    herken: "De vriendin die aanvoelt dat je down bent vóórdat je het zelf zegt, de moeder die precies weet wat je nodig hebt. Gevoel als kompas.",
+    samen: "Na De Hogepriesteres: intuïtie in actie. Naast 2-van-bekers: wederkerig gevoel.",
+    vandaag: "Luister vandaag naar iemand zonder meteen advies te geven.",
+    geld: "een intuïtief besluit op werk dat goed uitpakt",
+    familie: "de empathische moeder of vriendin in het gezin",
+    vriendschap: "de vriendin die altijd aanvoelt hoe het zit"
+  },
+  "koning-van-bekers": {
+    herken: "De vader die rustig blijft als alles misgaat, de vriend die emotie en verstand mengt, jijzelf als je kalm reageert in een ruzie.",
+    samen: "Na Koningin van Bekers: gevoel mét structuur. Naast De Keizer: autoriteit mét hart.",
+    vandaag: "Blijf vandaag kalm in één spannend moment.",
+    geld: "een zakelijke deal met een menselijk randje",
+    familie: "de stabiele factor binnen de familie",
+    vriendschap: "de vriend die de groep rustig houdt"
+  },
+
+  /* ---------- ZWAARDEN (lucht: denken, woorden, truth) ---------- */
+  "aas-van-zwaarden": {
+    herken: "Het moment dat je opeens ziet hoe het zit — de doorbraak in een ruzie, de oplossing waar je naar zocht, de waarheid die je hardop zegt.",
+    samen: "Na 2-van-zwaarden: van blokkade naar helderheid. Naast De Magiër: een idee dat snijdt.",
+    vandaag: "Zeg vandaag één ding hardop dat je al lang denkt.",
+    geld: "helderheid over een werkkwestie",
+    familie: "een eerlijk gesprek binnen de familie",
+    vriendschap: "duidelijkheid in een vriendschap"
+  },
+  "2-van-zwaarden": {
+    herken: "Twee opties die je voor je uitschuift, het “ik beslis morgen wel”, de informatie die je niet wilt horen. Je weet het al — je kijkt alleen niet.",
+    samen: "Vóór het Aas van Zwaarden: de blokkade vóór de doorbraak. Naast 8-van-zwaarden: twee keer niet kijken.",
+    vandaag: "Kies vandaag wél — ook als het niet perfect is.",
+    geld: "een keuze op werk die je uitstelt",
+    familie: "iets binnen de familie dat je niet onder ogen wilt zien",
+    vriendschap: "een gesprek met een vriendin dat je uitstelt"
+  },
+  "3-van-zwaarden": {
+    herken: "Het bericht dat pijn doet, de afwijzing, het plan dat niet doorgaat. Drie zwaarden in je hart — maar je ademt nog.",
+    samen: "Na 2-van-zwaarden: de keuze die pijn doet. Naast 10-van-zwaarden: het ergste is dit.",
+    vandaag: "Laat vandaag één pijnlijke gedachte toe — zonder hem weg te duwen.",
+    geld: "slecht nieuws op werk",
+    familie: "verdriet binnen de familie",
+    vriendschap: "een teleurstelling in een vriendschap of relatie"
+  },
+  "4-van-zwaarden": {
+    herken: "De dag waarop je alle notificaties uitzet, het dutje, het “nee” tegen een uitnodiging. Soms is herstel de productiefste keuze.",
+    samen: "Na 3-van-zwaarden: ademhalen na de pijn. Naast De Kluizenaar: stilte die geneest.",
+    vandaag: "Plan vandaag bewust rust in — niet “straks”.",
+    geld: "even geen werk — recupereren mag",
+    familie: "rust nodig binnen het drukke gezin",
+    vriendschap: "je hebt even tijd voor jezelf nodig"
+  },
+  "5-van-zwaarden": {
+    herken: "Je wint de discussie maar verliest de vriend, je krijgt gelijk maar niemand luistert, de deal is binnen maar ten koste van alles.",
+    samen: "Na 3-van-zwaarden: pijn die je “wint”. Vóór 6-van-zwaarden: de les is — kies je gevechten.",
+    vandaag: "Vraag jezelf af: wat win ik hier écht mee?",
+    geld: "een “succes” dat aanvoelt als verlies",
+    familie: "een ruzie binnen de familie die je “wint” maar verliest",
+    vriendschap: "gelijk hebben ten koste van de vriendschap"
+  },
+  "6-van-zwaarden": {
+    herken: "De verhuizing, de nieuwe baan, de relatie waarin je samen weggaat bij de ruzie. Niet alles is opgelost, maar het water is rustiger.",
+    samen: "Na 5-van-zwaarden: weggaan bij de pijn. Naast 8-van-bekers: vertrekken mét hoop.",
+    vandaag: "Kijk vandaag wat je meeneemt uit een moeilijke periode — ook de les.",
+    geld: "een overstap naar rustiger werk",
+    familie: "een verandering binnen het gezin",
+    vriendschap: "weggaan bij een ruzie met een vriendin"
+  },
+  "7-van-zwaarden": {
+    herken: "Het plan dat je voor jezelf houdt, het spraakbericht dat je niet stuurt, de truc die je uithaalt. Soms slim, soms oneerlijk — naar wie kijk je eigenlijk?",
+    samen: "Na 2-van-zwaarden: de verborgen keuze. Naast 5-van-zwaarden: sluwheid die opvalt.",
+    vandaag: "Wees vandaag eerlijk over één kleine “truc” die je toepast.",
+    geld: "een strategische zet op werk",
+    familie: "iets dat je binnen de familie verzwijgt",
+    vriendschap: "iets dat je een vriendin niet vertelt"
+  },
+  "8-van-zwaarden": {
+    herken: "De gedachten die ronddraaien, het “ik kan toch niet”, de situatie die benauwd voelt — terwijl de deur vaak al open staat. Jij legt jezelf de blinddoek om.",
+    samen: "Na 7-van-zwaarden: de geheimen die je klein houden. Naast 2-van-zwaarden: twee keer niet durven.",
+    vandaag: "Doe vandaag één ding waarvan je dacht: dat kan ik niet.",
+    geld: "een blokkade op werk die je zelf oplegt",
+    familie: "jezelf iets niet gunnen binnen de familie",
+    vriendschap: "jezelf tegenhouden in een vriendschap"
+  },
+  "9-van-zwaarden": {
+    herken: "Het uur om 03:00 waarop alles mislukt lijkt, de angst die groter is dan het probleem, de gedachten die rondjes draaien.",
+    samen: "Na 3-van-zwaarden: de nacht na de pijn. Vóór 10-van-zwaarden: het dieptepunt.",
+    vandaag: "Schrijf op wat je ’s nachts wakker houdt — en leg het daarna weg.",
+    geld: "zorgen over geld die je wakker houden",
+    familie: "zorgen om iemand in het gezin",
+    vriendschap: "piekeren over een vriendin of relatie"
+  },
+  "10-van-zwaarden": {
+    herken: "Het bericht “het is voorbij”, de opzegging, het hoofdstuk dat sluit. Pijnlijk — maar er komt daarna altijd opluchting.",
+    samen: "Na 9-van-zwaarden: de nacht eindigt. Naast De Dood: twee keer einde, maar dit is lichter.",
+    vandaag: "Sluit vandaag iets af waar je al te lang mee zit.",
+    geld: "een project of klus die stopt — er komt ruimte vrij",
+    familie: "een periode binnen de familie die afsluit",
+    vriendschap: "een vriendschap die eindigt — het mag"
+  },
+  "page-van-zwaarden": {
+    herken: "Het bericht met nieuws, de roddel die je interessant vindt, de vraag die je stelt in de meeting. Woorden als gereedschap.",
+    samen: "Na het Aas van Zwaarden: van inzicht naar nieuws. Naast Page van Staven: woorden plus actie.",
+    vandaag: "Stel vandaag één eerlijke vraag die je normaal niet stelt.",
+    geld: "nieuws over werk of een kans",
+    familie: "nieuws binnen de familie",
+    vriendschap: "een gesprek met een vriendin dat je anders voert"
+  },
+  "ridder-van-zwaarden": {
+    herken: "De “ik zeg het gewoon”-energie, het spraakbericht dat je stuurt zonder er drie keer over na te denken, de ruzie in de videogesprek die snel gaat.",
+    samen: "Na Page van Zwaarden: van nieuws naar actie. Naast Ridder van Staven: twee keer te snel.",
+    vandaag: "Denk vandaag twee tellen na vóór je dat ene bericht stuurt.",
+    geld: "een snelle beslissing op werk",
+    familie: "een directe opmerking binnen de familie",
+    vriendschap: "een bericht naar een vriend(in) dat je te snel stuurt"
+  },
+  "koningin-van-zwaarden": {
+    herken: "De vriendin die precies de juiste vraag stelt, de collega die door de smoesjes heen prikt, jijzelf als je eerlijk bent over wat je wilt.",
+    samen: "Na Koning van Zwaarden: verstand mét een hart. Naast het Aas van Zwaarden: woorden die snijden én helen.",
+    vandaag: "Zeg vandaag eerlijk wat je ergens van vindt — met respect.",
+    geld: "een eerlijke beoordeling op werk",
+    familie: "eerlijkheid binnen de familie, ook als het spannend is",
+    vriendschap: "eerlijk zijn tegen een vriendin"
+  },
+  "koning-van-zwaarden": {
+    herken: "De docent, de rechter, de baas die op basis van feiten beslist — of jijzelf als je je hoofd koel houdt in een emotionele situatie.",
+    samen: "Na De Keizer: macht met verstand. Naast 2-van-zwaarden: de logische beslissing.",
+    vandaag: "Neem vandaag een beslissing op basis van feiten, niet van emotie.",
+    geld: "een zakelijke beslissing die logisch is",
+    familie: "de autoriteit binnen de familie",
+    vriendschap: "de vriend die met verstand reageert in een ruzie"
+  },
+
+  /* ---------- PENTAKELS (aarde: geld, lichaam, praktische zaken) ---------- */
+  "aas-van-pentakels": {
+    herken: "De baan die via LinkedIn binnenkomt, het appartement dat te huur staat, de AI-tool die je werk opeens een stuk makkelijker maakt.",
+    samen: "Na 2-van-pentakels: van balanceren naar pakken. Naast het Aas van Staven: een kans met vuur én voeten in de aarde.",
+    vandaag: "Pak vandaag één concrete kans aan — ook als het spannend is.",
+    geld: "een concrete kans om geld te verdienen",
+    familie: "iets praktisch binnen de familie dat geregeld wordt",
+    vriendschap: "een vriend(in) die een concreet plan met je deelt"
+  },
+  "2-van-pentakels": {
+    herken: "Twee banen, studie én hybride werk, geld dat binnenkomt en meteen weer uitgaat. Je jongleert — en het lukt, maar je voelt het.",
+    samen: "Na het Aas van Pentakels: van één kans naar balanceren. Naast 8-van-staven: alles tegelijk.",
+    vandaag: "Maak een lijstje van wat je moet jongleren — dan voelt het minder zwaar.",
+    geld: "inkomen en uitgaven balanceren",
+    familie: "de praktische drukte binnen het gezin",
+    vriendschap: "balanceren tussen verschillende vrienden en groepen"
+  },
+  "3-van-pentakels": {
+    herken: "De verbouwing met je partner, het project op werk waar je samen aan trekt, de les die je van een vakman leert.",
+    samen: "Na 2-van-pentakels: van alleen naar samen. Naast 8-van-pentakels: elke dag een stukje.",
+    vandaag: "Vraag vandaag iemand om hulp bij iets praktisch — je hoeft het niet alleen te doen.",
+    geld: "een klus of project dat geld oplevert",
+    familie: "samen iets bouwen of regelen binnen de familie",
+    vriendschap: "samen met een vriendin aan iets werken"
+  },
+  "4-van-pentakels": {
+    herken: "Het spaargeld dat je niet aanraakt, de gewoonte waar je aan vasthoudt, de “voor de zekerheid”. Soms verstandig, soms gierig.",
+    samen: "Na 5-van-pentakels: van tekort naar vasthouden? Naast 10-van-staven: te veel dragen.",
+    vandaag: "Geef vandaag iets weg of geef iemand iets — loslaten mag.",
+    geld: "geld vasthouden of juist een buffer opbouwen",
+    familie: "vastzitten in een oud patroon binnen de familie",
+    vriendschap: "een vriendschap waarin je alles wilt controleren"
+  },
+  "5-van-pentakels": {
+    herken: "De rekening die niet uitkomt, de slimme thermostaat die stuk is, het plan dat mislukt, het gevoel dat je er alleen voor staat — terwijl de hulp dichterbij is dan je denkt.",
+    samen: "Na 4-van-pentakels: van vasthouden naar tekort. Vóór 6-van-pentakels: hulp vragen loont.",
+    vandaag: "Vraag vandaag iemand om hulp — je hoeft het niet alleen te dragen.",
+    geld: "tekort aan geld deze maand",
+    familie: "een moeilijke periode binnen de familie — je staat er niet alleen voor",
+    vriendschap: "een vriendin die het moeilijk heeft — wees er voor haar"
+  },
+  "6-van-pentakels": {
+    herken: "Kennis delen op werk, een cadeau dat wederkerig is, de hulp die je geeft én krijgt. Geven en nemen in balans.",
+    samen: "Na 5-van-pentakels: van tekort naar delen. Naast 3-van-pentakels: samen delen.",
+    vandaag: "Geef vandaag iets — tijd, geld of aandacht — en kijk wat terugkomt.",
+    geld: "delen van geld of middelen — genereus zijn loont",
+    familie: "geven en nemen binnen de familie in balans",
+    vriendschap: "een vriendschap waarin geven en nemen klopt"
+  },
+  "7-van-pentakels": {
+    herken: "De plant die nog niet bloeit, het project dat nog niet oplevert, de studie die nog niet af is. Groei kost tijd — ook als je het nu niet ziet.",
+    samen: "Na 6-van-pentakels: van delen naar wachten. Naast 4-van-pentakels: geduld versus vasthouden.",
+    vandaag: "Kijk vandaag naar iets waar je lang mee bezig bent — het groeit, ook zonder dat je het merkt.",
+    geld: "een investering die tijd nodig heeft",
+    familie: "geduld met iemand in het gezin",
+    vriendschap: "een vriendschap die langzaam groeit"
+  },
+  "8-van-pentakels": {
+    herken: "De cursus die je elke avond doet, het instrument dat je leert bespelen, de skill die je elke dag een beetje scherper maakt.",
+    samen: "Na 7-van-pentakels: van wachten naar doen. Naast 3-van-pentakels: samen beter worden.",
+    vandaag: "Oefen vandaag twintig minuten aan iets waar je beter in wilt worden.",
+    geld: "je vak verfijnen — dat betaalt zich terug",
+    familie: "iemand in huis die ergens druk mee bezig is",
+    vriendschap: "samen oefenen of leren met een vriendin"
+  },
+  "9-van-pentakels": {
+    herken: "Het cadeau dat je jezelf geeft, de reis die je boekt, het gevoel dat je het verdiend hebt — zonder schuldgevoel.",
+    samen: "Na 8-van-pentakels: van oefenen naar genieten. Naast De Keizerin: overvloed.",
+    vandaag: "Geniet vandaag van iets moois — je hebt ervoor gewerkt.",
+    geld: "financiële rust — geniet ervan",
+    familie: "een moment van luxe of rust binnen het gezin",
+    vriendschap: "samen genieten met vrienden"
+  },
+  "10-van-pentakels": {
+    herken: "Het huis van je ouders, een familietraditie, de financiële basis die generaties meegaat. Wat je bouwt, blijft.",
+    samen: "Na 9-van-pentakels: van persoonlijk naar gedeeld. Naast De Wereld: een hoofdstuk dat blijft.",
+    vandaag: "Bedenk vandaag wat je wilt doorgeven — een les, een waarde, iets praktisch.",
+    geld: "een erfenis of een langdurige investering",
+    familie: "wat je binnen de familie doorgeeft aan de volgende generatie",
+    vriendschap: "een vriendschap die al jaren meegaat"
+  },
+  "page-van-pentakels": {
+    herken: "De cursus die je start, de stage die je regelt, het bericht over een nieuwe praktische skill.",
+    samen: "Na het Aas van Pentakels: van kans naar leren. Naast Page van Staven: leren mét actie.",
+    vandaag: "Schrijf je vandaag in voor iets waarvan je wilt leren.",
+    geld: "een opleiding of cursus die je carrière helpt",
+    familie: "iemand in het gezin die studeert of leert",
+    vriendschap: "een vriendin die een nieuwe skill leert"
+  },
+  "ridder-van-pentakels": {
+    herken: "De collega die altijd op tijd is, de vriend die elke week hetzelfde appje stuurt, jijzelf als je een routine hebt die werkt.",
+    samen: "Na Page van Pentakels: van leren naar routine. Naast 8-van-pentakels: routine wordt vakmanschap.",
+    vandaag: "Doe vandaag je routine — ook als je geen zin hebt.",
+    geld: "betrouwbaar inkomen uit gestaag werk",
+    familie: "de betrouwbare factor binnen de familie",
+    vriendschap: "de trouwe vriend(in) die er altijd is"
+  },
+  "koningin-van-pentakels": {
+    herken: "De moeder die het eten regelt én het gesprek, de vriendin die cake meeneemt, jijzelf als je voor iemand zorgt zonder het te melden.",
+    samen: "Na De Keizerin: zorgzaamheid met voeten in de aarde. Naast Koningin van Staven: warmte in alles.",
+    vandaag: "Doe vandaag iets praktisch voor iemand — zonder het te melden.",
+    geld: "een huishouden of praktische zaak die goed loopt",
+    familie: "de verzorgende moeder of vriendin in het gezin",
+    vriendschap: "de vriendin die altijd iets lekkers meeneemt"
+  },
+  "koning-van-pentakels": {
+    herken: "De ondernemer die het bedrijf bouwt, de vader die voor zijn gezin zorgt, het huis dat afbetaald is. Succes dat je ziet én voelt.",
+    samen: "Na Ridder van Pentakels: van routine naar een klein imperium. Naast De Keizer: macht met een praktische basis.",
+    vandaag: "Neem vandaag een praktische beslissing die op de lange termijn helpt.",
+    geld: "een stevig financieel fundament — ook met alle abonnementen meegerekend",
+    familie: "de stabiele, succesvolle factor binnen de familie",
+    vriendschap: "de vriend(in) op wie je altijd kunt bouwen"
+  }
+};
+
+</script>
+  <script>
+/* ============================================================
+   js/legging-extra.js — extra context per legging
+   ------------------------------------------------------------
+   LEGGING_EXTRA[id] vult de legging aan met:
+     waarom    2-3 zinnen: wanneer en waarom je deze legging pakt
+     voorbeeld 2-3 zinnen: een concreet voorbeeld uit de praktijk,
+               met fictieve kaarten erin
+     valkuil   1-2 zinnen: de fout die beginners hier vaak maken
+   Wordt getoond op het vraag-scherm (vóór het trekken).
+   ============================================================ */
+
+const LEGGING_EXTRA = {
+
+  "dagkaart": {
+    waarom: "Eén kaart per dag werkt als een kompas: niet als voorspelling, maar als de energie waarmee je vandaag meedoet. Lezers die dit elke dag doen, zeggen vaak dat ze de kaart ’s avonds herkennen in hoe de dag verliep.",
+    voorbeeld: "Stel: je trekt De Zegewagen. Dan is vandaag geen dag om te wachten tot iemand anders iets regelt — het is een dag om zelf een klein stapje te zetten, hoe klein ook. Iemand die 9-van-staven trok, zei: “Ik had de hele dag het gevoel dat ik alles alleen deed — en toen besefte ik dat ik inderdaad alles zelf deed.”",
+    valkuil: "Niet lezen als “dit gaat vandaag gebeuren”. Lees het als “dit is de energie van vandaag” — en kijk ’s avonds wat je ermee hebt gedaan."
+  },
+  "verleden-heden-toekomst": {
+    waarom: "De klassieker omdat hij een situatie ontleedt in drie tempi. Handig als je merkt dat je steeds in hetzelfde patroon valt: de “verleden”-kaart laat vaak zien waar het begon.",
+    voorbeeld: "Iemand trok voor een ruzie met haar zus: Verleden = 6-van-bekers (een oude herinnering die opspeelde), Heden = 5-van-zwaarden (gelijk willen hebben), Toekomst = Matigheid (weer in balans komen). Het gesprek werd daardoor een stuk makkelijker.",
+    valkuil: "De “toekomst”-kaart is geen lot — het is waar het heen kán als je zo doorgaat. Jij hebt nog steeds de keuze."
+  },
+  "situatie-obstakel-advies": {
+    waarom: "Dit is de legging voor “wat moet ik weten over…”. De middelste kaart (obstakel) voelt vaak even naar, maar is juist de nuttigste: die laat zien wat er nu écht in de weg zit, waardoor het advies scherp wordt.",
+    voorbeeld: "Voor “kan ik dit project aannemen?” trok iemand: Situatie = 8-van-staven (het is druk), Obstakel = 10-van-staven (te veel op je schouders), Advies = 4-van-zwaarden (neem eerst rust). Het antwoord was dus: niet nu, eerst bijtanken.",
+    valkuil: "Niet schrikken van een “negatieve” obstakelkaart. Die kaart is de sleutel, niet het vonnis."
+  },
+  "jij-de-ander-verbinding": {
+    waarom: "Voor alles wat met een andere persoon te maken heeft: liefde, vriendschap, familie, collega’s. De derde kaart — de verbinding — laat zien wat er tússen jullie leeft, los van wie jullie los van elkaar zijn.",
+    voorbeeld: "In een liefdesreading trok iemand: Jij = Koningin van Staven (zelfverzekerd), De ander = 4-van-bekers (wat mist er nog?), Verbinding = 2-van-bekers (er is wél een klik). De boodschap: de basis is goed, maar er mist nog iets — bespreek het.",
+    valkuil: "Niet alleen naar de kaart van de ander kijken en concluderen “zij/hij is het probleem”. De verbinding-kaart gaat over jullie samen."
+  },
+  "optie-a-b": {
+    waarom: "Voor als je tussen twee wegen staat en beide realistisch lijken. Vergelijk de kaarten niet op “beter”, maar op energie: welke weg voelt nu lichter, en welke vraagt nu meer van je?",
+    voorbeeld: "Keuze tussen twee banen: Optie A = Ridder van Staven (snel, avontuurlijk, onzekere start), Optie B = Ridder van Pentakels (stabiel, saai, veelbelovend op termijn), Wat je moet weten = Matigheid (geduld loont). De keuze werd: B, met geduld.",
+    valkuil: "Niet verwachten dat één optie “perfect” is. De derde kaart vertelt vaak wat je bij beide wegen moet weten — lees die als eerste."
+  },
+  "ja-nee-check": {
+    waarom: "Soms wil je gewoon een helder antwoord. Rechtop telt als ja, ondersteboven als nee. Bij 2 tegen 1 wint de meerderheid — maar kijk óók naar de betekenissen van de kaarten, die geven de “waarom”.",
+    voorbeeld: "“Moet ik dit etentje afzeggen?” — rechtop, rechtop, ondersteboven = 2× ja, 1× nee: JA, ga. De nee-kaart (bijvoorbeeld 4-van-bekers) verklaarde waarom je twijfelde: je had rust nodig, niet het feestje zelf.",
+    valkuil: "Niet klakkeloos het stemresultaat volgen als je gevoel iets anders zegt. De kaarten geven het antwoord én de nuance."
+  },
+  "maandoverzicht": {
+    waarom: "Aan het begin van de maand: vier terreinen in één blik — werk, liefde, groei en waar je op moet letten. Lees het als maand-energie, niet als dagvoorspelling.",
+    voorbeeld: "Iemand trok: Werk = 8-van-pentakels (extra uren, vak leren), Liefde = 3-van-bekers (leuke avonden met vriendinnen), Groei = De Kluizenaar (meer tijd voor jezelf), Let op = 5-van-staven (kleine ruzies niet opblazen). Terugkijkend aan het eind van de maand: alle vier klopten.",
+    valkuil: "Niet elke dag checken of het “al uitkomt”. Kijk aan het eind van de maand terug — dan zie je het patroon."
+  },
+  "energiescan": {
+    waarom: "Als je wilt weten wat je nu voedt en wat je leegtrekt. Wees eerlijk bij “wat negeer ik” — daar zit bijna altijd de boodschap van de hele scan.",
+    voorbeeld: "Iemand trok: Voedt = De Zon, Leegtrekt = 8-van-staven (alles tegelijk willen), Negeer = De Maan (een vaag onbehagen), Loslaten = 4-van-pentakels (controle), Boodschap = De Ster. De les: stop met alles tegelijk en vertrouw erop.",
+    valkuil: "Niet alleen de “mooie” kaarten lezen. Juist de kaart bij “wat negeer ik” is vaak de eyeopener."
+  },
+  "drieluik-verhaal": {
+    waarom: "Drie kaarten als begin – midden – eind van één verhaal. Perfect om te oefenen met het “lezen als verhaal”: de middelste kaart is het kantelpunt waar alles om draait.",
+    voorbeeld: "Begin = De Dwaas (iets nieuws beginnen), Midden = De Toren (het loopt anders dan gepland), Eind = De Wereld (het wordt mooier dan je dacht). Het verhaal las als een klein avontuur met een happy end.",
+    valkuil: "Niet elke kaart los interpreteren en dan puzzelen. Lees ze in volgorde hardop als één zin — dan “valt” het verhaal."
+  },
+  "keltisch-kruis": {
+    waarom: "Het volledige kruis voor een grote, complexe vraag. Tien kaarten: begin bij 1 (de situatie) en 4 (de wortel — waar het vandaan komt). Positie 10 is de uitkomst als alles meezit.",
+    voorbeeld: "Voor “moet ik verhuizen voor mijn werk?” trok iemand o.a.: Situatie = 2-van-pentakels (alles balanceren), Wortel = 10-van-pentakels (roots, familie), Hoop/vrees = De Toren (angst voor chaos), Uitkomst = 6-van-staven (erkenning en succes).",
+    valkuil: "Niet in willekeurige volgorde lezen. Begin met 1 en 2 (de kruisbalk), dan 3 en 4 (onder de tafel), en eindig bij 10."
+  },
+  "jaaroverzicht": {
+    waarom: "Rond Oud & Nieuw: twaalf kaarten, één per maand. Lees het als maandthema, niet als voorspelling. Begin in januari en kijk elke maand terug: herkende je het?",
+    voorbeeld: "Iemand trok voor februari 2-van-bekers en had die maand inderdaad een fijne nieuwe ontmoeting; voor oktober De Dood — en in die maand rondde ze inderdaad een groot hoofdstuk af.",
+    valkuil: "Niet in paniek raken van een “zware” maandkaart. Het is een thema om mee te werken, geen noodlot."
+  },
+  "de-brug": {
+    waarom: "Specifiek voor een overgang: verhuizing, nieuwe baan, een relatie die verandert, een studie die afloopt. Kaart 4 is de brug zélf — wat de overgang van je vraagt.",
+    voorbeeld: "Bij een verhuizing trok iemand: Nu = 10-van-staven (alles regelt ze zelf), Achterlaat = 6-van-bekers (het oude huis, de herinneringen), Meeneemt = De Ster (hoop), Brug = De Gehangene (even stilstaan mag), Eerste stap = Page van Pentakels (inschrijven), Hulp = 3-van-pentakels (vrienden helpen sjouwen), Aankomst = 4-van-staven (thuiskomen in het nieuwe huis).",
+    valkuil: "Niet denken dat de brug “vanzelf” gaat. Kaart 5 (eerste stap) is het belangrijkste van de hele legging — doe die stap deze week."
+  },
+  "relatiespiegel": {
+    waarom: "Voor één belangrijke relatie: liefde, een hechte vriendschap of familie. Kaarten 1–3 zijn jouw kant, 4–5 de kant van de ander, kaart 6 is waar het tussen jullie kan groeien.",
+    voorbeeld: "In een vriendschap trok iemand: Ik = 7-van-zwaarden (houdt iets achter), Mijn behoefte = 3-van-zwaarden (eerlijkheid), Inbreng = Koningin van Bekers (warmte), De ander = 4-van-bekers (voelt zich niet gezien), Hun behoefte = 2-van-bekers (echt contact), Groeien kan = Het Oordeel (een fris begin).",
+    valkuil: "Niet van elke kaart concluderen dat de ánder iets fout doet. Kijk eerst naar je eigen drie kaarten — daar heb je de meeste invloed."
+  },
+  "carriere-check": {
+    waarom: "Voor werk, studie en ambities die even vastzitten. Wees eerlijk bij kaart 2 (wat me remt) — daar zit bijna altijd de sleutel. Kaart 5 is je eerste concrete stap.",
+    voorbeeld: "Bij een vastgelopen project trok iemand: Sta = 7-van-staven (moet het verdedigen), Remt = 8-van-zwaarden (zelftwijfel), Talent = De Magiër (alles in huis), Kans = Page van Staven (een nieuw idee), Volgende stap = 3-van-staven (gewoon beginnen).",
+    valkuil: "Niet de “kans”-kaart (4) al lezen als “het komt vanzelf”. Zonder kaart 5 gebeurt er niets."
+  },
+  "de-spiegel": {
+    waarom: "Als iets je bezighoudt en je wilt zien welk deel dáárvan van jou afkomstig is. Alles in deze legging is een spiegel: wat je toont, wat je verbergt, wat je op anderen projecteert — en wat eronder echt leeft.",
+    voorbeeld: "Iemand die steeds ruzie had met haar zus trok: Laat zien = Koningin van Zwaarden (altijd de verstandige), Verberg = 3-van-zwaarden (eigen pijn), Projecteer = 5-van-zwaarden (zij is altijd de boze), Echt leeft = De Hogepriesteres (ze weet het allang).",
+    valkuil: "Niet stoppen bij kaart 1 (“zo ben ik”). Kaart 4 is de eyeopener — de waarheid onder de oppervlakte."
+  }
+};
+
+</script>
+  <script>
+/* ============================================================
    js/app.js — de "motor" van de app
    ------------------------------------------------------------
    Wat hier gebeurt (stap 1):
@@ -4280,6 +5048,9 @@ const DAGSPREUKEN = [
   "Je hoeft niet perfect te zijn om te beginnen.",
   "Vandaag mag je kiezen voor rust.",
   "Iets nieuws beginnen voelt even eng — dat hoort erbij.",
+  "Vraag het niet aan de groepsapp — vraag het de kaarten.",
+  "Notificaties uit, aandacht aan.",
+  "Vanavond mag je trots zijn op één klein ding.",
   "Eindig de dag met dankbaarheid, hoe klein ook.",
   "Morgen is een schone lei."
 ];
@@ -4583,6 +5354,15 @@ function bouwVraagScherm() {
   document.getElementById("vraag-kicker").textContent = legging.aantal + (legging.aantal === 1 ? " kaart" : " kaarten") + " · " + legging.wanneer;
   document.getElementById("vraag-titel").textContent = legging.naam;
   document.getElementById("vraag-tip").textContent = legging.tip || "";
+  const lx = leggingExtraVan(legging.id);
+  const vc = document.getElementById("vraag-context");
+  if (vc) {
+    vc.innerHTML = lx
+      ? '<div class="vraag-context-blok"><p class="vraag-context-label">Waarom deze legging</p><p>' + lx.waarom + "</p></div>" +
+        '<div class="vraag-context-blok"><p class="vraag-context-label">Zo kan het eruitzien</p><p>' + lx.voorbeeld + "</p></div>" +
+        '<div class="vraag-context-blok"><p class="vraag-context-label">Valkuil om te vermijden</p><p>' + lx.valkuil + "</p></div>"
+      : "";
+  }
   const invoer = document.getElementById("vraag-invoer");
   invoer.value = concept.vraag || "";
   const voorWie = document.getElementById("voorwie-invoer");
@@ -4832,31 +5612,32 @@ function spreadLayout(aantal, leggingId) {
     ] };
   }
   if (leggingId === "jaaroverzicht") {
-    // 12 maanden als klok/ cirkel
+    // 12 maanden als klok/cirkel — kaart + label passen wél binnen het kader
     const pos = [];
     for (let i = 0; i < 12; i++) {
       const a = (i / 12) * 2 * Math.PI - Math.PI / 2;
-      pos.push({ x: 50 + 38 * Math.cos(a), y: 50 + 38 * Math.sin(a) });
+      pos.push({ x: 50 + 33 * Math.cos(a), y: 50 + 33 * Math.sin(a) });
     }
-    return { h: 320, w: "17%", pos };
+    return { h: 375, w: "16%", pos };
   }
   switch (aantal) {
-    case 1: return { h: 190, w: "38%", pos: [{ x: 50, y: 50 }] };
-    case 3: return { h: 160, w: "26%", pos: [{ x: 16, y: 50 }, { x: 50, y: 50 }, { x: 84, y: 50 }] };
-    case 4: return { h: 250, w: "30%", pos: [{ x: 30, y: 27 }, { x: 70, y: 27 }, { x: 30, y: 73 }, { x: 70, y: 73 }] };
-    case 5: return { h: 260, w: "22%", pos: [{ x: 50, y: 50 }, { x: 50, y: 13 }, { x: 50, y: 87 }, { x: 13, y: 50 }, { x: 87, y: 50 }] };
-    case 7: return { h: 270, w: "20%", pos: [{ x: 11, y: 27 }, { x: 37, y: 27 }, { x: 63, y: 27 }, { x: 89, y: 27 }, { x: 25, y: 76 }, { x: 50, y: 76 }, { x: 75, y: 76 }] };
+    // h is de hoogte van het DIAGRAM-kader; kaart (3:5) + label (20px) moeten er volledig in passen
+    case 1:  return { h: 265, w: "36%", pos: [{ x: 50, y: 50 }] };
+    case 3:  return { h: 178, w: "26%", pos: [{ x: 16, y: 50 }, { x: 50, y: 50 }, { x: 84, y: 50 }] };
+    case 4:  return { h: 305, w: "29%", pos: [{ x: 30, y: 32 }, { x: 70, y: 32 }, { x: 30, y: 68 }, { x: 70, y: 68 }] };
+    case 5:  return { h: 300, w: "21%", pos: [{ x: 50, y: 50 }, { x: 50, y: 24 }, { x: 50, y: 76 }, { x: 24, y: 50 }, { x: 76, y: 50 }] };
+    case 7:  return { h: 292, w: "19%", pos: [{ x: 11, y: 26 }, { x: 37, y: 26 }, { x: 63, y: 26 }, { x: 89, y: 26 }, { x: 25, y: 74 }, { x: 50, y: 74 }, { x: 75, y: 74 }] };
     default: {
-      // standaard: rijen van 3
+      // standaard: rijen van 3 — kaarthoogte (±145px) + label passen per rij binnen 180px
       const pos = [];
       const rijen = Math.ceil(aantal / 3);
       for (let i = 0; i < aantal; i++) {
         const rij = Math.floor(i / 3), inRij = Math.min(3, aantal - rij * 3);
         const x = inRij === 1 ? 50 : 50 + (i % 3 - (inRij - 1) / 2) * 34;
-        const y = 50 + (rij - (rijen - 1) / 2) * (86 / Math.max(1, rijen - 1) || 0);
-        pos.push({ x, y: rijen === 1 ? 50 : y });
+        const y = ((rij + 0.5) / rijen) * 100;   // rijen gelijkmatig verdelen, kaart blijft binnen kader
+        pos.push({ x, y });
       }
-      return { h: 170 * rijen, w: "26%", pos };
+      return { h: 180 * rijen, w: "24%", pos };
     }
   }
 }
@@ -4865,7 +5646,27 @@ function bouwSpreadDiagram(legging, kaarten) {
   const el = document.getElementById("uitleg-spread");
   if (!el || !kaarten || !kaarten.length) { if (el) el.innerHTML = ""; return; }
   const layout = spreadLayout(kaarten.length, legging.id);
-  el.style.height = layout.h + "px";
+  // Kaartbreedte schaalt mee met de schermbreedte, maar nooit groter dan het
+  // 390px-ontwerp (anders worden de mini-kaarten op een 15 Pro Max / iPad enorm).
+  // De kaderhoogte berekenen we hieruit exact, zodat kaart + nummer + label
+  // nóóit meer buiten het kader steken (werkt op elke breedte: 320 t/m iPad).
+  const W = el.clientWidth || 358;
+  const wPct = parseFloat(layout.w) / 100;
+  let cardW = Math.min(W * wPct, 358 * wPct);
+  layout.pos.forEach(p => {
+    const cx = (p.x / 100) * W;
+    const f = p.rot ? 5 / 3 : 1; // geroteerde kaart is in de breedte 5/3x zo groot
+    cardW = Math.min(cardW, ((cx + 8) * 2) / f, ((W - cx - 8) * 2) / f);
+  });
+  cardW = Math.max(cardW, 40);
+  const cardH = cardW * 5 / 3;
+  let H = 0;
+  layout.pos.forEach(p => {
+    const bh = p.rot ? cardW : cardH;
+    if (p.y > 0) H = Math.max(H, (bh / 2 + 8) / (p.y / 100));        // num-bolletje boven
+    if (p.y < 100) H = Math.max(H, (bh / 2 + 20) / (1 - p.y / 100)); // label eronder
+  });
+  el.style.height = Math.ceil(H + 8) + "px";
   el.innerHTML = "";
   kaarten.forEach((c, i) => {
     const kaart = kaartVind(c.id);
@@ -4875,7 +5676,7 @@ function bouwSpreadDiagram(legging, kaarten) {
     mini.className = "spread-kaart" + (c.omgekeerd ? " omgekeerd" : "");
     mini.style.left = p.x + "%";
     mini.style.top = p.y + "%";
-    mini.style.width = layout.w;
+    mini.style.width = cardW + "px";
     if (p.rot) mini.style.setProperty("--rot", p.rot + "deg");
     mini.innerHTML =
       '<span class="spread-num">' + (i + 1) + "</span>" +
@@ -4906,12 +5707,14 @@ function bouwUitleg(reading, alleenLezen) {
     const kaart = kaartVind(c.id);
     const pos = legging.posities[i];
     const betekenis = c.omgekeerd ? kaart.betekenis_omgekeerd : kaart.betekenis_rechtop;
+    const ex = kaartExtraVan(kaart.id);
     const standBadge = '<span class="stand ' + (c.omgekeerd ? "omgekeerd" : "rechtop") + '">' + (c.omgekeerd ? "↧ Ondersteboven" : "Rechtop") + "</span>";
     const inhoud =
       '<p class="kernwoord">' + kaart.kernwoord + "</p>" +
       '<p class="vertaling">“' + kaart.vertaling + "”</p>" +
       '<p class="context-lijn">' + contextRegel(legging, reading, i) + "</p>" +
       '<p class="betekenis">' + betekenis + "</p>" +
+      (ex && ex.herken ? '<p class="positie-extra">In het echte leven: ' + ex.herken + "</p>" : "") +
       '<p class="reflectie"><span class="reflectie-vraagteken">?</span><span>' + kaart.reflectievraag + "</span></p>";
 
     const blok = document.createElement("article");
@@ -5264,6 +6067,41 @@ function kaartDiepteRegel(kaart, soort) {
   return (d[soort] || "-").replace(/</g, "&lt;");
 }
 
+// Extra context per kaart (zie js/kaart-extra.js) en per legging (js/legging-extra.js)
+function kaartExtraVan(id) { return (typeof KAART_EXTRA !== "undefined" && KAART_EXTRA[id]) || null; }
+function leggingExtraVan(id) { return (typeof LEGGING_EXTRA !== "undefined" && LEGGING_EXTRA[id]) || null; }
+
+// popup-rijen met extra kaart-context
+function kaartExtraRijen(kaart) {
+  const ex = kaartExtraVan(kaart.id);
+  if (!ex) return "";
+  let h = "";
+  if (ex.geld) h += '<div class="popup-rij"><p class="popup-label">In geld &amp; praktische zaken</p><p>' + ex.geld + "</p></div>";
+  if (ex.familie) h += '<div class="popup-rij"><p class="popup-label">In familie</p><p>' + ex.familie + "</p></div>";
+  if (ex.vriendschap) h += '<div class="popup-rij"><p class="popup-label">In vriendschap</p><p>' + ex.vriendschap + "</p></div>";
+  if (ex.herken) h += '<div class="popup-rij"><p class="popup-label">In het echte leven</p><p>' + ex.herken + "</p></div>";
+  if (ex.samen) h += '<div class="popup-rij"><p class="popup-label">Vaak samen met</p><p>' + ex.samen + "</p></div>";
+  if (ex.vandaag) h += '<div class="popup-rij"><p class="popup-label">Vraag voor vandaag</p><p>' + ex.vandaag + "</p></div>";
+  return h;
+}
+
+// kd-blokken met extra kaart-context (Bibliotheek kaart-detail)
+function kaartExtraBlokken(k) {
+  const ex = kaartExtraVan(k.id);
+  if (!ex) return "";
+  let h = "";
+  if (ex.herken) h += '<div class="kd-blok" style="--i:7"><p class="kd-label">In het echte leven</p><p>' + ex.herken + "</p></div>";
+  const dom = [
+    ex.geld ? "<strong>Geld:</strong> " + ex.geld : "",
+    ex.familie ? "<strong>Familie:</strong> " + ex.familie : "",
+    ex.vriendschap ? "<strong>Vriendschap:</strong> " + ex.vriendschap : ""
+  ].filter(Boolean).join("<br>");
+  if (dom) h += '<div class="kd-blok" style="--i:8"><p class="kd-label">Geld · familie · vriendschap</p><p>' + dom + "</p></div>";
+  if (ex.samen) h += '<div class="kd-blok" style="--i:9"><p class="kd-label">Vaak samen met</p><p>' + ex.samen + "</p></div>";
+  if (ex.vandaag) h += '<div class="kd-blok" style="--i:10"><p class="kd-label">Vraag voor in je journaal</p><p>' + ex.vandaag + "</p></div>";
+  return h;
+}
+
 function toonKaartPopup(id) {
   const kaart = kaartVind(id);
   const popup = document.getElementById("kaart-popup");
@@ -5278,6 +6116,7 @@ function toonKaartPopup(id) {
     '<div class="popup-rij"><p class="popup-label">Kijkrichting</p><p>' + kaart.kijkrichting + "</p></div>" +
     '<div class="popup-rij"><p class="popup-label">In liefde</p><p>' + kaartDiepteRegel(kaart, "liefde") + "</p></div>" +
     '<div class="popup-rij"><p class="popup-label">In werk</p><p>' + kaartDiepteRegel(kaart, "werk") + "</p></div>" +
+    kaartExtraRijen(kaart) +
     '<div class="popup-rij"><p class="popup-label">Reflectievraag</p><p>' + kaart.reflectievraag + "</p></div>" +
     '<button class="knop knop-secundair popup-sluit" id="popup-sluit">Sluiten</button>';
   popup.hidden = false;
@@ -5851,7 +6690,8 @@ function openKaartDetail(id) {
     '<div class="kd-blok" style="--i:3"><p class="kd-label">Kijkrichting</p><p>' + k.kijkrichting + "</p></div>" +
     '<div class="kd-blok" style="--i:4"><p class="kd-label">Reflectievraag</p><p>' + k.reflectievraag + "</p></div>" +
     '<div class="kd-blok" style="--i:5"><p class="kd-label">In liefde &amp; in werk</p><p><strong>' + kaartDiepteRegel(k, "liefde") + "</strong><br>" + kaartDiepteRegel(k, "werk") + "</p></div>" +
-    '<div class="kd-blok" style="--i:6"><p class="kd-label">Thema & fase</p><p>' + themaVan(k) + "<br>" + faseVan(k) + "</p></div>";
+    '<div class="kd-blok" style="--i:6"><p class="kd-label">Thema & fase</p><p>' + themaVan(k) + "<br>" + faseVan(k) + "</p></div>" +
+    kaartExtraBlokken(k);
   bindTilt(document.getElementById("kd-scene"), document.getElementById("kd-kaart"), document.getElementById("kd-glare"));
   pushScherm("scherm-kaartdetail");
 }

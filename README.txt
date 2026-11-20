@@ -1,47 +1,40 @@
-v45 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
+v48 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
   - index.html
   - sw.js
 
-v45 = POLISH-RONDE via de design-skills (jakubkrehel/skills, nu als
-project-skills op de laptop in .vibe/skills/):
+v48 = iPHONE 15 PRO MAX OPTIMALISATIE + 2026-CONTENT + ui-ux-pro-max skill pass:
 
-1. KLEUREN (better-colors + better-ui), ALLEMAAL GEMETEN (WCAG):
-   - alle rgb-literals vervangen door tokens (--goud-rgb, --lav-rgb,
-     --roze-rgb, --accent-rgb) — themes wisselen nu schoon
-   - contrast gemeten in beide thema's; light theme aangepast (lightness
-     only): --sec 5.2:1, --goud 4.9:1, --lav 4.7:1, --accent 4.8:1 op ivoor
-   - één kleur = één betekenis: roze = gevaar/fout, lavendel = omgekeerde
-     kaart, goud = tarot-accent, berry-roze = decoratief accent (Aurora)
-   - foto-randjes nu neutraal (wit/10 donker, zwart/8 licht) ipv goud —
-     geen kleur-fringe meer op de kaarten (gouden gloed blijft ALLEEN op
-     de geselecteerde kaart)
+1) SPREAD-DIAGRAMMEN NU ECHT RESPONSIVE (de echte fix voor brede schermen):
+   tot v47 hadden de diagram-kaders vaste pixelhoogtes terwijl de mini-kaarten
+   schaalen met de schermbreedte — op de 15 Pro Max (430pt) staken kaarten tot
+   19px uit het kader. Nu berekent de app de kaderhoogte live uit de echte
+   breedte: kaart + nummerbolletje + label passen áltijd binnen het kader.
+   Gemeten op 430x932, 390x844, 375x667 én 932x430 (landscape): 0 overflows,
+   0 horizontale scroll, 0 errors. Kaarten worden nooit groter dan het
+   390px-ontwerp (ook niet op iPad).
 
-2. TYPOGRAFIE (better-typography):
-   - alle geschaalde tekst nu in rem (browser-tekstgrootte werkt mee)
-   - opsz alleen nog op de échte display-titels (hero/splash)
-   - text-wrap: balance op koppen, pretty op paragrafen, break-word op body
-   - tabular-nums op tellers/nummers, antialiased op root, …-ellipsis in
-     placeholders, typografische quotes
+2) 15 PRO MAX / PRO-RULES POLISH (ui-ux-pro-max-skill checklist afgewerkt):
+   - royalere zij-gutters (20px) vanaf 420pt breed
+   - popup houdt rekening met safe-area top/bottom (Dynamic Island + home
+     indicator) en max-height in dvh; landscape-compacte modus
+   - cursor:pointer op alle tappables; geen tekstselectie/long-press menu
+     op kaarten (voelt als native app)
+   - tabbalk/toast/sheet hadden al env(safe-area-inset-*) — geverifieerd
 
-3. MOTION (better-motion):
-   - ÉÉN press-scale overal: 0.96 (was 0.88-0.98 Mixed)
-   - popup/modal enters vanaf scale 0.98, 380ms ease-out (was 0.85 spring)
-   - toast-exit 180ms (korter dan enter), geen transition: all meer
-   - reduced-motion gate bleef behouden
+3) ALLE TEKSTEN NAAR 2026-CONTEXT (in kaart-extra.js + legging-extra.js):
+   datingapp-matches, spraakberichtjes met AI-transcriptie, videogesprekken,
+   AI-tools en abonnementen, hybride werk, pushnotificaties, teamchat,
+   slimme apparaten... plus 3 nieuwe dagspreuken o.a. "Vraag het niet aan de
+   groepsapp — vraag het de kaarten."
 
-4. LAYOUT & TOEGANKELIJKHEID (better-layout + better-accessibility):
-   - zoom weer toegestaan (maximum-scale/user-scalable uit de viewport —
-     WCAG 1.4.4); inputs waren al 16px dus iOS zoomt niet meer
-   - 320px reflow getest: geen horizontale scroll
-   - tabs 44px hoog, Escape sluit popup/sheet, role=dialog + aria-modal,
-     focus naar binnen bij popup, focus naar h1 ALLEEN bij toetsenbord,
-     document.title wisselt mee per tab, aria-labels op alle invoervelden,
-     toast = role=status, chip-verwijder 24px
-   - copy-check (better-writing): "Bijv." overal consistent, destructieve
-     bevestiging zonder "!", wis-knop actuatorischer
+4) ui-ux-pro-max-skill (nextlevelbuilder) geïnstalleerd in .vibe/skills en
+   door de hele app gehaald: design-system check (Liquid Glass navigatie =
+   wat we al hebben, premium gold accent = match), pro-rules checklist
+   (44pt touch targets, safe areas, contrast, reduced motion, iPad max-width)
+   — alles was al in orde behalve bovenstaande punten, nu gefixt.
 
-Getest: 15/15 leggingen end-to-end OK, 0 errors; contrast-scan beide
-thema's: 0 echte failures; screenshots Aurora + Nacht gecheckd.
+Getest: 4 viewports x 15 leggingen end-to-end (0 errors), screenshots op
+430x932 met gesimuleerde Dynamic Island/home-indicator: home, kaartengrid,
+gekozen-balk, uitleg-spread, popup — alles clean.
 
-Upload: app opent in Aurora (licht). Nacht: Meer > Stijl > Nacht.
-Check Meer onderaan: "Versie v45".
+Na upload: app openen -> auto-reload -> in Meer onderaan staat "Versie v48".
