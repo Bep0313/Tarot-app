@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="48">
+<html lang="nl" data-versie="51">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=48 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=51 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    LETTERTYPES (ingebed — de app blijft 100% offline)
@@ -190,18 +190,23 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .scherm::-webkit-scrollbar { display: none; }
 .scherm[hidden] { display: none; }
 
-/* Tab-wissel: snelle cross-fade met een klein opmoventje van de inhoud */
-.scherm.tab-in { animation: tabIn 0.32s cubic-bezier(0.3, 0.7, 0.3, 1) both; }
+/* Tab-wissel: snelle cross-fade met een klein opmoventje van de inhoud.
+   will-change: de iOS-compositor promoot het scherm pas §laat als layer →
+   eerste frames haperen. Met will-change tijdens de animatie + klasse-opruiming
+   in app.js (speelAnim) is de wissel elke frame glad. */
+.scherm.tab-in   { animation: tabIn  0.30s cubic-bezier(0.32, 0.72, 0, 1) both; will-change: transform, opacity; }
 @keyframes tabIn {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* iOS-stijl push voor subscreens (kommt in latere stappen): nieuw scherm schuift van rechts */
-.scherm.push-in  { animation: pushIn 0.32s cubic-bezier(0.3, 0.7, 0.3, 1) both; }
-.scherm.push-out { animation: pushOut 0.32s cubic-bezier(0.3, 0.7, 0.3, 1) both; }
-@keyframes pushIn  { from { transform: translateX(100%); } to { transform: translateX(0); } }
-@keyframes pushOut { from { transform: translateX(0); } to { transform: translateX(-28%); filter: brightness(0.6); } }
+/* iOS-stijl push voor subscreens: nieuw scherm schuift van rechts.
+   Dimmen met OPACITY (GPU-only) — filter: brightness() laat iOS het hele
+   scherm elke frame opniew tekenen: dát was de hoofdoorzaak van het haperen. */
+.scherm.push-in  { animation: pushIn  0.34s cubic-bezier(0.32, 0.72, 0, 1) both; will-change: transform, opacity; }
+.scherm.push-out { animation: pushOut 0.34s cubic-bezier(0.32, 0.72, 0, 1) both; will-change: transform, opacity; }
+@keyframes pushIn  { from { transform: translateX(100%); opacity: 1; } to { transform: translateX(0); } }
+@keyframes pushOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-24%); opacity: 0.64; } }
 
 /* Algemene fade-up voor lijsten (gebruikt met --i voor een "staggered" vertraging) */
 @keyframes fadeUp {
@@ -344,10 +349,10 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 
 /* ---------- 5. STARTSCHERM (LEGGINGEN) ---------- */
 /* Bij scrollen krimpt de kop smooth in elkaar (iOS "large title"-effect) */
-.home-kop { margin-bottom: 20px; transition: margin-bottom 0.3s ease; }
+.home-kop { margin-bottom: 20px; }
 .home-kop.compact { margin-bottom: 12px; }
 .home-kop.compact .home-titel { transform: scale(0.8); }
-.home-kop.compact .home-ondertitel { opacity: 0; max-height: 0; margin-top: 0; }
+.home-kop.compact .home-ondertitel { opacity: 0; pointer-events: none; }
 .home-datum {
   color: var(--sec);
   font-size: calc(0.6875rem * var(--tekst-schaal));
@@ -719,10 +724,10 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .sub-uitleg { color: var(--sec); font-size: calc(0.8125rem * var(--tekst-schaal)); margin-top: 5px; line-height: 1.4; max-width: 30ch; }
 
 /* Push/pop navigatie-animaties (iOS-stijl) */
-.scherm.pop-out { animation: popOut 0.28s ease both; }
-.scherm.rev-in  { animation: revIn 0.32s cubic-bezier(0.3, 0.7, 0.3, 1) both; }
+.scherm.pop-out { animation: popOut 0.30s cubic-bezier(0.32, 0.72, 0, 1) both; will-change: transform, opacity; }
+.scherm.rev-in  { animation: revIn  0.34s cubic-bezier(0.32, 0.72, 0, 1) both; will-change: transform, opacity; }
 @keyframes popOut { to { transform: translateX(100%); } }
-@keyframes revIn  { from { transform: translateX(-28%); filter: brightness(0.6); } to { transform: translateX(0); filter: none; } }
+@keyframes revIn  { from { transform: translateX(-24%); opacity: 0.64; } to { transform: translateX(0); opacity: 1; } }
 
 /* ---------- 12. VRAAG-SCHERM ---------- */
 .vraag-kaart {
@@ -936,8 +941,8 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   padding: 18px;
   margin-bottom: 14px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 26px rgba(0, 0, 0, 0.30);
-  animation: fadeUp 0.5s cubic-bezier(0.22, 0.9, 0.28, 1) both;
-  animation-delay: calc(var(--i) * 90ms);
+  animation: fadeUp 0.42s cubic-bezier(0.22, 0.9, 0.28, 1) both;
+  animation-delay: calc(var(--i) * 55ms);
 }
 .positie-label { color: var(--lav); font-size: calc(0.7188rem * var(--tekst-schaal)); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }
 .positie-kaart-rij { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -1156,8 +1161,8 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   border-radius: var(--r-m);
   padding: 16px 18px;
   margin-bottom: 12px;
-  animation: fadeUp 0.45s cubic-bezier(0.22, 0.9, 0.28, 1) both;
-  animation-delay: calc(var(--i) * 70ms);
+  animation: fadeUp 0.4s cubic-bezier(0.22, 0.9, 0.28, 1) both;
+  animation-delay: calc(var(--i) * 50ms);
 }
 .kd-label { color: var(--lav); font-size: calc(0.6875rem * var(--tekst-schaal)); text-transform: uppercase; letter-spacing: 0.13em; margin-bottom: 6px; }
 .kd-blok p { font-size: calc(0.9062rem * var(--tekst-schaal)); line-height: 1.55; }
@@ -1216,7 +1221,7 @@ button.meer-rij:active { transform: scale(0.96); border-color: rgba(var(--goud-r
   font-size: calc(0.9375rem * var(--tekst-schaal));
 }
 .eigen-rij { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--r-s); padding: 10px 14px; margin-bottom: 8px; font-size: calc(0.875rem * var(--tekst-schaal)); }
-.gekozen-chip.trekken .flip-inner { animation: kaartTrek 0.9s cubic-bezier(0.3, 0.8, 0.3, 1) both; }
+.gekozen-chip.trekken .flip-inner { animation: kaartTrek 0.68s cubic-bezier(0.3, 0.8, 0.3, 1) both; }
 @keyframes kaartTrek { from { transform: rotateY(720deg) scale(0.5); } to { transform: rotateY(0deg) scale(1); } }
 body.geen-omgekeerd .chip-flip { display: none !important; }
 
@@ -1425,8 +1430,8 @@ body.licht .card3d::after { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
   background: linear-gradient(115deg, transparent 32%, rgba(255,255,255,.16) 46%, rgba(255,255,255,.05) 52%, transparent 64%);
   background-size: 250% 250%; background-position: 50% 50%;
 }
-.kd-kaart { width: min(240px, 64vw); aspect-ratio: 3 / 5; margin: 6px auto 10px; filter: drop-shadow(0 24px 40px rgba(0,0,0,.55)); }
-.popup-kaart3d { width: 150px; aspect-ratio: 3 / 5; margin: 0 auto 12px; filter: drop-shadow(0 16px 30px rgba(0,0,0,.5)); }
+.kd-kaart { width: min(240px, 64vw); aspect-ratio: 3 / 5; margin: 6px auto 10px; box-shadow: 0 24px 40px rgba(0, 0, 0, 0.55); will-change: transform; }
+.popup-kaart3d { width: 150px; aspect-ratio: 3 / 5; margin: 0 auto 12px; box-shadow: 0 16px 30px rgba(0, 0, 0, 0.5); will-change: transform; }
 .kd-tilt-hint { text-align: center; color: var(--sec); font-size: calc(0.6875rem * var(--tekst-schaal)); margin: -6px 0 12px; }
 @media (prefers-reduced-motion: reduce) { .card3d { transition: none; } }
 
@@ -1625,6 +1630,18 @@ p, .mix-uitleg, .sub-uitleg, .journaal-tekst, .verhaal { text-wrap: pretty; }
 @media (orientation: landscape) and (max-height: 520px) {
   .scherm { padding-top: calc(env(safe-area-inset-top) + 12px); }
   .popup-kaart { max-width: 430px; }
+}
+
+/* --- v49: motion-glad — touch krijgt een éénmalig intro-kanteltje in plaats
+   van duur hover-tilt tijdens scrollen; de "beweeg voor 3D"-hint is mouse-only --- */
+@media (pointer: coarse) {
+  .kd-tilt-hint { display: none; }
+  .kd-kaart { animation: kaartIntro 0.7s cubic-bezier(0.32, 0.72, 0, 1) 0.12s both; }
+  .popup-kaart3d { animation: kaartIntro 0.6s cubic-bezier(0.32, 0.72, 0, 1) 0.05s both; }
+}
+@keyframes kaartIntro {
+  from { transform: perspective(900px) rotateY(-12deg) translateY(10px); opacity: 0; }
+  to   { transform: perspective(900px) rotateY(0deg) translateY(0); opacity: 1; }
 }
 
 </style>
@@ -3894,13 +3911,26 @@ document.addEventListener("error", e => {
 // sceneEl = element met perspective, cardEl = de kaart, glareEl = glans-laag
 function bindTilt(sceneEl, cardEl, glareEl) {
   if (!sceneEl || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  // Op iPhone/iPad is hover-tilt zinloos en duur: elke pointermove tijdens
+  // het scrollen liet de kaart + glare opnieuw tekenen → scroll-haperen.
+  // Daarom tilt alleen op precisie-pointers (muis/trackpad), en rAF-gethrottled.
+  if (!matchMedia("(pointer: fine)").matches) return;
+  let verdacht = false, laatste = null;
   const kantel = (x, y) => {
     cardEl.style.transform = `rotateX(${(0.5 - y) * 14}deg) rotateY(${(x - 0.5) * 18}deg)`;
     if (glareEl) glareEl.style.backgroundPosition = (x * 120) + "% " + (y * 120) + "%";
   };
   sceneEl.addEventListener("pointermove", e => {
-    const r = sceneEl.getBoundingClientRect();
-    kantel((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+    if (e.pointerType && e.pointerType !== "mouse") return;
+    laatste = e;
+    if (verdacht) return;
+    verdacht = true;
+    requestAnimationFrame(() => {
+      verdacht = false;
+      if (!laatste || sceneEl.hidden) return;
+      const r = sceneEl.getBoundingClientRect();
+      kantel((laatste.clientX - r.left) / r.width, (laatste.clientY - r.top) / r.height);
+    });
   });
   sceneEl.addEventListener("pointerleave", () => {
     cardEl.style.transform = "rotateX(0deg) rotateY(0deg)";
@@ -5163,6 +5193,33 @@ const TAB_NAAR_SCHERM = {
   meer: "scherm-meer"
 };
 
+// Speelt een CSS-animatieklasse één keer af en ruimt hem daarna op.
+// Belangrijk voor gladheid: zodra de klasse weg is, geeft iOS het scherm
+// als compositing-layer weer vrij (geen geheugen- of jank-opstapeling),
+// en luistert de cleanup op animationend in plaats van een gegokte timeout.
+function speelAnim(el, klas, animNaam, duur, daarna) {
+  if (!el) return;
+  el.classList.remove(klas);
+  void el.offsetWidth; // herstart de keyframes
+  el.classList.add(klas);
+  let klaar = false;
+  const luister = (ev) => {
+    if (ev.target === el && (!animNaam || ev.animationName === animNaam)) einde();
+  };
+  const einde = () => {
+    if (klaar) return;
+    klaar = true;
+    el.removeEventListener("animationend", luister);
+    clearTimeout(timer);
+    el.classList.remove(klas);
+    if (daarna) daarna();
+  };
+  el.addEventListener("animationend", luister);
+  // vangnet op de exacte keyframe-duur: verbergen hangt NOOIT af van
+  // event-levering (animationend kan onder belasting laat doorkomen)
+  const timer = setTimeout(einde, duur || 400);
+}
+
 function toonTab(tabNaam, viaToetsenbord) {
   // subschermen + stack altijd sluiten bij tab-wissel (anders bleef er ooit content onder hangen)
   schermStack.length = 0;
@@ -5189,9 +5246,7 @@ function toonTab(tabNaam, viaToetsenbord) {
     const scherm = document.getElementById(id);
     if (naam === tabNaam) {
       scherm.hidden = false;
-      scherm.classList.remove("tab-in");
-      void scherm.offsetWidth; // trucje om de animatie opnieuw te starten
-      scherm.classList.add("tab-in");
+      speelAnim(scherm, "tab-in", "tabIn", 300);
       scherm.scrollTop = 0;
       huidigeScroll = 0;
       // focus naar de h1 alleen bij toetsenbordnavigatie (anders een ring op touch)
@@ -5259,14 +5314,9 @@ function pushScherm(id) {
   if (!nieuw) return;
   if (huidig === nieuw) return; // dubbelklik: al op dit scherm → niets doen
   schermStack.push(huidig ? huidig.id : null);
-  if (huidig) {
-    huidig.classList.add("push-out");
-    setTimeout(() => { huidig.hidden = true; huidig.classList.remove("push-out"); }, 300);
-  }
+  if (huidig) speelAnim(huidig, "push-out", "pushOut", 340, () => { huidig.hidden = true; });
   nieuw.hidden = false;
-  nieuw.classList.remove("push-in");
-  void nieuw.offsetWidth;
-  nieuw.classList.add("push-in");
+  speelAnim(nieuw, "push-in", "pushIn", 340);
   nieuw.scrollTop = 0;
   document.getElementById("tabbalk").style.visibility = "hidden"; // tabbalk even weg op subschermen
   document.getElementById("gekozen-balk").hidden = (id !== "scherm-kaarten"); // balk alleen op het kaartenscherm
@@ -5277,10 +5327,7 @@ function popScherm() {
   const vorigeId = schermStack.pop();
   if (!vorigeId) { toonTab("nieuw"); return; } // stack leeg/onbekend → naar home
   const huidig = document.querySelector(".scherm:not([hidden])");
-  if (huidig) {
-    huidig.classList.add("pop-out");
-    setTimeout(() => { huidig.hidden = true; huidig.classList.remove("pop-out"); }, 260);
-  }
+  if (huidig) speelAnim(huidig, "pop-out", "popOut", 300, () => { huidig.hidden = true; });
   const tabNaam = Object.keys(TAB_NAAR_SCHERM).find(k => TAB_NAAR_SCHERM[k] === vorigeId);
   document.getElementById("gekozen-balk").hidden = (vorigeId !== "scherm-kaarten");
   if (tabNaam) {
@@ -5290,9 +5337,7 @@ function popScherm() {
   } else if (vorigeId) {
     const el = document.getElementById(vorigeId);
     el.hidden = false;
-    el.classList.remove("rev-in");
-    void el.offsetWidth;
-    el.classList.add("rev-in");
+    speelAnim(el, "rev-in", "revIn", 340);
     el.scrollTop = 0;
   }
   huidigeScroll = 0;
@@ -6123,6 +6168,7 @@ function toonKaartPopup(id) {
   bindTilt(document.getElementById("popup-scene"), document.getElementById("popup-kaart3d"), document.getElementById("popup-glare"));
   document.getElementById("popup-sluit").onclick = () => { popup.hidden = true; };
   popup.onclick = e => { if (e.target === popup) popup.hidden = true; };
+  document.querySelectorAll("#kaart-popup-kaart img.kaart-foto").forEach(im => { if (im.decode) im.decode().catch(() => {}); });
   // focus naar binnen bij openen (toetsenbord/screenreader), Escape sluit overal
   setTimeout(() => { const s = document.getElementById("popup-sluit"); if (s) s.focus({ preventScroll: true }); }, 60);
 }
@@ -6692,6 +6738,9 @@ function openKaartDetail(id) {
     '<div class="kd-blok" style="--i:5"><p class="kd-label">In liefde &amp; in werk</p><p><strong>' + kaartDiepteRegel(k, "liefde") + "</strong><br>" + kaartDiepteRegel(k, "werk") + "</p></div>" +
     '<div class="kd-blok" style="--i:6"><p class="kd-label">Thema & fase</p><p>' + themaVan(k) + "<br>" + faseVan(k) + "</p></div>" +
     kaartExtraBlokken(k);
+  // afbeeldingen vóór de schermanimatie laten decoderen (img.decode is async)
+  // — zonder dit decodeert iOS ze midden in de push-animatie: eerste frames haperen
+  document.querySelectorAll("#kd-inhoud img.kaart-foto").forEach(im => { if (im.decode) im.decode().catch(() => {}); });
   bindTilt(document.getElementById("kd-scene"), document.getElementById("kd-kaart"), document.getElementById("kd-glare"));
   pushScherm("scherm-kaartdetail");
 }
