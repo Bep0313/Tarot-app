@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="54">
+<html lang="nl" data-versie="55">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=54 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=55 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    LETTERTYPES (ingebed — de app blijft 100% offline)
@@ -703,7 +703,8 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
      herpaint per scroll-frame (haperen). De zwevende glass-balk doet het werk nu zelf. */
 }
 
-.sub-kop { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
+.sub-kop { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; padding: 0 2px; }
+.sub-kop > div { flex: 1; min-width: 0; }
 .terug {
   flex-shrink: 0;
   width: 40px; height: 40px;
@@ -719,7 +720,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 }
 .terug svg { width: 20px; height: 20px; }
 .terug:active { transform: scale(0.96); background: rgba(var(--goud-rgb), 0.12); }
-.sub-kicker { color: var(--sec); font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 600; text-transform: uppercase; letter-spacing: 0.10em; }
+.sub-kicker { color: var(--sec); font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 600; text-transform: uppercase; letter-spacing: 0.10em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sub-titel { font-family: var(--serif); font-size: calc(1.5625rem * var(--tekst-schaal)); font-weight: 600; line-height: 1.15; letter-spacing: -0.012em; }
 .sub-uitleg { color: var(--sec); font-size: calc(0.8125rem * var(--tekst-schaal)); margin-top: 5px; line-height: 1.4; max-width: 30ch; }
 
@@ -1154,12 +1155,14 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 /* --- Kaart-detail: per-kaart tint (--kd-tint), hero met wash + watermerk --- */
 .kd-hero { position: relative; text-align: center; padding: 4px 0 6px; animation: fadeUp 0.35s ease both; }
 .kd-hero::before {
-  content: ""; position: absolute; inset: -30px -20px 6px; z-index: -1; pointer-events: none;
-  background: radial-gradient(closest-side, rgba(var(--kd-tint, 232, 200, 116), 0.20), transparent 76%);
+  content: ""; position: absolute; left: 50%; top: 42%; width: 310px; height: 310px;
+  transform: translate(-50%, -50%); z-index: -1; pointer-events: none; border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--kd-tint, 232, 200, 116), 0.20), transparent 66%);
+  filter: blur(16px);
 }
 .kd-hero::after {
-  content: attr(data-symbool); position: absolute; left: 50%; top: 4px; transform: translateX(-50%);
-  font-size: 150px; line-height: 1; opacity: 0.05; z-index: -1; pointer-events: none;
+  content: attr(data-symbool); position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%);
+  font-size: 200px; line-height: 1; opacity: 0.05; z-index: -1; pointer-events: none;
 }
 .kd-scene { cursor: pointer; }
 .kd-kaart .kaart-foto { transition: transform 0.55s cubic-bezier(0.32, 0.72, 0, 1); }
@@ -1180,14 +1183,20 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   background: rgba(var(--goud-rgb), 0.12); border: 1px solid rgba(var(--goud-rgb), 0.35);
   color: var(--goud); font-weight: 700; font-size: calc(0.9375rem * var(--tekst-schaal)); letter-spacing: 0.02em;
 }
+/* kernwoord + onderwerpen als chips IN de chip-rij (geen losse zwevende pill) */
+.kd-chip-kern {
+  background: rgba(var(--goud-rgb), 0.12); border-color: rgba(var(--goud-rgb), 0.35);
+  color: var(--goud); font-weight: 700;
+}
+.kd-chip-onderwerp { opacity: 0.85; font-weight: 600; }
 .kd-citaat {
   position: relative; max-width: 17em; margin: 18px auto 8px; padding: 0 6px;
   font-family: var(--serif); font-style: italic; color: var(--tekst);
   font-size: calc(1.0625rem * var(--tekst-schaal)); line-height: 1.5; text-wrap: balance;
 }
 .kd-citaat::before {
-  content: "“"; display: block; height: 0.3em; font-size: 2em; line-height: 0.1; font-style: normal;
-  color: rgb(var(--kd-tint, 232, 200, 116)); margin-bottom: 12px;
+  content: "“ "; font-size: 1em; line-height: 1; font-style: normal;
+  color: rgb(var(--kd-tint, 232, 200, 116));
 }
 .kd-groep { margin-top: 24px; animation: fadeUp 0.4s cubic-bezier(0.22, 0.9, 0.28, 1) both; animation-delay: calc(var(--i) * 55ms); }
 .kd-groep-kop {
@@ -4529,6 +4538,501 @@ const KAART_DOMEIN = {
 </script>
   <script>
 /* ============================================================
+   js/kaart-beginner.js — beginners-uitleg per kaart
+   ------------------------------------------------------------
+   Voor als je net begint met tarot. Per kaart:
+     zien        wat je letterlijk op de kaart ziet
+     simpel      de kern in de simpelste woorden
+     voorbeeld    één concreet moment uit het dagelijks leven
+     onderwerpen  3-4 thema-chips (komma-gescheiden)
+   Wordt getoond in de sectie "Zo werkt deze kaart" op de
+   kaartpagina + als chips + "In het kort" in de popup.
+   ============================================================ */
+
+const KAART_BEGINNER = {
+
+  /* ---------- Grote Arcana ---------- */
+  "de-dwaas": {
+    zien: "Een man staat op het randje van een klif, een roos in zijn hand en een klein bundeltje op zijn rug. Onder hem ligt een dal.",
+    simpel: "Een fris begin zonder plan. Soms slim, soms een sprong in het diepe.",
+    voorbeeld: "Je zegt ja op die cursus of date zonder alles uitgezocht te hebben.",
+    onderwerpen: "nieuw begin, avontuur, vertrouwen"
+  },
+  "de-magier": {
+    zien: "Een man staat achter een tafel met vier symbolen: een staf, een kelk, een zwaard en een munt. Boven zijn hoofd een liggende acht; hij wijst naar de hemel en naar de aarde.",
+    simpel: "Alles wat je nodig hebt ligt al op tafel. Het enige dat telt: beginnen.",
+    voorbeeld: "Die skill heb je allang in huis — je hoeft hem alleen te gebruiken.",
+    onderwerpen: "manifestatie, focus, talent"
+  },
+  "de-hogepriesteres": {
+    zien: "Een vrouw zit tussen een zwarte en een witte pilaar, een maansikkel aan haar voeten. Ze houdt een boek vast.",
+    simpel: "Niet alles zie je met je ogen. Luister naar je gevoel — dat weet meer.",
+    voorbeeld: "Dat eerste gevoel bij een berichtje: daar kun je op vertrouwen.",
+    onderwerpen: "intuïtie, geheimen, wijsheid"
+  },
+  "de-keizerin": {
+    zien: "Een vrouw met een kroon van sterren zit op een troon in een groen veld. Om haar heen groeien bloemen en koren.",
+    simpel: "Zorg goed voor jezelf en je omgeving — daar groei je van.",
+    voorbeeld: "Die selfcare-avond, of dat plantje dat je écht water geeft.",
+    onderwerpen: "zorg, overvloed, natuur"
+  },
+  "de-keizer": {
+    zien: "Een man met een lange baard zit op een stenen troon. In zijn hand een ankh, het symbool van leven.",
+    simpel: "Regels en structuur geven rust. Jij mag best de baas spelen — over jezelf.",
+    voorbeeld: "Die vaste sportdag in je agenda die écht blijft staan.",
+    onderwerpen: "structuur, autoriteit, discipline"
+  },
+  "de-hierofant": {
+    zien: "Een man met een drievoudige kroon zit tussen twee figuren die naar hem luisteren. Hij zegent met twee vingers.",
+    simpel: "Leren van tradities en van mensen met ervaring. Wat werkt, mag je overnemen.",
+    voorbeeld: "Vraag je oma of mentor hoe zij dat vroeger aanpakte.",
+    onderwerpen: "traditie, leren, waarden"
+  },
+  "de-geliefden": {
+    zien: "Twee mensen kijken elkaar aan onder een engel. Achter hen zie je een berg en een woestijn.",
+    simpel: "Een keuze maken vanuit je hart. Soms is liefde een rigoureuze beslissing.",
+    voorbeeld: "Kies de relatie, baan of stad waar je hart volmondig ja op zegt.",
+    onderwerpen: "keuze, liefde, harmonie"
+  },
+  "de-zegewagen": {
+    zien: "Een man met een kroon staat in een wagen, getrokken door een zwarte en een witte sfinx.",
+    simpel: "Twee tegengestelde krachten kun je sturen als je ze in balans houdt. Jij zit aan het stuur.",
+    voorbeeld: "Werk en privé trekken aan je — jij bepaalt welke kant de wagen op gaat.",
+    onderwerpen: "wilskracht, focus, overwinning"
+  },
+  "kracht": {
+    zien: "Een vrouw doet de bek van een leeuw zachtjes dicht met haar handen. Boven haar hoofd zweeft een liggende acht.",
+    simpel: "Zachte kracht wint van hard forceren. Wees lief voor jezelf, dan heb je meer power.",
+    voorbeeld: "Die hobbel win je niet door harder te werken, maar door even te pauzeren.",
+    onderwerpen: "moed, geduld, innerlijke kracht"
+  },
+  "de-kluizenaar": {
+    zien: "Een oude man met een mantel staat op een bergtop en houdt een lantaarn omhoog. In de lantaarn brandt een ster.",
+    simpel: "Even alleen zijn om te ontdekken wat jíj écht vindt. De antwoorden zitten in jou.",
+    voorbeeld: "Een stille wandeling zonder telefoon — en opeens weet je het.",
+    onderwerpen: "introspectie, wijsheid, rust"
+  },
+  "rad-van-fortuin": {
+    zien: "Een groot wiel draait in de lucht. In de vier hoeken zitten vier wezens: een engel, een leeuw, een stier en een sfinx.",
+    simpel: "Het leven draait door — meewind en tegenwind wisselen elkaar af. Blijf flexibel.",
+    voorbeeld: "De ene week loopt alles stroef, de andere week valt alles op zijn plek.",
+    onderwerpen: "verandering, geluk, cyclus"
+  },
+  "gerechtigheid": {
+    zien: "Een vrouw zit rechtop met een zwaard in de ene hand en een weegschaal in de andere.",
+    simpel: "Eerlijk zijn loont. Wat je zaait, oogst je — in welke vorm dan ook.",
+    voorbeeld: "Dat eerlijke gesprek over wie wat doet in huis.",
+    onderwerpen: "eerlijkheid, balans, oorzaak en gevolg"
+  },
+  "de-gehangene": {
+    zien: "Een man hangt met zijn hoofd naar beneden aan een T-vormig kruis, handen achter zijn rug. Zijn gezicht is rustig.",
+    simpel: "Even pas op de plaats. Soms is niets doen het slimste wat je kunt doen.",
+    voorbeeld: "Dat besluit waar je nog één nachtje over slaapt — precies goed.",
+    onderwerpen: "pauze, ander perspectief, overgave"
+  },
+  "de-dood": {
+    zien: "Een skelet in een harnas rijdt op een wit paard en houdt een zwarte vlag met een witte roos omhoog.",
+    simpel: "Iets mag écht eindigen, zodat er iets nieuws kan beginnen. Verdriet en opluchting horen bij elkaar.",
+    voorbeeld: "Die oude ruzie of dat project dat je eindelijk afsluit.",
+    onderwerpen: "transformatie, loslaten, einde"
+  },
+  "matigheid": {
+    zien: "Een engel staat met één voet op het land en één in het water, en giet water van de ene kelk in de andere.",
+    simpel: "De balans vinden tussen twee dingen. Niet alles tegelijk, niet te weinig.",
+    voorbeeld: "Een uurtje scrollen én een uurtje bewegen — de gulden middenweg.",
+    onderwerpen: "balans, geduld, harmonie"
+  },
+  "de-duivel": {
+    zien: "Een gehörnde figuur zit op een troon. Twee mensen staan ervoor met kettingen om hun nek — maar de kettingen zitten los.",
+    simpel: "Wat je klein houdt, zijn vaak je eigen gedachten. Die kettingen kun je gewoon afdoen.",
+    voorbeeld: "Die scrollverslaving of dat “ik kan dat toch niet” — je mag gewoon stoppen.",
+    onderwerpen: "verslaving, beklemming, bevrijding"
+  },
+  "de-toren": {
+    zien: "Een toren wordt geraakt door de bliksem. De kroon valt eraf en twee figuren tuimelen naar beneden.",
+    simpel: "Iets wat wankel leek stort in — en dat maakt ruimte voor iets echts. Even pijnlijk, dan helder.",
+    voorbeeld: "Die baan die klapte bleek achteraf de beste wending van je jaar.",
+    onderwerpen: "ommekeer, waarheid, doorbraak"
+  },
+  "de-ster": {
+    zien: "Een naakte vrouw knielt bij het water en giet uit twee kannen: één op het land, één in het water. Boven haar acht sterren.",
+    simpel: "Hoop houden, ook als het donker is. Alles komt goed.",
+    voorbeeld: "Na een rotdag toch die ene kleine reden om door te gaan.",
+    onderwerpen: "hoop, inspiratie, heling"
+  },
+  "de-maan": {
+    zien: "Een grote maan hangt laag boven een weg. Een hond en een wolf huilen ervoor. In het water kruipt een kreeft.",
+    simpel: "Niet alles is wat het lijkt. Twijfel is normaal — check de feiten voor je in paniek raakt.",
+    voorbeeld: "Dat berichtje dat enger klonk dan het was — even nalezen.",
+    onderwerpen: "illusie, angst, het onbewuste"
+  },
+  "de-zon": {
+    zien: "Een kind zit op een wit paard met een zonnebloem in de hand. Achter een muur schijnt de zon voluit.",
+    simpel: "Alles komt goed. Vrolijkheid, succes en duidelijkheid — geniet ervan.",
+    voorbeeld: "Die dag waarop alles meezit en je het verdiend hebt.",
+    onderwerpen: "vreugde, succes, vitaliteit"
+  },
+  "het-oordeel": {
+    zien: "Een engel blaast op een trompet boven het water. Mensen klimmen op uit het water, handen omhoog, blij.",
+    simpel: "Een tweede kans of een wakker-worden. Luister naar die innerlijke stem.",
+    voorbeeld: "Dat moment waarop je beseft: ik wil iets anders met mijn leven.",
+    onderwerpen: "ommekeer, ontwaken, roeping"
+  },
+  "de-wereld": {
+    zien: "Een dansende figuur hangt in een krans van laurier, met een staf in elke hand. In de vier hoeken zitten vier wezens.",
+    simpel: "Een cyclus is rond — je hebt iets afgerond. Tijd om te vieren en door te pakken.",
+    voorbeeld: "Dat diploma of project dat je afrondt — het mag gevierd worden.",
+    onderwerpen: "voltooiing, reizen, succes"
+  },
+
+  /* ---------- Staven (vuur: doen, energie, werk) ---------- */
+  "aas-van-staven": {
+    zien: "Uit een wolk steekt een hand een bloeiende staf omhoog, met een kroon erboven.",
+    simpel: "Een vonk van een nieuw idee of plan. Pak het beet.",
+    voorbeeld: "Die plotselinge ingeving om die kamer te herschilderen.",
+    onderwerpen: "inspiratie, nieuw plan, energie"
+  },
+  "2-van-staven": {
+    zien: "Een man kijkt vanaf een kasteel over de zee, twee staven gekruist in zijn hand.",
+    simpel: "De eerste stap is gezet, nu kijk je verder. Maak het plan voor de volgende.",
+    voorbeeld: "De eerste les zit erop — nu de rest van de cursus plannen.",
+    onderwerpen: "planning, vooruitzicht, keuze"
+  },
+  "3-van-staven": {
+    zien: "Een man leunt op een staf en kijkt naar schepen die de zee op varen.",
+    simpel: "Je inspanning begint vruchten af te werpen. Wacht op het bericht.",
+    voorbeeld: "De sollicitatie is de deur uit — nu komt het antwoord.",
+    onderwerpen: "groei, uitkijken, hoop"
+  },
+  "4-van-staven": {
+    zien: "Twee figuren dansen onder een guirlande tussen vier gestoken staven — een klein feestje.",
+    simpel: "Vieren en genieten. Een mijlpaal is bereikt — laat het niet ongemerkt voorbijgaan.",
+    voorbeeld: "Die housewarming na een drukke periode.",
+    onderwerpen: "viering, stabiliteit, thuis"
+  },
+  "5-van-staven": {
+    zien: "Vijf figuren slaan met staven op elkaar in — een ruzie die klein begon.",
+    simpel: "Een conflict of meningsverschil. Praat het uit voordat het groeit.",
+    voorbeeld: "Dat ene appje in de groepschat dat verkeerd landt.",
+    onderwerpen: "conflict, competitie, meningsverschil"
+  },
+  "6-van-staven": {
+    zien: "Een man rijdt op een paard door een juichend dorp, een lauwerkrans om zijn hoofd.",
+    simpel: "Erkenning voor wat je hebt gedaan. Neem het compliment gewoon aan.",
+    voorbeeld: "Die lovende feedback van je baas of vriendin.",
+    onderwerpen: "erkenning, overwinning, succes"
+  },
+  "7-van-staven": {
+    zien: "Een man staat op een heuvel met een staf in de hand, en kijkt naar zes staven die op hem afkomen.",
+    simpel: "Je staat ergens voor — verdedig het rustig. Je hoeft niet te schreeuwen.",
+    voorbeeld: "Dat idee dat je verdedigt in de vergadering.",
+    onderwerpen: "verdediging, volharding, grenzen"
+  },
+  "8-van-staven": {
+    zien: "Acht staven schieten als pijlen door de lucht boven een landschap.",
+    simpel: "Alles gaat opeens snel. Goed nieuws of een spoedklus — handel vlot.",
+    voorbeeld: "Die reeks berichten die in één keer binnenkomt.",
+    onderwerpen: "snelheid, actie, nieuws"
+  },
+  "9-van-staven": {
+    zien: "Een man leunt op een staf met een verband om zijn hoofd, en kijkt naar acht staven achter hem.",
+    simpel: "Je bent er bijna, maar wel even moe. Nog één duw en het staat.",
+    voorbeeld: "De laatste week voor die deadline.",
+    onderwerpen: "volharding, waakzaamheid, herstel"
+  },
+  "10-van-staven": {
+    zien: "Een man sjouwt tien staven op zijn rug, gebogen onder de last.",
+    simpel: "Je draagt te veel. Leg er een paar neer — delegeren mag.",
+    voorbeeld: "Die takenlijst waar je er gewoon twee van schrapt.",
+    onderwerpen: "last, verantwoordelijkheid, loslaten"
+  },
+  "page-van-staven": {
+    zien: "Een jonge figuur staat op een klif met een staf in de hand en kijkt nieuwsgierig vooruit.",
+    simpel: "Een enthousiast nieuw idee. Luister ernaar en moedig het aan.",
+    voorbeeld: "Die vriendin die een wild plan oppert — geef het een kans.",
+    onderwerpen: "enthousiasme, nieuws, ontdekking"
+  },
+  "ridder-van-staven": {
+    zien: "Een man in harnas rijdt op een paard met zijn staf hoog in de lucht.",
+    simpel: "Vol gas vooruit — soms iets te enthousiast. Slaap er bij grote dingen één nachtje over.",
+    voorbeeld: "Die impulsieve aankoop of afspraak die je bijna annuleert.",
+    onderwerpen: "actie, impuls, avontuur"
+  },
+  "koningin-van-staven": {
+    zien: "Een vrouw zit op een troon met een staf in de ene hand en een zonnebloem in de andere. Een zwarte kat ligt aan haar voeten.",
+    simpel: "Zelfverzekerd zijn zonder te hoeven schreeuwen. Jij bent warm én sterk.",
+    voorbeeld: "Jij die in de groep de boel soepel laat lopen zonder drama.",
+    onderwerpen: "zelfvertrouwen, warmte, charisma"
+  },
+  "koning-van-staven": {
+    zien: "Een man met een baard zit op een troon met een staf in de hand. Op de troon zit een salamander.",
+    simpel: "Leiderschap met visie. Jij ziet het grotere plaatje — deel het.",
+    voorbeeld: "Jij die het plan voor de vakantie of het feest uitdenkt.",
+    onderwerpen: "visie, leiderschap, pionier"
+  },
+
+  /* ---------- Bekers (water: gevoel, liefde, relaties) ---------- */
+  "aas-van-bekers": {
+    zien: "Uit een wolk steekt een hand een kelk omhoog, met een duif erboven en lotusbloemen in het water.",
+    simpel: "Een nieuw gevoel of een nieuwe liefde. Laat het landen.",
+    voorbeeld: "Die klik met iemand die je net ontmoet hebt.",
+    onderwerpen: "nieuw gevoel, liefde, blijheid"
+  },
+  "2-van-bekers": {
+    zien: "Twee figuren schenken uit hun kelken naar elkaar toe. Boven hen een staf met twee slangen.",
+    simpel: "Twee mensen die elkaar écht zien. De klik is wederzijds.",
+    voorbeeld: "Dat gesprek waarin je merkt: wij snappen elkaar.",
+    onderwerpen: "partnerschap, wederzijdse trek, verbinding"
+  },
+  "3-van-bekers": {
+    zien: "Drie vrouwen heffen hun kelken omhoog in een tuin, lachend en dansend.",
+    simpel: "Vieren met je mensen. Vriendschap en gezelligheid voeden je.",
+    voorbeeld: "Die avond met je vriendinnen waar je hard om lacht.",
+    onderwerpen: "viering, vriendschap, gemeenschap"
+  },
+  "4-van-bekers": {
+    zien: "Een man zit onder een boom met gekruiste armen. Drie kelken staan voor hem; een vierde wordt uit een wolk aangeboden.",
+    simpel: "Je bent even verzadigd. Er komt een kans voorbij die je nu over het hoofd ziet.",
+    voorbeeld: "Die kans op werk die je wegwuift omdat je moe bent.",
+    onderwerpen: "verzadiging, gemiste kans, contemplatie"
+  },
+  "5-van-bekers": {
+    zien: "Een figuur in een mantel staat met zijn rug naar ons toe. Van vijf kelken zijn er drie omgevallen, twee staan nog overeind.",
+    simpel: "Verdriet om iets dat kapot is. Kijk ook naar wat nog wél rechtop staat.",
+    voorbeeld: "Na die relatiebreuk waarbij je vergeet hoeveel er nog wél is.",
+    onderwerpen: "verlies, rouw, perspectief"
+  },
+  "6-van-bekers": {
+    zien: "Een volwassene geeft een kelk aan een kind in een tuin. In de achtergrond staat een wit huis.",
+    simpel: "Herinneringen en nostalgie. Iets uit het verleden komt terug — in een goede zin.",
+    voorbeeld: "Die foto van vroeger die opeens boven komt drijven.",
+    onderwerpen: "herinnering, nostalgie, onschuld"
+  },
+  "7-van-bekers": {
+    zien: "Een figuur kijkt naar zeven kelken in de wolken, elk met iets anders moois erin.",
+    simpel: "Te veel moois om te kiezen. Kies één ding en doe het écht.",
+    voorbeeld: "Vijf series en drie hobby's — kies er één.",
+    onderwerpen: "keuze, dromen, verleiding"
+  },
+  "8-van-bekers": {
+    zien: "Een figuur loopt weg van acht opgestapelde kelken, armen over elkaar geslagen.",
+    simpel: "Iets wat af is, laat je los. Op naar iets dat beter bij je past.",
+    voorbeeld: "Die hobby of studie waar je stilletjes mee stopt.",
+    onderwerpen: "loslaten, vertrekken, innerlijke reis"
+  },
+  "9-van-bekers": {
+    zien: "Een man zit content met gekruiste armen; achter hem staan negen kelken op een rij.",
+    simpel: "Een wens is uitgekomen. Geniet ervan — dit is even puur geluk.",
+    voorbeeld: "Die uitslag of dat cadeau waar je zo blij mee bent.",
+    onderwerpen: "tevredenheid, wens vervuld, geluk"
+  },
+  "10-van-bekers": {
+    zien: "Tien kelken onder een regenboog, boven een stel met kinderen bij een huis.",
+    simpel: "Geluk in liefde en thuis. Dit is het plaatje van een fijn leven.",
+    voorbeeld: "Die zondag waarop het hele gezin aan tafel zit.",
+    onderwerpen: "geluk, familie, harmonie"
+  },
+  "page-van-bekers": {
+    zien: "Een jonge figuur zit aan het water en kijkt naar de kelk in zijn hand. Daarin zwemt een vis.",
+    simpel: "Dagdromen en creativiteit. Laat je fantasie gaan — daar komen ideeën vandaan.",
+    voorbeeld: "Die tekensessie waarin opeens iets moois ontstaat.",
+    onderwerpen: "creativiteit, fantasie, bericht"
+  },
+  "ridder-van-bekers": {
+    zien: "Een man in harnas rijdt over een veld met zijn kelk hoog geheven.",
+    simpel: "Een romantisch gebaar of een warm aanbod komt eraan. Kijk wel even naar de voorwaarden.",
+    voorbeeld: "Die bloemen of dat lieve berichtje van die crush.",
+    onderwerpen: "romantiek, aanbod, charme"
+  },
+  "koningin-van-bekers": {
+    zien: "Een vrouw zit op een troon aan het water met een kelk in de hand. Ze kijkt naar de zee.",
+    simpel: "Jij voelt anderen feilloos aan. Vertrouw op dat gevoel.",
+    voorbeeld: "Jij die aanvoelt dat je vriendin een moeilijke dag heeft.",
+    onderwerpen: "empathie, intuïtie, compassie"
+  },
+  "koning-van-bekers": {
+    zien: "Een man zit op een troon in zee, met een scepter in de ene hand en een kelk in de andere. Bliksem en golven om hem heen.",
+    simpel: "Kalm blijven terwijl het stormt. Jouw rust is een anker voor anderen.",
+    voorbeeld: "Jij die in de ruzie met één zin de boel sust.",
+    onderwerpen: "wijsheid, rust, emotionele balans"
+  },
+
+  /* ---------- Zwaarden (lucht: denken, praten, waarheid) ---------- */
+  "aas-van-zwaarden": {
+    zien: "Uit een wolk steekt een hand een zwaard omhoog, met een kroon erboven.",
+    simpel: "Een helder inzicht of een duidelijk besluit. Dit is het moment.",
+    voorbeeld: "Die ene zin waarmee je opeens begrijpt hoe het zit.",
+    onderwerpen: "helderheid, doorbraak, waarheid"
+  },
+  "2-van-zwaarden": {
+    zien: "Een geblinddoekte figuur houdt twee zwaarden gekruist voor de borst.",
+    simpel: "Je stelt een moeilijke keuze uit. Kiezen kost minder dan blijven twijfelen.",
+    voorbeeld: "Die twee banen waartussen je al weken twijfelt.",
+    onderwerpen: "impasse, moeilijke keuze, stilstand"
+  },
+  "3-van-zwaarden": {
+    zien: "Een hart met drie zwaarden erin, in een bewolkte lucht boven het water.",
+    simpel: "Pijnlijk nieuws of verdriet. Het hoort erbij — en het gaat weer over.",
+    voorbeeld: "Die afwijzing waar je een nacht wakker van ligt.",
+    onderwerpen: "hartzeer, verdriet, waarheid"
+  },
+  "4-van-zwaarden": {
+    zien: "Een figuur ligt te rusten op een baar in een lege, stille ruimte, een zwaard naast zich.",
+    simpel: "Rust. Je hebt het even nodig — neem die pauze echt.",
+    voorbeeld: "Dat weekend waarin je écht offline bent.",
+    onderwerpen: "rust, herstel, pauze"
+  },
+  "5-van-zwaarden": {
+    zien: "Drie figuren met zwaarden: twee lopen weg, één staat alleen achter met twee zwaarden.",
+    simpel: "Een “winnen” dat leeg voelt. Soms is stoppen wijzer dan doorgaan.",
+    voorbeeld: "Die ruzie waarin je gelijk krijgt, maar niemand blij is.",
+    onderwerpen: "conflict, holle overwinning, verlies"
+  },
+  "6-van-zwaarden": {
+    zien: "Een gehulde figuur vaart over rustig water in een boot, met zwaarden in de boot gestoken.",
+    simpel: "Je gaat verder, weg van de drukte. Een rustige nieuwe start.",
+    voorbeeld: "Die verhuizing of nieuwe baan in een andere stad.",
+    onderwerpen: "overgang, heling, nieuwe start"
+  },
+  "7-van-zwaarden": {
+    zien: "Een man sluipt weg met vijf zwaarden in zijn armen; twee zwaarden liggen nog op de grond.",
+    simpel: "Iets achterhouden of slim spelen. Soms oké, soms niet — wees eerlijk tegen jezelf.",
+    voorbeeld: "Die geheimhouding waar je zelf niet trots op bent.",
+    onderwerpen: "strategie, geheim, bedrog"
+  },
+  "8-van-zwaarden": {
+    zien: "Een geblinddoekte, vastgebonden vrouw staat tussen acht zwaarden in.",
+    simpel: "Je voelt je gevangen — maar door je eigen gedachten. Die kun je losser maken.",
+    voorbeeld: "Dat “ik kan het niet” dat je zelf in stand houdt.",
+    onderwerpen: "gevangen, zelfbeperking, angst"
+  },
+  "9-van-zwaarden": {
+    zien: "Een figuur zit rechtop in bed met de handen voor het gezicht. Negen zwaarden hangen aan de muur.",
+    simpel: "Piekeren, vooral 's nachts. Bij daglicht ziet het er vaak kleiner uit.",
+    voorbeeld: "Die zorgen om drie uur 's nachts om geld.",
+    onderwerpen: "zorgen, slapeloosheid, angst"
+  },
+  "10-van-zwaarden": {
+    zien: "Een figuur ligt op de grond met tien zwaarden in de rug. In de lucht breekt het licht door.",
+    simpel: "Het is écht voorbij — ook al deed het pijn. De lucht klaart op.",
+    voorbeeld: "Dat geheim dat uitkomt, waarvan je dacht dat het erg zou zijn.",
+    onderwerpen: "einde, pijn, opluchting"
+  },
+  "page-van-zwaarden": {
+    zien: "Een jonge figuur staat op een klif met een zwaard in de hand en kijkt over de zee.",
+    simpel: "Nieuwsgierig zijn en dingen uitzoeken. Vraag door in plaats van te oordelen.",
+    voorbeeld: "Die keer dat je écht luisterde naar iemands verhaal.",
+    onderwerpen: "nieuwsgierigheid, bericht, waarheid"
+  },
+  "ridder-van-zwaarden": {
+    zien: "Een man in harnas rijdt op volle snelheid, zwaard recht vooruit.",
+    simpel: "Snelle actie is handig, maar kijk bij grote dingen eerst even om je heen.",
+    voorbeeld: "Dat bericht dat je in een opwelling verstuurt.",
+    onderwerpen: "snelheid, actie, haast"
+  },
+  "koningin-van-zwaarden": {
+    zien: "Een vrouw zit op een troon in de wolken, zwaard omhoog gericht, een vogel in haar andere hand.",
+    simpel: "Eerlijk en scherp tegelijk. Jij zegt de waarheid zonder gemeen te zijn.",
+    voorbeeld: "Jij die eerlijk zegt wat je van iets vindt.",
+    onderwerpen: "eerlijkheid, scherpte, onafhankelijkheid"
+  },
+  "koning-van-zwaarden": {
+    zien: "Een man met een baard zit op een troon met een zwaard in de hand, in een stormachtige lucht.",
+    simpel: "Kalm en rationeel beslissen. Feiten boven emoties — maar met een warm hart.",
+    voorbeeld: "Jij die in de ruzie de nuchtere mediator bent.",
+    onderwerpen: "ratio, recht, autoriteit"
+  },
+
+  /* ---------- Pentakels (aarde: praktisch, geld, lichaam) ---------- */
+  "aas-van-pentakels": {
+    zien: "Uit een wolk steekt een hand een grote munt omhoog met een kroon erop. Onderaan een bloeiende tuin.",
+    simpel: "Een concrete kans: geld, een baan of een project. Dit is het begin.",
+    voorbeeld: "Die vacature die precies op het juiste moment verschijnt.",
+    onderwerpen: "kans, welvaart, nieuw project"
+  },
+  "2-van-pentakels": {
+    zien: "Een jonge figuur jongleert met twee munten. Achter hem deint een schip op zee.",
+    simpel: "Balanceren tussen twee dingen. Dat lukt als je flexibel blijft.",
+    voorbeeld: "Werk en studie in dezelfde week combineren.",
+    onderwerpen: "balans, aanpassingsvermogen, handel"
+  },
+  "3-van-pentakels": {
+    zien: "Een vakman toont een plan aan twee figuren in gewaden. In de kerk achter hem zie je drie bogen.",
+    simpel: "Samenwerken loont. Laat je werk zien en vraag feedback.",
+    voorbeeld: "Die groepsopdracht waar je trots op mag zijn.",
+    onderwerpen: "samenwerking, vakmanschap, erkenning"
+  },
+  "4-van-pentakels": {
+    zien: "Een man zit op een kist met een munt op zijn hoofd, één onder elke voet en twee in zijn armen geklemd.",
+    simpel: "Vasthouden aan wat je hebt. Spaarzaam is oké, gierig niet.",
+    voorbeeld: "Je buffer die je rustig laat groeien.",
+    onderwerpen: "bezit, zekerheid, vasthouden"
+  },
+  "5-van-pentakels": {
+    zien: "Twee figuren lopen door de sneeuw langs een verlicht raam, elk een munt in de hand.",
+    simpel: "Een moeilijke periode. Er is altijd hulp — je moet hem alleen vragen.",
+    voorbeeld: "Die maand dat je even bijleent of hulp vraagt.",
+    onderwerpen: "schaarste, tegenslag, volharden"
+  },
+  "6-van-pentakels": {
+    zien: "Een man op een troon geeft munten aan twee knielende figuren.",
+    simpel: "Geven en nemen in balans. Jij mag óók ontvangen.",
+    voorbeeld: "Die keer dat je hulp aanneemt in plaats van alles alleen te doen.",
+    onderwerpen: "geven, delen, gulheid"
+  },
+  "7-van-pentakels": {
+    zien: "Een man leunt op zijn schop en kijkt naar een tak met zeven munten eraan.",
+    simpel: "Je hebt er hard voor gewerkt — nu even geduld. Het groeit vanzelf.",
+    voorbeeld: "Dat project dat langzaam maar zeker vorm krijgt.",
+    onderwerpen: "geduld, groei, beoordeling"
+  },
+  "8-van-pentakels": {
+    zien: "Een vrouw zit gebogen over een munt die ze bewerkt. Aan de muur hangen acht munten.",
+    simpel: "Vakmanschap: elke dag een beetje beter. Oefening maakt de meester.",
+    voorbeeld: "Die cursus waarbij je elke week iets nieuws leert.",
+    onderwerpen: "skill, toewijding, ambacht"
+  },
+  "9-van-pentakels": {
+    zien: "Een vrouw staat in een wijngaard met een kap over haar hoofd, een hond aan haar voeten. Negen munten hangen aan de muur.",
+    simpel: "Genieten van wat je hebt gebouwd. Je mag trots zijn.",
+    voorbeeld: "Die zondag waarop je alles voor het zeggen hebt.",
+    onderwerpen: "zelfstandigheid, genieten, succes"
+  },
+  "10-van-pentakels": {
+    zien: "Een man, vrouw en kind staan bij een huis met een boog van tien munten erboven.",
+    simpel: "Veiligheid en bezit voor de lange termijn. Familie en thuis zijn goud.",
+    voorbeeld: "Dat eigen huis of de spaarpot voor later.",
+    onderwerpen: "erfenis, familie, financiële zekerheid"
+  },
+  "page-van-pentakels": {
+    zien: "Een jonge figuur loopt door een groen veld met een munt in de hand.",
+    simpel: "Leren en studeren lonen. Een nieuwe skill oppakken.",
+    voorbeeld: "Die cursus waar je deze maand aan begint.",
+    onderwerpen: "studie, kans, praktisch"
+  },
+  "ridder-van-pentakels": {
+    zien: "Een man in harnas staat stil in een veld met een munt in de hand, zijn paard achter hem.",
+    simpel: "Degelijk en gestaag. De schildpad wint de race.",
+    voorbeeld: "Die vaste baan waar je elke maand braaf komt opdagen.",
+    onderwerpen: "vastberadenheid, routine, betrouwbaarheid"
+  },
+  "koningin-van-pentakels": {
+    zien: "Een vrouw zit op een troon met een munt in de hand, een konijn aan haar voeten, een veld vol koren achter haar.",
+    simpel: "Praktische zorg voor jezelf en anderen. Jij regelt het gewoon.",
+    voorbeeld: "Jij die voor iedereen een soepje regelt als iemand ziek is.",
+    onderwerpen: "zorg, nuchterheid, welvaart"
+  },
+  "koning-van-pentakels": {
+    zien: "Een man met een baard zit op een troon versierd met stierenkoppen, een munt in de hand.",
+    simpel: "Succes brengt verantwoordelijkheid. Beheer je middelen verstandig.",
+    voorbeeld: "Jij die het budget van het huishouden regelt.",
+    onderwerpen: "zakelijk succes, overvloed, beheer"
+  }
+};
+
+</script>
+  <script>
+/* ============================================================
    js/kaart-extra.js — extra context per kaart (uitgebreide duiding)
    ------------------------------------------------------------
    KAART_EXTRA[id] vult de basiskaart aan met:
@@ -6664,6 +7168,14 @@ function kaartDomeinVan(id, veld) {
   return ((ex && ex[veld]) || "").replace(/</g, "&lt;");
 }
 
+// Beginners-uitleg per kaart (zie js/kaart-beginner.js): zien / simpel / voorbeeld / onderwerpen
+function kaartBeginnerVan(id) {
+  const b = (typeof KAART_BEGINNER !== "undefined") ? KAART_BEGINNER[id] : null;
+  if (!b) return null;
+  const esc = s => (s || "").replace(/</g, "&lt;");
+  return { zien: esc(b.zien), simpel: esc(b.simpel), voorbeeld: esc(b.voorbeeld), onderwerpen: esc(b.onderwerpen) };
+}
+
 // popup-rijen met extra kaart-context
 function kaartExtraRijen(kaart) {
   const ex = kaartExtraVan(kaart.id);
@@ -6684,6 +7196,7 @@ function kaartExtraRijen(kaart) {
 
 function toonKaartPopup(id) {
   const kaart = kaartVind(id);
+  const beg = kaartBeginnerVan(id);
   const popup = document.getElementById("kaart-popup");
   const kaartEl = document.getElementById("kaart-popup-kaart");
   kaartEl.innerHTML =
@@ -6691,6 +7204,7 @@ function toonKaartPopup(id) {
       kaartBeeld(kaart) + '<span class="chip-en">' + kaart.naam_en + '</span><span class="chip-naam">' + kaart.naam_nl + '</span><div class="glare" id="popup-glare"></div></div></div>' +
     "<h3>" + kaart.symbool + " " + kaart.naam_nl + "</h3>" +
     '<p class="popup-kernwoord">' + kaart.kernwoord + " · " + kaart.naam_en + "</p>" +
+    (beg && beg.simpel ? '<div class="popup-rij"><p class="popup-label">In het kort</p><p>' + beg.simpel + "</p></div>" : "") +
     '<div class="popup-rij"><p class="popup-label">Thema</p><p>' + themaVan(kaart) + "</p></div>" +
     '<div class="popup-rij"><p class="popup-label">Fase</p><p>' + faseVan(kaart) + "</p></div>" +
     '<div class="popup-rij"><p class="popup-label">Kijkrichting</p><p>' + kaart.kijkrichting + "</p></div>" +
@@ -7271,6 +7785,7 @@ function renderKaartDetail(id) {
   };
 
   const ex = kaartExtraVan(id);
+  const beg = kaartBeginnerVan(id);
   const inhoud = document.getElementById("kd-inhoud");
   inhoud.style.setProperty("--kd-tint", kaartAccentVan(k));
   const fase = k.type === "klein" ? faseVan(k).split(" — ")[0] : null;
@@ -7290,31 +7805,37 @@ function renderKaartDetail(id) {
         "</div>" +
       "</div>" +
       '<div class="kd-chips">' +
+        '<span class="kd-chip kd-chip-kern">✦ ' + k.kernwoord + "</span>" +
         '<span class="kd-chip">' + symboolVan(k) + " " + kaartNummerLabel(k) + "</span>" +
         (k.type === "klein" ? '<span class="kd-chip">' + ELEMENT_EMOJI[k.element] + " " + k.element + "</span>" : "") +
         (fase ? '<span class="kd-chip">✦ ' + fase + "</span>" : "") +
+        (beg && beg.onderwerpen ? beg.onderwerpen.split(",").map(o => o.trim()).filter(o => o.toLowerCase() !== String(k.kernwoord).toLowerCase()).map(o => '<span class="kd-chip kd-chip-onderwerp">' + o + "</span>").join("") : "") +
       "</div>" +
-      '<span class="kd-kernwoord">✦ ' + k.kernwoord + "</span>" +
       '<p class="kd-citaat">' + k.vertaling + "</p>" +
       '<p class="kd-stand" id="kd-stand">▲ Rechtop · tik de kaart om te draaien</p>' +
     "</div>" +
-    '<section class="kd-groep" style="--i:1"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>De betekenis</h3>' +
+    (beg ? '<section class="kd-groep" style="--i:1"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Zo werkt deze kaart</h3>' +
+      '<div class="kd-blik"><p class="kd-blik-label">Wat je ziet</p><p>' + beg.zien + "</p></div>" +
+      '<div class="kd-blik"><p class="kd-blik-label">In het kort</p><p>' + beg.simpel + "</p></div>" +
+      '<div class="kd-blik"><p class="kd-blik-label">In het echt</p><p>' + beg.voorbeeld + "</p></div>" +
+    "</section>" : "") +
+    '<section class="kd-groep" style="--i:2"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>De betekenis</h3>' +
       '<div class="kd-blik kd-blik-rech"><p class="kd-blik-label">▲ Rechtop</p><p>' + k.betekenis_rechtop + "</p></div>" +
       '<div class="kd-blik kd-blik-omg"><p class="kd-blik-label">↧ Ondersteboven</p><p>' + k.betekenis_omgekeerd + "</p></div>" +
     "</section>" +
-    '<section class="kd-groep" style="--i:2"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Op de kaart</h3>' +
+    '<section class="kd-groep" style="--i:3"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Op de kaart</h3>' +
       '<div class="kd-blik"><p>' + k.kijkrichting + "</p></div>" +
     "</section>" +
-    '<section class="kd-groep" style="--i:3"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>In je leven</h3>' +
+    '<section class="kd-groep" style="--i:4"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>In je leven</h3>' +
       '<div class="kd-mini-grid">' +
         minis.map(m => '<div class="kd-mini"><p class="kd-mini-label">' + m[0] + " " + m[1] + "</p><p>" + m[2] + "</p></div>").join("") +
       "</div>" +
       (ex && ex.herken ? '<div class="kd-blik kd-herken"><p class="kd-blik-label">In het echte leven</p><p>' + ex.herken + "</p></div>" : "") +
     "</section>" +
     (ex && ex.samen ?
-      '<section class="kd-groep" style="--i:4"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Vaak samen met</h3>' +
+      '<section class="kd-groep" style="--i:5"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Vaak samen met</h3>' +
       '<div class="kd-blik"><p>' + ex.samen + "</p></div></section>" : "") +
-    '<section class="kd-groep" style="--i:5"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>In je journaal</h3>' +
+    '<section class="kd-groep" style="--i:6"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>In je journaal</h3>' +
       '<div class="kd-journaal">' +
         '<p class="kd-mini-label">Reflectievraag</p>' +
         '<p class="reflectie"><span class="reflectie-vraagteken">?</span><span>' + k.reflectievraag + "</span></p>" +
