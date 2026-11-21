@@ -1,47 +1,48 @@
-v51 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
+v54 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
   - index.html
   - sw.js
 
-v51 = MOTION-OVERHAUL: scherm-wissels en tik-animaties glad & premium
-(gemaakt met de motion-foundations + motion-patterns skills)
+v54 = INHOUDLIJKE HERVORMING: alle teksten leven nu — veel tekst, veel inhoud.
+Deze versie vervangt de droogste tekstlagen van de app door complete zinnen
+die een herkenbaar moment noemen + wat het van jou vraagt. Niks "veel tekst,
+weinig inhoud" meer.
 
-DE HOODOORZAAK VAN HET HAPEREN (uit je screenshot):
-1) Bij elke pagina-wissel dimde het oude scherm met filter: brightness()
-   -> iOS moet het HELE scherm elke frame opnieuw tekenen. Dat is de
-   duurste fout die je kunt maken in een transitie. Nu: dimmen met
-   OPACITY (pure GPU-compositing, 0% CPU-verf).
+WAT ER NIEUW IS:
 
-2) De 3D-tilt van de kaart reageerde op ALLE pointer-bewegingen. Op de
-   iPhone betekent dat: ELKE keer dat je over de kaart scrolt/wrijft,
-   werd de kaart + glans 60x per seconde opnieuw getekend - precies het
-   haperende gevoel. Nu: tilt alleen voor muis/trackpad (rAF-gethrottled);
-   op touch krijgt de kaart een keurig eenmalig intro-kanteltje en de
-   "beweeg voor 3D"-hint verdwijnt (heeft daar toch geen zin).
+1) NIEUW BESTAND: js/kaart-domein.js
+   78 kaarten x 3 levensgebieden: geld & praktische zaken, familie & thuis,
+   vriendschap. Elke zin is compleet en concreet, bijv:
+   - De-Dood geld:     "Sluit het gat in je uitgaven: wat je niets meer
+                        oplevert, mag stoppen."
+   - De-Dood familie:  "Een oude ruzie kan eindelijk dicht — begin met de
+                        kleinste zin."
+   - De-Ster vriendschap: "Die vriendin die je herinnert aan wie je bent:
+                        heb je haar al bedankt?"
+   De zinnen verschijnen in de 'In je leven'-mini's op de kaartpagina en in
+   de kaart-popup. De oude korte steekwoorden zijn vervangen, niet aangevuld.
 
-3) Schermen kregen geen compositing-layer toegewezen bij de start van de
-   animatie -> eerste frames moesten alles rasteriseren. Nu: will-change
-   Tijdens de animatie, en daarna netjes opruimen (geen geheugen-opstapeling).
+2) HERschreven: js/kaart-diepte.js
+   78 kaarten x 2 gebieden (liefde, werk & studie). Ook hier nu complete
+   zinnen met een moment + inzicht, in plaats van korte thema's met puntjes.
 
-4) Afbeeldingen decodeerden nóg tijdens de transitie (kaart-detail, popup).
-   Nu worden ze met img.decode() vóór de schermanimatie klaargezet.
+De oude droge fragmenten zitten er nog in als terugval (fallback), maar de
+app toont overal de nieuwe lagen WANT die gaan voor.
 
-5) De app hing bij "verberg het oude scherm" af van een animation-event
-   dat onder belasting laat kan doorkomen -> schermen bleven overlappen.
-   Nu staat er een exacte klok op de keyframe-duur: nooit overlappen.
+GETEST (alles groen):
+- 78 kaarten x 3 domein-velden compleet, 78 x 2 diepte-velden, puur Nederlands
+  (geen vreemde-talen-lekken meer — gecontroleerd)
+- 15/15 leggingen end-to-end op 430x932 (iPhone 15 Pro Max): 0 uitsteeksel
+  uit het spread-kader, 0 horizontale scroll, 0 console-errors, tekst overal
+  aanwezig, geen undefined/NaN in de uitkomsten
+- Kaart-detail: 5 mini's zichtbaar met de nieuwe zinnen, flip rechtop/
+  ondersteboven, knoppen vorige/volgende (wrap na 78), terug-knop, stack schoon
+- Kaart-popup: 12 rijen, inclusief geld/familie/vriendschap uit het nieuwe
+  domein-bestand
+- Zowel nacht- (Aurora) als licht-thema gecontroleerd
+- dist single-file build geladen en gecontroleerd: KAART_DOMEIN (78) en
+  KAART_DIEPTE (78) aanwezig, nieuwe zinnen zichtbaar, 0 errors
 
-PLUS (motion-patterns regels):
-   - kaart-trek-animatie sneller (720 graden in 0.68s ipv 0.9s)
-   - stagger-vertragingen in de timing-band (uitleg-blokken 55ms,
-     kaart-detail-blokken 50ms) en kortere blok-animaties
-   - home-kop krimpt niet meer via layout-maat (marge/max-hoogte = reflow)
-     maar via transform/opacity: 0 reflow tijdens het scrollen
-   - iOS-decel-curve (cubic-bezier(0.32, 0.72, 0, 1)) op alle wissels
-   - reduced-motion was al gerespecteerd - blijft zo
-
-Getest: 15/15 leggingen end-to-end (0 errors), tab/push/pop/popup-mechaniek
-+ klasse-cleanup geverifieerd, dist single-file gecheckt, 430x932
-incl. safe-area: 0 spread-overflows.
-
-Na upload: app openen -> auto-reload -> in Meer onderaan staat "Versie v51".
-Vooral de Bibliotheek -> kaart openen en sluiten een paar keer: het
-verschil met hiervoor voelt meteen.
+Na upload: app openen -> auto-reload -> in Meer onderaan staat "Versie v54".
+Check especially: Bibliotheek -> open een kaart -> scroll naar 'In je leven'
+-> de geld/familie/vriendschap-regels zijn nu echte zinnen in plaats van
+korte steekwoorden. En de popup (tik een kaart in een lezing) laat ze ook zien.

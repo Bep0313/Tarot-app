@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="51">
+<html lang="nl" data-versie="54">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=51 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=54 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    LETTERTYPES (ingebed — de app blijft 100% offline)
@@ -1151,23 +1151,87 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 /* ---------- 17. BIBLIOTHEEK & KAART-DETAIL ---------- */
 #kd-ster.actief { color: var(--goud); border-color: rgba(var(--goud-rgb), 0.5); box-shadow: 0 0 16px rgba(var(--goud-rgb), 0.3); }
 #kd-ster.actief .ster-pad { fill: currentColor; }
-.kd-hero { text-align: center; padding: 10px 0 20px; animation: fadeUp 0.4s ease both; }
-.kd-symbool { font-size: 58px; filter: drop-shadow(0 0 18px rgba(var(--goud-rgb), 0.35)); }
-.kd-kernwoord { color: var(--goud); font-weight: 700; font-size: calc(1.0625rem * var(--tekst-schaal)); margin-top: 10px; }
-.kd-vertaling { color: var(--sec); font-style: italic; margin-top: 4px; font-size: calc(0.875rem * var(--tekst-schaal)); }
-.kd-blok {
-  background: rgba(32, 28, 66, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: var(--r-m);
-  padding: 16px 18px;
-  margin-bottom: 12px;
-  animation: fadeUp 0.4s cubic-bezier(0.22, 0.9, 0.28, 1) both;
-  animation-delay: calc(var(--i) * 50ms);
+/* --- Kaart-detail: per-kaart tint (--kd-tint), hero met wash + watermerk --- */
+.kd-hero { position: relative; text-align: center; padding: 4px 0 6px; animation: fadeUp 0.35s ease both; }
+.kd-hero::before {
+  content: ""; position: absolute; inset: -30px -20px 6px; z-index: -1; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(var(--kd-tint, 232, 200, 116), 0.20), transparent 76%);
 }
-.kd-label { color: var(--lav); font-size: calc(0.6875rem * var(--tekst-schaal)); text-transform: uppercase; letter-spacing: 0.13em; margin-bottom: 6px; }
-.kd-blok p { font-size: calc(0.9062rem * var(--tekst-schaal)); line-height: 1.55; }
-.kd-blok.rechtop { border-left: 3px solid var(--goud); }
-.kd-blok.omgekeerd { border-left: 3px solid var(--lav); }
+.kd-hero::after {
+  content: attr(data-symbool); position: absolute; left: 50%; top: 4px; transform: translateX(-50%);
+  font-size: 150px; line-height: 1; opacity: 0.05; z-index: -1; pointer-events: none;
+}
+.kd-scene { cursor: pointer; }
+.kd-kaart .kaart-foto { transition: transform 0.55s cubic-bezier(0.32, 0.72, 0, 1); }
+.kd-kaart.omgekeerd .kaart-foto { transform: rotate(180deg); }
+.kd-stand {
+  display: inline-block; margin-top: 2px; padding: 6px 14px; border-radius: 999px;
+  background: rgba(var(--kd-tint, 232, 200, 116), 0.13); border: 1px solid rgba(var(--kd-tint, 232, 200, 116), 0.38);
+  color: var(--tekst); font-size: calc(0.75rem * var(--tekst-schaal)); font-weight: 600;
+}
+.kd-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 16px; }
+.kd-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.10);
+  color: var(--sec); font-size: calc(0.75rem * var(--tekst-schaal)); font-variant-numeric: tabular-nums;
+}
+.kd-kernwoord {
+  display: inline-block; margin-top: 12px; padding: 6px 16px; border-radius: 999px;
+  background: rgba(var(--goud-rgb), 0.12); border: 1px solid rgba(var(--goud-rgb), 0.35);
+  color: var(--goud); font-weight: 700; font-size: calc(0.9375rem * var(--tekst-schaal)); letter-spacing: 0.02em;
+}
+.kd-citaat {
+  position: relative; max-width: 17em; margin: 18px auto 8px; padding: 0 6px;
+  font-family: var(--serif); font-style: italic; color: var(--tekst);
+  font-size: calc(1.0625rem * var(--tekst-schaal)); line-height: 1.5; text-wrap: balance;
+}
+.kd-citaat::before {
+  content: "“"; display: block; height: 0.3em; font-size: 2em; line-height: 0.1; font-style: normal;
+  color: rgb(var(--kd-tint, 232, 200, 116)); margin-bottom: 12px;
+}
+.kd-groep { margin-top: 24px; animation: fadeUp 0.4s cubic-bezier(0.22, 0.9, 0.28, 1) both; animation-delay: calc(var(--i) * 55ms); }
+.kd-groep-kop {
+  display: flex; align-items: center; gap: 8px; margin: 0 2px 10px;
+  color: var(--sec); font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.kd-groep-kop::after { content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, rgba(var(--kd-tint, 232, 200, 116), 0.45), transparent 70%); }
+.kd-punt { width: 6px; height: 6px; border-radius: 50%; background: rgb(var(--kd-tint, 232, 200, 116)); flex-shrink: 0; }
+.kd-blik {
+  background: rgba(32, 28, 66, 0.72); border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--r-m); padding: 14px 16px 16px;
+}
+.kd-blik + .kd-blik { margin-top: 10px; }
+.kd-blik p { font-size: calc(0.9062rem * var(--tekst-schaal)); line-height: 1.55; }
+.kd-blik-label {
+  color: var(--lav); font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.13em; margin-bottom: 6px;
+}
+.kd-blik-rech { border-inline-start: 3px solid var(--goud); }
+.kd-blik-omg  { border-inline-start: 3px solid var(--lav); }
+.kd-herken   { border-inline-start: 3px solid rgb(var(--kd-tint, 232, 200, 116)); margin-top: 10px; }
+.kd-mini-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.kd-mini { background: rgba(32, 28, 66, 0.60); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--r-s); padding: 12px 14px; }
+.kd-mini p { font-size: calc(0.8438rem * var(--tekst-schaal)); line-height: 1.5; }
+.kd-mini-label { color: var(--lav); font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700; text-transform: uppercase; letter-spacing: 0.11em; margin-bottom: 5px; }
+.kd-journaal {
+  background: rgba(var(--kd-tint, 232, 200, 116), 0.08); border: 1px solid rgba(var(--kd-tint, 232, 200, 116), 0.28);
+  border-radius: var(--r-m); padding: 16px 18px;
+}
+.kd-journaal .reflectie { margin-top: 2px; }
+.kd-dagvraag { font-size: calc(0.8438rem * var(--tekst-schaal)); line-height: 1.5; color: var(--tekst); font-style: italic; }
+.kd-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; animation: fadeUp 0.4s cubic-bezier(0.22, 0.9, 0.28, 1) 330ms both; }
+.kd-nav-knop {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: var(--r-m); padding: 12px 14px; min-height: 44px; cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.2s ease;
+}
+.kd-nav-knop:active { transform: scale(0.97); }
+.kd-nav-knop.volg { align-items: flex-end; }
+.kd-nav-knop.volg .kd-nav-naam { text-align: right; }
+.kd-nav-richting { color: var(--sec); font-size: calc(0.625rem * var(--tekst-schaal)); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; }
+.kd-nav-naam { font-family: var(--serif); font-size: calc(0.9375rem * var(--tekst-schaal)); color: var(--tekst); text-wrap: balance; max-width: 100%; }
 
 /* ---------- 18. MEER (instellingen) ---------- */
 .meer-groep { margin-bottom: 26px; }
@@ -1252,9 +1316,9 @@ body.licht {
     var(--bg);
 }
 /* Kaarten/vlakken: wit-crème papier met zachte warme schaduw */
-body.licht .legging, body.licht .hist-item, body.licht .positie-blok, body.licht .kd-blok,
+body.licht .legging, body.licht .hist-item, body.licht .positie-blok, body.licht .kd-blik, body.licht .kd-mini,
 body.licht .meer-rij, body.licht .kaart-chip, body.licht .sheet-vraag, body.licht .dag-melding,
-body.licht .leeg-midden, body.licht .journaal-leeg {
+body.licht .leeg-midden, body.licht .journaal-leeg, body.licht .kd-nav-knop {
   background: rgba(255, 255, 255, 0.85);
   border-color: rgba(51, 36, 60, 0.09);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 8px 22px rgba(51, 36, 63, 0.08);
@@ -1635,7 +1699,6 @@ p, .mix-uitleg, .sub-uitleg, .journaal-tekst, .verhaal { text-wrap: pretty; }
 /* --- v49: motion-glad — touch krijgt een éénmalig intro-kanteltje in plaats
    van duur hover-tilt tijdens scrollen; de "beweeg voor 3D"-hint is mouse-only --- */
 @media (pointer: coarse) {
-  .kd-tilt-hint { display: none; }
   .kd-kaart { animation: kaartIntro 0.7s cubic-bezier(0.32, 0.72, 0, 1) 0.12s both; }
   .popup-kaart3d { animation: kaartIntro 0.6s cubic-bezier(0.32, 0.72, 0, 1) 0.05s both; }
 }
@@ -1643,6 +1706,13 @@ p, .mix-uitleg, .sub-uitleg, .journaal-tekst, .verhaal { text-wrap: pretty; }
   from { transform: perspective(900px) rotateY(-12deg) translateY(10px); opacity: 0; }
   to   { transform: perspective(900px) rotateY(0deg) translateY(0); opacity: 1; }
 }
+
+/* --- v52: kaart-detail in Aurora (licht) — zachte pastel-tints op ivoor --- */
+body.licht .kd-chip { background: rgba(42, 36, 64, 0.05); border-color: rgba(42, 36, 64, 0.12); color: var(--sec); }
+body.licht .kd-hero::before { background: radial-gradient(closest-side, rgba(var(--kd-tint, 138, 100, 32), 0.16), transparent 76%); }
+body.licht .kd-journaal { background: rgba(var(--kd-tint, 138, 100, 32), 0.07); }
+body.licht .kd-stand { color: var(--tekst); }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
 </style>
   <script>
@@ -3941,103 +4011,519 @@ function bindTilt(sceneEl, cardEl, glareEl) {
 </script>
   <script>
 /* ============================================================
-   js/kaart-diepte.js — extra duiding per kaart
+   js/kaart-diepte.js — liefde & werk per kaart (herschreven, v54)
    ------------------------------------------------------------
-   KAART_DIEPTE[id] = { liefde: "...", werk: "..." }
-   Korte, concrete zinnen over hoe de kaart zich verhoudt tot
-   relaties (liefde/vriendschap) en tot werk/studie/geld (werk).
-   Wordt getoond in de kaart-popup en het kaart-scherm (Bibliotheek).
+   Per kaart één zin 'liefde' en één zin 'werk': een herkenbaar
+   moment plus een inzicht of advies. Elke zin zegt wát er gaande
+   is en wat je ermee kunt — geen droge kernwoord-fragmenten.
+   Wordt getoond in de kaart-popup, de per-positieblokken en de
+   'In je leven'-mini's op de kaartpagina (Bibliotheek).
    ============================================================ */
 
 const KAART_DIEPTE = {
 
   /* ---------- Grote Arcana ---------- */
-  "de-dwaas":            { liefde: "verliefd zonder land onder de voeten",                    werk: "stap het onbekende in, plan komt onderweg" },
-  "de-magier":           { liefde: "charme en initiatief nemen",                            werk: "alles ligt klaar: maak het waar" },
-  "de-hogepriesteres":   { liefde: "luister naar je onderbuikgevoel",                        werk: "de oplossing zit binnenin, niet buiten je" },
-  "de-keizerin":         { liefde: "warmte, verzorging, laten bloeien",                      werk: "groei geduldig voeden tot iets rijps" },
-  "de-keizer":           { liefde: "duidelijkheid en afspraken zijn sexy",                  werk: "orde, regels en verantwoordelijkheid nemen" },
-  "de-hierofant":       { liefde: "erkenning van buiten, officieel maken",                  werk: "volgens het boekje, opleiding, leerling zijn" },
-  "de-geliefden":        { liefde: "een echte keuze tussen twee mensen of wegen",            werk: "kiezen voor wat (en wie) er echt toe doet" },
-  "de-zegewagen":        { liefde: "samen de slee in beweging zetten",                       werk: "doorzetten richting iets groots" },
-  "kracht":              { liefde: "geduld zegeviert over hard schreeuwen",                  werk: "zachte overtuiging is je sterkste spier" },
-  "de-kluizenaar":       { liefde: "even alleen zijn om te weten wat je voelt",             werk: "met terugtrekken win je helderheid" },
-  "rad-van-fortuin":     { liefde: "wat vastzat komt weer in beweging",                     werk: "timing — de wind draait, surf mee" },
-  "gerechtigheid":       { liefde: "er eerlijk van harte over praten",                       werk: "harde feiten wegen, eerlijk oordelen" },
-  "de-gehangene":        { liefde: "een keer de wereld door de ogen van de ander",          werk: "iets stilleggen om het anders te zien" },
-  "de-dood":             { liefde: "iets eindigen zodat er plaats komt",                    werk: "een deur gaat dicht — en dat is goed" },
-  "matigheid":           { liefde: "geven en nemen in gelijke maat",                        werk: "rustig tempo, de juiste mix vinden" },
-  "de-duivel":           { liefde: "zoete ketens: ben je vrij in deze liefde?",             werk: "kijk naar je eigen verslaving aan status of werk" },
-  "de-toren":            { liefde: "echt contact pas na een schok",                            werk: "wat kraakt gaat om — bouw daarna beter" },
-  "de-ster":             { liefde: "open wonden helen, hoop komt terug",                     werk: "geloof weer in je eigen licht" },
-  "de-maan":             { liefde: "angst en verlangens vertroebelen wat je ziet",          werk: "niet alles is wat het lijkt — onderzoek" },
-  "de-zon":              { liefde: "open, vrolijk en zonder spelletjes",                    werk: "zichtbaar stralen, succes voelen" },
-  "het-oordeel":         { liefde: "oude bekenden keren terug, opnieuw beginnen",           werk: "wat lang sliep wordt wakker geroepen" },
-  "de-wereld":           { liefde: "een vol, afgerond hoofdstuk samen",                    werk: "ronde maken, beloning innen, eromheen dansen" },
+  "de-dwaas":             { liefde: "Verliefd zonder land onder je voeten — en juist dat maakt het zo spannend.",                               werk: "Begin gerust zonder plan; het plan schrijf je onderweg, als je al rijdt." },
+  "de-magier":            { liefde: "Je trekt aan met wie je bént — niet met een aangepaste versie van jezelf.",                                 werk: "Je hebt alles al in huis; dit is de week van doen, niet van plannen." },
+  "de-hogepriesteres":    { liefde: "Je buikgevoel wist het eerder dan de appjes — en je had gelijk.",                                           werk: "Stop met meningen zoeken; het antwoord zit allang in jezelf." },
+  "de-keizerin":          { liefde: "Jij bent de warmte in deze relatie — zorg dat je er zelf ook in zit.",                                     werk: "Groei komt van voeding, niet van duwen. Geef het rust en aandacht." },
+  "de-keizer":            { liefde: "Duidelijke afspraken zijn liefde in een nette jas — maak ze gewoon.",                                      werk: "Zet één keer structuur neer en iedereen wordt er rustiger van." },
+  "de-hierofant":         { liefde: "Officieel maken mag: samenwonen, trouwen, of gewoon zeggen “wij zijn een ding”.",                          werk: "Leer van iemand die het pad kent: cursus, mentor, het goede oude boek." },
+  "de-geliefden":         { liefde: "Diep vanbinnen weet je al wie je kiest — je zoekt alleen nog bevestiging.",                                 werk: "Kies één ding en kies het voluit; half kiezen is niet kiezen." },
+  "de-zegewagen":         { liefde: "Trek samen aan één kant, anders draait de wagen alleen maar rondjes.",                                     werk: "Eén doel deze week en er dwars doorheen — geen lijstje van twintig dingen." },
+  "kracht":               { liefde: "Zacht blijven is hier de sterke zet; gelijk halen kan altijd nog.",                                        werk: "Je overtuigt door kalmte, niet door harder te praten dan de rest." },
+  "de-kluizenaar":        { liefde: "Trek je even terug om te voelen wat jíj wilt — niet wat de ander wil.",                                    werk: "Tien minuten stilte geeft meer helderheid dan een meeting van een uur." },
+  "rad-van-fortuin":      { liefde: "Iets komt weer in beweging — en jij mag mee blijven kiezen welke kant het opgaat.",                        werk: "De wind draait mee: surf erop in plaats van ertegen in te zwemmen." },
+  "gerechtigheid":        { liefde: "Zeg het zoals het is; eerlijkheid maakt deze relatie alleen maar beter.",                                  werk: "Weeg de feiten zonder smoesjes — de uitslag is eerlijk, ook voor jou." },
+  "de-gehangene":         { liefde: "Bekijk het gesprek eens vanuit de ander — alles ziet er meteen anders uit.",                               werk: "Sta stil bij wat vastloopt; het antwoord komt van een kant die je niet verwacht." },
+  "de-dood":              { liefde: "Iets moet echt eindigen, anders komt er geen plek voor wat wél klopt.",                                    werk: "Sluit het oude project of de oude rol af; pas daarna stroomt het weer." },
+  "matigheid":            { liefde: "Geven en nemen in precies de goede maat — check wie er te veel geeft.",                                    werk: "Rustig tempo versla gehaaid werk; vind je mix en houd je ritme aan." },
+  "de-duivel":            { liefde: "Vraag je eerlijk af: kies ik dit uit liefde of uit gewoonte?",                                            werk: "Die ene gewoonte — scrollen, doorpompen — kost je meer dan je toegeeft." },
+  "de-toren":             { liefde: "Wat kraakt moet breken — en daarna pas kan er écht contact komen.",                                       werk: "Laat het plan vallen dat niet werkt; bouwen kan pas na de klap." },
+  "de-ster":              { liefde: "Na de storm komt het vertrouwen terug — langzaam, maar echt.",                                            werk: "Laat je licht zien: deel het werk waar je stilletjes trots op bent." },
+  "de-maan":              { liefde: "Lees dat ene bericht niet vijf keer — er zit minder in dan je denkt.",                                    werk: "Niet alles is wat het lijkt: check de feiten voordat je reageert." },
+  "de-zon":               { liefde: "Zeg het gewoon vrolijk en direct — zonneschijn heeft geen strategie nodig.",                               werk: "Een goede week om zichtbaar te zijn: deel het, pitch het, laat het zien." },
+  "het-oordeel":          { liefde: "Iemand uit het verleden komt terug — jij beslist of dat een ja is.",                                       werk: "Iets wat lang sliep wordt wakker: pak die kans voor hij weer inslaapt." },
+  "de-wereld":            { liefde: "Samen een hoofdstuk afronden voelt als thuiskomen — vier het ook echt.",                                  werk: "Maak het af, incasseer de complimenten, en kijk dan pas om." },
 
   /* ---------- Staven ---------- */
-  "aas-van-staven":      { liefde: "een sprankje passie, vonk van nu",                      werk: "nieuw idee vastpakken en laten branden" },
-  "2-van-staven":        { liefde: "de wereld ligt open — verleg je grenzen",              werk: "plannen maken voor groter dan nu" },
-  "3-van-staven":        { liefde: "uitkijken naar wat eraan komt",                        werk: "schepen op zee: jouw inzet komt terug" },
-  "4-van-staven":       { liefde: "thuis vieren, samen feest",                             werk: "mijlpaal halen en er evenbij stilstaan" },
-  "5-van-staven":        { liefde: "prikkelen of echt ruzie?",                             werk: "gezonde concurrentie, botende ego's" },
-  "6-van-staven":        { liefde: "trots mogen stralen voor je partner",                  werk: "erkenning en publiek succes" },
-  "7-van-staven":        { liefde: "je plek verdedigen zonder te vechten",                 werk: "positie houden onder druk" },
-  "8-van-staven":        { liefde: "het gaat snel — geniet van de rit",                    werk: "alle ballen zijn in de lucht: tempo!" },
-  "9-van-staven":        { liefde: "moe maar niet opgeven",                                werk: "uitgeput doorgaan — de laatste loodjes" },
-  "10-van-staven":      { liefde: "teveel gewicht — leg wat af",                          werk: "niet alles zelf sjouwen" },
-  "page-van-staven":     { liefde: "speelse, ontdekkende verliefdheid",                    werk: "nieuw talent ontdekken met enthousiasme" },
-  "ridder-van-staven":   { liefde: "hartstocht — blijf branden, niet opbranden",           werk: "vol enthousiasme op weg, kijk uit waar" },
-  "koningin-van-staven": { liefde: "warm, zelfverzekerd en gul",                          werk: "natuurlijk leiderschap dat inspireert" },
-  "koning-van-staven":   { liefde: "groot hart, grote warme visie",                   werk: "visie neerzetten en mensen meekrijgen" },
+  "aas-van-staven":       { liefde: "Er vonkt iets nieuws — geef het lucht, maar houd je hoofd erbij.",                                        werk: "Dat ene idee van 23:00? Pak het op voordat de vonk dooft." },
+  "2-van-staven":         { liefde: "Je kijkt over de horizon van je relatie: waar wil jíj hiermee heen?",                                     werk: "Twee wegen, één keuze — kies de kant die je stilletjes al wilde." },
+  "3-van-staven":         { liefde: "Wat je hebt gegeven komt terug — gun het nog een week.",                                                 werk: "De schepen zijn onderweg; vertrouw op wat je al hebt uitgezet." },
+  "4-van-staven":         { liefde: "Vieren met wie je liefhebt — ook als het om iets kleins gaat.",                                           werk: "Mijlpaal gehaald? Sta er één avond bij stil voordat je weer doorrent." },
+  "5-van-staven":         { liefde: "Gekibbel is geen breuk — prik vooral niet als je moe bent.",                                              werk: "Je hoeft niet elk gevecht aan te gaan; kies er één." },
+  "6-van-staven":         { liefde: "Straal een keer met je verhaal in plaats van het weg te lachen.",                                         werk: "Compliment gekregen? Zeg dankjewel en laat zien wat je maakte." },
+  "7-van-staven":         { liefde: "Sta rustig op je plek — wie je kent, weet waar je staat.",                                                werk: "Onderbouw je keuze één keer goed, daarna niet meer." },
+  "8-van-staven":         { liefde: "Het gaat snel — laat de liefde niet per ongeluk op de achterbank belanden.",                              werk: "Alles komt tegelijk: kies wat er vandaag écht moet." },
+  "9-van-staven":         { liefde: "Je bent moe, maar niet klaar — geef de relatie nog één ronde.",                                           werk: "Laatste loodjes: leun op wat al staat in plaats van te twijfelen." },
+  "10-van-staven":        { liefde: "Jij sjouwt alles in je eentje — om hulp vragen is geen zwakte.",                                          werk: "De stapel delen is geen falen: geef één taak weg." },
+  "page-van-staven":      { liefde: "Iemand of iets maakt jou nieuwsgierig — dat is best een goed teken.",                                     werk: "Een bericht biedt een kans: kijk er even in voordat je doorscrollt." },
+  "ridder-van-staven":    { liefde: "Hartstocht is er, beloftes nog niet — geniet en kijk wat blijft.",                                        werk: "Vol enthousiasme begonnen: bouw vanavond de vaart een beetje af." },
+  "koningin-van-staven":  { liefde: "Jij maakt de sfeer — zonder je aan te passen aan wie dan ook.",                                           werk: "Leiding geven op jouw manier: warm, duidelijk, overtuigend." },
+  "koning-van-staven":    { liefde: "Grote gebaren zijn leuk, zekerheid voelt beter — geef beide.",                                            werk: "Zet je visie in één zin neer — mensen stappen vanzelf mee." },
 
   /* ---------- Bekers ---------- */
-  "aas-van-bekers":      { liefde: "een nieuw vat vol gevoel, aanbod",                     werk: "werk dat vanuit je hart stroomt" },
-  "2-van-bekers":        { liefde: "wederkerige liefde, eerlijk delen",                  werk: "samenwerking op basis van respect" },
-  "3-van-bekers":        { liefde: "vriendschap en community rondom jullie",             werk: "team wat samen succes viert" },
-  "4-van-bekers":       { liefde: "mismoedig — kijk nog eens om je heen",                 werk: "interne ontevredenheid, uit je schulp" },
-  "5-van-bekers":       { liefde: "rouw om wat is, hoop over het hoofd gezien",           werk: "verlies verwerken zonder blind te worden" },
-  "6-van-bekers":       { liefde: "nostalgie, een oude liefde of vriendschap",            werk: "herinneren hoe het begon, terug naar je basis" },
-  "7-van-bekers":       { liefde: "fantasieën versus de echte relatie",                  werk: "teveel opties — maak een keuze" },
-  "8-van-bekers":       { liefde: "weglopen van wat je niet meer voedt",                 werk: "klaren achterlaten, op zoek naar zin" },
-  "9-van-bekers":       { liefde: "tevreden in je vel, alleen maar niet eenzaam",         werk: "je hebben genoeg — geniet ervan" },
-  "10-van-bekers":      { liefde: "gezinshuiselijk geluk, harmonie",                    werk: "emotionele compleetheid thuis en op werk" },
-  "page-van-bekers":    { liefde: "een kaartje, gevoelig en verlegen",                   werk: "creatief beginnen, boodschap van binnen" },
-  "ridder-van-bekers":  { liefde: "de romantische ridder — grootste gebaar",              werk: "aanbieding op tafel, design je droom" },
-  "koningin-van-bekers":{ liefde: "mededogen, je hele hart open",                        werk: "empathie als kracht, intuïtief besluiten" },
-  "koning-van-bekers":  { liefde: "warme steun zonder oordelen",                        werk: "balans tussen zakelijk en menselijk" },
+  "aas-van-bekers":       { liefde: "Je hart opent zich onverwacht — duw het niet dicht uit gewoonte.",                                       werk: "Kies werk dat voelt als stromen, niet als zwemmen tegen de stroom in." },
+  "2-van-bekers":         { liefde: "De klik is echt én twee kanten op — koester dit gewoon.",                                                 werk: "De eerste meeting klikte? Doe een voorstel en kijk wat er terugkomt." },
+  "3-van-bekers":         { liefde: "Je mensen doen ertoe — plan die avond dus écht in.",                                                     werk: "Samen winnen is ook werken: deel het succes met wie er meedeed." },
+  "4-van-bekers":         { liefde: "“Prima” is niet prima — kijk wat je mist en zeg het gewoon.",                                            werk: "Je verveelt je niet zomaar: je bent toe aan iets met betekenis." },
+  "5-van-bekers":         { liefde: "Rouw om wat weg is, maar zie ook de twee bekers die nog vol staan.",                                      werk: "Een tegenvaller is geen oordeel — vraag je af wat de misser je zegt." },
+  "6-van-bekers":         { liefde: "Een geur, liedje of oude foto brengt de vonk terug — gebruik hem.",                                      werk: "Herinner waar je ooit begon; dat vuur herstart vanzelf." },
+  "7-van-bekers":         { liefde: "Drie matches, vier wat-ifs — kies één mens, niet een fantasie.",                                         werk: "Alle opties even mooi kan niet: maak de keuze en ga erin." },
+  "8-van-bekers":         { liefde: "Weggaan is hier niet vluchten — het is op zoek naar meer.",                                              werk: "Stap op als het niets meer voedt; beter bestaat echt." },
+  "9-van-bekers":         { liefde: "Je zucht tevreden — en verdient zo'n avond extra.",                                                      werk: "Wens uitgekomen? Geniet er twee volle dagen van voor de volgende sprint." },
+  "10-van-bekers":        { liefde: "Dit voelt als thuis: rust, lach en echte vertrouwdheid.",                                                 werk: "Werk en privé in balans — verlies de ene helft niet in de andere." },
+  "page-van-bekers":      { liefde: "Een klein gebaar of verlegen berichtje betekent meer dan het lijkt.",                                     werk: "Schrijf die creatieve inval vanavond op — morgen ben je hem kwijt." },
+  "ridder-van-bekers":    { liefde: "Bloemen zijn leuk, er gewoon zíjn is nog beter.",                                                        werk: "Een prachtig aanbod komt langs: check de voorwaarden, niet alleen de glans." },
+  "koningin-van-bekers":  { liefde: "Je voelt de ander feilloos aan — check ook even wat jíj nodig hebt.",                                      werk: "Intuïtief beslissen is hier geen gok, maar een gave." },
+  "koning-van-bekers":    { liefde: "Rustig blijven als het stormt is jouw stilste superkracht.",                                               werk: "Hoofd én hart samen: je beslist rustig én menselijk." },
 
   /* ---------- Zwaarden ---------- */
-  "aas-van-zwaarden":    { liefde: "eerlijk zeggen hoe het zit",                          werk: "heldere analyse, kwestie doorsnijden" },
-  "2-van-zwaarden":      { liefde: "stilzwijgen verbergt een keuze",                     werk: "met dubbele info toch beslissen" },
-  "3-van-zwaarden":      { liefde: "pijn onder ogen zien, hart eruit",                   werk: "teleurstelling verwerken, niet doorslikken" },
-  "4-van-zwaarden":      { liefde: "even adem ruimen in je eentje",                     werk: "time-out! recuperatie is productief" },
-  "5-van-zwaarden":      { liefde: "kleine overwinning, grote afstand",                 werk: "winst pakken terwijl de relatie lijdt" },
-  "6-van-zwaarden":      { liefde: "samen weg van ruzie naar rust",                    werk: "verhuizen naar rustiger water" },
-  "7-van-zwaarden":      { liefde: "niet alles delen met de ander",                   werk: "listig te werk, of oneerlijk spel?" },
-  "8-van-zwaarden":      { liefde: "je voelt gevangen — de deur staat open",           werk: "zelfbeperking losmaken" },
-  "9-van-zwaarden":      { liefde: "'s nachts piekeren over de liefde",               werk: "angst groter dan het echte probleem" },
-  "10-van-zwaarden":     { liefde: "echt voorbij — eindpunt bereikt",                werk: "het ergste is voorbij, daarna komt opluchting" },
-  "page-van-zwaarden":   { liefde: "scherpe woorden, nieuwsgierig naar waarheid",    werk: "blij leren, kritisch meekijken" },
-  "ridder-van-zwaarden": { liefde: "direct, snel verliefd, altijd weg",           werk: "brutale energie, snelle uitdaging aan" },
-  "koningin-van-zwaarden":{ liefde: "scherp zien wat er speelt, helder praten",  werk: "ervaren, nuchter oordelen" },
-  "koning-van-zwaarden": { liefde: "hoofd boven hart, rationeel",                werk: "autoriteit met kennis en logica" },
+  "aas-van-zwaarden":     { liefde: "Zeg hardop hoe het zit — helderheid opent hier alle deuren.",                                             werk: "Je ziet de oplossing plots glashelder: schrijf op en handel vandaag." },
+  "2-van-zwaarden":       { liefde: "Niet kiezen is ook een keuze — en meestal de duurste.",                                                   werk: "Doe de blinddoek af: je weet al welke van de twee het wordt." },
+  "3-van-zwaarden":       { liefde: "De pijn is echt — praat erover in plaats van hem te dragen.",                                             werk: "Teleurstelling mag er zijn, inslikken niet: haal er iemand bij." },
+  "4-van-zwaarden":       { liefde: "Rust nemen is niet terugtrekken — het is opladen.",                                                       werk: "Een pauze is geen verloren tijd; dat merk je pas als je terugkomt." },
+  "5-van-zwaarden":       { liefde: "Je kunt gelijk halen én de ander verliezen — wat wil je nou echt?",                                        werk: "Gewonnen maar alleen? Kies je gevecht en laat de rest los." },
+  "6-van-zwaarden":       { liefde: "Samen weg van de spanning — rustiger water bestaat echt.",                                                werk: "Andere baan, stad of team: de overstap voelt goed zodra er vaart in zit." },
+  "7-van-zwaarden":       { liefde: "Niet alles delen is slim — maar de dingen die ertoe doen wel.",                                           werk: "Wees strategisch: houd je kaarten nog even tegen je borst." },
+  "8-van-zwaarden":       { liefde: "De kooi voelt echt, maar de deur staat open — kijk nog eens goed.",                                       werk: "“Ik kan niet” is vaak “ik durf niet”: begin bij het kleinste stapje dat wél kan." },
+  "9-van-zwaarden":       { liefde: "Om drie uur 's nachts is alles zwarter dan het is — slaap er een nacht over.",                            werk: "Angst groeit in het donker; meet hem morgenochtend nog eens." },
+  "10-van-zwaarden":      { liefde: "Dit is echt voorbij — en dat betekent: de pijn heeft een einddatum.",                                    werk: "Het ergste is gebeurd; opruimen mag, herstarten kan vanaf hier." },
+  "page-van-zwaarden":    { liefde: "Vraag het gewoon eerlijk — je krijgt betere antwoorden dan tips.",                                        werk: "Nieuwsgierigheid betaalt zich terug: stel die ene vraag in de meeting." },
+  "ridder-van-zwaarden":  { liefde: "Snel is fijn, bot niet — temper je toon een tikje.",                                                      werk: "Hard rijden mag, maar rijd niet over je eigen plan heen." },
+  "koningin-van-zwaarden":{ liefde: "Je overziet de situatie volledig — zet de grens met een glimlach.",                                       werk: "Je prikt door smoesjes heen; eerlijke feedback is hier een cadeautje." },
+  "koning-van-zwaarden":  { liefde: "Kop boven hart in deze ronde — logica beslist, en dat mag.",                                              werk: "Verstand beslist: de cijfers liegen niet, je gevoel soms wel." },
 
   /* ---------- Pentakels ---------- */
-  "aas-van-pentakels":   { liefde: "een concreet aanbod, tastbaar",            werk: "kans met voeten in de klei: pak aan" },
-  "2-van-pentakels":     { liefde: "balanceren tussen jaw en nee",           werk: " twee projecten tegelijk jongleren" },
-  "3-van-pentakels":     { liefde: "elkaars talent binnenhalen en waarderen", werk: "samen bouwen, vakmanschap samen" },
-  "4-van-pentakels":     { liefde: "vasthouden of vastzitten?",             werk: "buffer opbouwen, niet gierig worden" },
-  "5-van-pentakels":     { liefde: "tekort dat je samen kunt dragen",     werk: "even moeite — hulp bestaat, kijk op" },
-  "6-van-pentakels":     { liefde: "geven en nemen in evenwicht",       werk: "delen van kennis of geld — genereus" },
-  "7-van-pentakels":     { liefde: "geduld: liefde groeit in haar eigen tempo", werk: "langzaam groeien is nog steeds groeien" },
-  "8-van-pentakels":     { liefde: "elke dag een klein beetje investeren", werk: "doorgaan, je vak verfijnen" },
-  "9-van-pentakels":     { liefde: "genieten van wat je samen hebt",   werk: "vruchten plukken, financiÃ«le rust" },
-  "10-van-pentakels":    { liefde: "familie, geslacht, langdurig welzijn", werk: "erfenis of winstgevende afronding" },
-  "page-van-pentakels":  { liefde: "aandacht voor praktische gebaren",  werk: "leergeïj-ierige kansen aangrijpen" },
-  "ridder-van-pentakels":{ liefde: "trouw, betrouwbaar, traag maar zeker", werk: "stug doorwerken, routine is goud" },
-  "koningin-van-pentakels":{ liefde: "verzorgend, warm en praktisch", werk: "groeien met rust — werk met zorg" },
-  "koning-van-pentakels": { liefde: "vast, trouw, beschermend",      werk: "stevig resultaat, bouwen aan imperium" }
+  "aas-van-pentakels":    { liefde: "Een concreet aanbod: samen eten, samen huren, iets vastleggen.",                                         werk: "De opdracht of baan valt zomaar in je schoot — pak hem met twee handen." },
+  "2-van-pentakels":      { liefde: "Je houdt alles in de lucht — geef je relatie één vaste plek in je agenda.",                                werk: "Twee ballen in de lucht kan, drie niet — schrap er één." },
+  "3-van-pentakels":      { liefde: "Ieders talent meenemen maakt jullie samen sterker.",                                                      werk: "Samen bouwen aan iets goeds: verdeel het werk en geniet van het vakmanschap." },
+  "4-van-pentakels":      { liefde: "Vasthouden kan, controleren niet — voel het verschil.",                                                    werk: "Beschermen mag, knijpen niet: kijk waar je te strak vasthoudt." },
+  "5-van-pentakels":      { liefde: "Samen door een zwaar moment — alleen hoeft niemand het te dragen.",                                         werk: "Het is even zwaar, en hulp bestaat: vraag er één keer om." },
+  "6-van-pentakels":      { liefde: "Geven én ontvangen: check wie er in deze relatie te veel geeft.",                                         werk: "Jouw kennis betaalt zich terug in meer dan geld — geef er wat van weg." },
+  "7-van-pentakels":      { liefde: "Liefde groeit in jaren, niet in appjes per dag — gun het de tijd.",                                       werk: "Langzaam is óók groei: de plant bloeit precies wanneer jij niet kijkt." },
+  "8-van-pentakels":      { liefde: "Kleine dagelijkse gebaren doen het werk: een berichtje telt ook.",                                         werk: "Elke dag een kwartier oefenen: over een maand zit je vak op een ander niveau." },
+  "9-van-pentakels":      { liefde: "Geniet van wat jullie hébben, in plaats van van wat er nog moet.",                                        werk: "De vruchten hangen klaar — pluk ze zonder schuldgevoel." },
+  "10-van-pentakels":     { liefde: "Familie, traditie, thuis — je bouwt aan iets dat overleeft.",                                             werk: "Dit werk draagt je naam en je toekomst: bouw iets dat blijft." },
+  "page-van-pentakels":   { liefde: "Kleine praktische gebaren werken hier beter dan grote woorden.",                                           werk: "Leer de basis grondig: die cursus is de moeite meer dan waard." },
+  "ridder-van-pentakels": { liefde: "Stevig en standvastig aanwezig zijn — dat is jouw liefdestaal.",                                          werk: "Routine en stiptheid: kleine stabiele stappen winnen de race." },
+  "koningin-van-pentakels": { liefde: "Jij geeft zorgen zonder op te branden — koester jezelf ook.",                                           werk: "Warm én praktisch: je regelt het echt, en dat mag gezien worden." },
+  "koning-van-pentakels": { liefde: "Je bent provider en beschermer — zonder te knellen.",                                                     werk: "Je bouwt aan iets tastbaars: vermogen, naam, toekomst." }
+};
+
+</script>
+  <script>
+/* ============================================================
+   js/kaart-domein.js — geld, familie & vriendschap per kaart
+   ------------------------------------------------------------
+   Per kaart drie complete zinnen: één over geld & praktische
+   zaken, één over familie & thuis, één over vriendschap.
+   Elke zin noemt een herkenbaar moment plus wat het van jou
+   vraagt — geen kale thema-fragmenten. Wordt getoond in de
+   'In je leven'-mini's op de kaartpagina en in de kaart-popup.
+   ============================================================ */
+
+const KAART_DOMEIN = {
+
+  /* ---------- Grote Arcana ---------- */
+  "de-dwaas": {
+    geld: "Je koopt iets zonder te twijfelen — soms de beste aankoop van de maand, soms spijt op zondagavond.",
+    familie: "Iemand thuis wil iets nieuws proberen; doe mee in plaats van te waarschuwen.",
+    vriendschap: "Zeg ja op die spontane uitnodiging — twijfelen komt toch pas als je thuis bent."
+  },
+  "de-magier": {
+    geld: "Alles om te verdienen ligt al klaar; breng het eindelijk bij elkaar.",
+    familie: "Iemand in huis laat een talent zien — zeg er iets van, hard genoeg.",
+    vriendschap: "Je vrienden zien jouw talent beter dan jij zelf; geloof ze één keer."
+  },
+  "de-hogepriesteres": {
+    geld: "Je weet allang wat je met dat geld moet — zeg de beslissing hardop.",
+    familie: "Er hangt iets ongezegds in huis; wacht tot het rijp is en forceer niets.",
+    vriendschap: "Een vriendin zegt “prima” — dat is het niet; vraag gewoon door."
+  },
+  "de-keizerin": {
+    geld: "Geef je huis of je werkplek de liefdevolle upgrade die het verdient.",
+    familie: "Jij bepaalt de sfeer thuis: kaarsje aan, tafel dekken, mensen laten landen.",
+    vriendschap: "Verzorg je vriendschappen als planten: vaste aandacht werkt beter dan grote gebaren."
+  },
+  "de-keizer": {
+    geld: "Zet de administratie op één vast moment per week — de rest van de dagen is vrij.",
+    familie: "Leg de afspraken thuis één keer hard vast: wie wat doet, staat op papier.",
+    vriendschap: "In de groep wil niemand de planner zijn — wees jij het één keer."
+  },
+  "de-hierofant": {
+    geld: "Betaal het pad dat je verder brengt: opleiding, certificaat, goede mentor.",
+    familie: "Traditie hoeft niet benauvend te zijn — kies bewust wat je behoudt.",
+    vriendschap: "Jullie eigen rituelen (de jaarlijkse trip, de vaste borrel) zijn goud: bewaak ze."
+  },
+  "de-geliefden": {
+    geld: "Twee opties, één keuze — welk geldbesluit voelt als thuiskomen?",
+    familie: "Een keuze in het gezin raakt iedereen: leg je kaarten open op tafel.",
+    vriendschap: "Kies deze maand één vriendschap om écht in te investeren."
+  },
+  "de-zegewagen": {
+    geld: "Eén gelddoel per maand verslaat tien halve plannen.",
+    familie: "Jij bent deze week de motor thuis — maar vraag ook even om hulp.",
+    vriendschap: "Pak die vriend op die altijd vaart heeft: mooie energie, met mate."
+  },
+  "kracht": {
+    geld: "Onderhandel kalm: rustige stem, stevige prijs.",
+    familie: "Geef thuis je grens aan zonder te schreeuwen — dat werkt beter.",
+    vriendschap: "Eerlijk zijn tegen een vriendin kan zacht én stevig tegelijk."
+  },
+  "de-kluizenaar": {
+    geld: "Geen shopgevoel nu — zoek eerst uit wat je eigenlijk mist.",
+    familie: "Trek je even terug uit de drukte thuis; je komt vanzelf liever terug.",
+    vriendschap: "Die vriendin die al lang op “we moeten afspreken” wacht: bel haar."
+  },
+  "rad-van-fortuin": {
+    geld: "Een onverwachte meevaller of tegenvaller — het wiel draait gewoon door.",
+    familie: "Nieuws in de familie legt alles even door elkaar en ruimt ook op.",
+    vriendschap: "Iemand van vroeger duikt op: oud contact, nieuwe energie."
+  },
+  "gerechtigheid": {
+    geld: "De rekening of teruggave valt eerlijk uit — controleer het alleen even zelf.",
+    familie: "Een familiezaak vraagt eerlijkheid over wat ieder geeft.",
+    vriendschap: "Praat het uit: eerlijkheid maakt deze vriendschap juist steviger."
+  },
+  "de-gehangene": {
+    geld: "Die investering staat op “park” — beslis of het strategie is of uitstel.",
+    familie: "Iemand thuis wacht op een zet van jou; jij mag de eerste zijn.",
+    vriendschap: "Jij appt altijd als eerste — laat de ander deze keer bewegen."
+  },
+  "de-dood": {
+    geld: "Sluit het gat in je uitgaven: wat je niets meer oplevert, mag stoppen.",
+    familie: "Een oude ruzie kan eindelijk dicht — begin met de kleinste zin.",
+    vriendschap: "Een vriendschap verandert van vorm; dat is groei, geen verlies."
+  },
+  "matigheid": {
+    geld: "Inkomen en uitgaven in één overzicht: daarna kun je weer ademen.",
+    familie: "De taken thuis zijn scheef gegroeid — herschrijf ze samen.",
+    vriendschap: "Twee vrienden die elkaar in balans houden zijn zeldzaam: koester dat."
+  },
+  "de-duivel": {
+    geld: "Eén abonnement is stilletjes duurder geworden — check vandaag je afschriften.",
+    familie: "Een oud familiepatroon meldt zich; jij hoeft deze keer niet mee te spelen.",
+    vriendschap: "Als je jezelf in een vriendschap klein maakt: sta op en meet je echte maat."
+  },
+  "de-toren": {
+    geld: "Het omgevallen plan maakt plaats — kijk wat de vruchtbare grond waard is.",
+    familie: "Er komt iets uit in de familie waar iedereen al stilletjes op wacht.",
+    vriendschap: "Na de ruzie in de groep ruimen jullie samen het puin op — dat scheelt."
+  },
+  "de-ster": {
+    geld: "Een kleine meevaller herstelt je vertrouwen: er komt meer waar dit vandaan kwam.",
+    familie: "Een warm moment thuis heelt meer dan een gesprek van twee uur.",
+    vriendschap: "Die vriendin die je herinnert aan wie je bent: heb je haar al bedankt?"
+  },
+  "de-maan": {
+    geld: "Te mooi om waar te zijn? Loop het contract of de deal nog één keer na.",
+    familie: "Niet alles wordt thuis gezegd — je voelt het, het moment komt vanzelf.",
+    vriendschap: "Het misverstand met je vriendin groeit vooral in je hoofd, niet in het echt."
+  },
+  "de-zon": {
+    geld: "Goed nieuws over werk of geld staat klaar om gehoord te worden.",
+    familie: "Een vrolijk moment thuis verdient een plek op de koelkast.",
+    vriendschap: "Plan die gezellige dag waar iedereen eindelijk echt ja op zegt."
+  },
+  "het-oordeel": {
+    geld: "Een oude belofte of schuld kan worden ingelost: ruim op en hij is weg.",
+    familie: "Contact met familie van vroeger: één bericht is genoeg om te testen.",
+    vriendschap: "Een oude vriendin keert terug — kijk gewoon wat er van de vonk over is."
+  },
+  "de-wereld": {
+    geld: "Werk af is werk af: factureren mag, incasseer wat je toekomt.",
+    familie: "Een familiemijlpaal: vier die zo groot als hij is.",
+    vriendschap: "Die reis of dat plan met vrienden is écht doorgegaan — vier het samen."
+  },
+
+  /* ---------- Staven ---------- */
+  "aas-van-staven": {
+    geld: "Vonk = nieuw inkomstenidee; schrijf het op voordat je gaat slapen.",
+    familie: "Iemand thuis heeft een plannetje — luister er even naar, het kan briljant zijn.",
+    vriendschap: "Een nieuwe vriendschap staat op het punt te vonken."
+  },
+  "2-van-staven": {
+    geld: "Die kans verder weg (studie, verhuizing, nieuwe baan) vraagt om plannen met lef.",
+    familie: "Iemand in huis droomt groot — doe even mee met dromen.",
+    vriendschap: "Plan met de groep iets voor over een paar maanden en zet de datum vast."
+  },
+  "3-van-staven": {
+    geld: "Wat je hebt uitgezet komt terug — houd deze week je inbox in de gaten.",
+    familie: "Nieuws van iemand die ver weg woont komt binnen; lees het aandachtig.",
+    vriendschap: "Het plan met je vrienden loopt — houd je belofte vast."
+  },
+  "4-van-staven": {
+    geld: "Bonus of cadeau gekregen: geniet ervan zonder je te hoeven verantwoorden.",
+    familie: "Familiefeest of mijlpaal: kom echt opdagen, ook als je moe bent.",
+    vriendschap: "Kleine overwinningen met je mensen vieren is een gewoonte die blijft hangen."
+  },
+  "5-van-staven": {
+    geld: "Klein gedoe over geld of verdeling: los het op voordat het groeit.",
+    familie: "Irritaties thuis: benoem ze als sneeuwvlokjes, niet als lawines.",
+    vriendschap: "Misverstand in de groep: herstel het met één eerlijk bericht."
+  },
+  "6-van-staven": {
+    geld: "Erkenning — en soms een deel van de winst: neem je compliment aan.",
+    familie: "Iemand thuis behaalde iets: zeg je trots hardop.",
+    vriendschap: "Vier het succes van je vriendin alsof het je eigen is."
+  },
+  "7-van-staven": {
+    geld: "Verdedig je tarief eens rustig: jij weet echt wat je waard bent.",
+    familie: "Sta je plek in een discussie thuis, zonder oude koeien uit de sloot te halen.",
+    vriendschap: "Kom op voor je vriendin in een gesprek waar ze zelf niet bij is."
+  },
+  "8-van-staven": {
+    geld: "Spoedklus of deadline komt binnen: hier betaalt juist snelheid.",
+    familie: "Drukke dag thuis: alles tegelijk — vergeet de lach erin niet.",
+    vriendschap: "Beantwoord dat bericht vandaag; kleine reacties houden vriendschappen warm."
+  },
+  "9-van-staven": {
+    geld: "De klus is bijna af — duw het laatste stukje er vanavond door.",
+    familie: "Nog één ronde thuis, en dan mag je echt bijtanken.",
+    vriendschap: "Waardeer de vriendin die vermoeid toch doorgaat: zeg het haar."
+  },
+  "10-van-staven": {
+    geld: "Iets dat je allemaal meedraagt, is allang niet meer van jou — leg het neer.",
+    familie: "Deel de taken thuis: anders sjouw jij alleen, en dat kweekt wrok.",
+    vriendschap: "Laat iemand anders deze keer plannen; jij mag passagier zijn."
+  },
+  "page-van-staven": {
+    geld: "Een kans die je nog niet kent: lees je er één avond in.",
+    familie: "Nieuws van thuis: klein berichtje, groot effect.",
+    vriendschap: "Een vriendin gooit een nieuw idee op tafel — zeg er ja op."
+  },
+  "ridder-van-staven": {
+    geld: "Impulsieve upgrade of nieuwe tool? Slaap er één nacht over.",
+    familie: "Iemand komt vol energie thuis met plannen — luister mee.",
+    vriendschap: "Spontane afspraak vanavond: die energie wil je vasthouden."
+  },
+  "koningin-van-staven": {
+    geld: "Jouw project begint te lopen — laat zien wat je hebt gedaan.",
+    familie: "Jij bent de lijm thuis; benoem dat eens en deel de rol even.",
+    vriendschap: "De groep draait vaak om jou: geef iemand anders één keer het stuur."
+  },
+  "koning-van-staven": {
+    geld: "Jouw project groeit: neem de leiding en het betaalt zich uit.",
+    familie: "De familie wil richting — jij geeft die met warmte.",
+    vriendschap: "Neem het voortouw in de groep; ze wachten er stilletjes op."
+  },
+
+  /* ---------- Bekers ---------- */
+  "aas-van-bekers": {
+    geld: "Werk kiezen vanuit je hart betaalt in energie — begin er gewoon aan.",
+    familie: "Een warm moment thuis komt ongevraagd voorbij: sta er even bij stil.",
+    vriendschap: "Zeg tegen die vriendin wat je in haar waardeert — vandaag nog."
+  },
+  "2-van-bekers": {
+    geld: "De samenwerking zit goed: het voorstel of de deal kan echt.",
+    familie: "Een goed gesprek met een familielid — geniet gewoon van de klik.",
+    vriendschap: "Nieuwe vriendschap klikt: investeer er bewust in."
+  },
+  "3-van-bekers": {
+    geld: "Het team haalt iets: vier het, dan blijven mensen er langer aan plakken.",
+    familie: "Plan de gezellige avond thuis dwars door de drukte heen.",
+    vriendschap: "Die avond met je meiden voedt de ziel — plan de volgende alvast."
+  },
+  "4-van-bekers": {
+    geld: "Je baan is prima, maar er knaagt iets — luister naar de knager.",
+    familie: "Je voelt je over het hoofd gezien: zeg het vóórdat het wrok wordt.",
+    vriendschap: "Niemand vraagt hoe het écht gaat — begin er zelf over."
+  },
+  "5-van-bekers": {
+    geld: "Verlies op werk of inkomsten: rouw even kort, bekijk het dan pas lang.",
+    familie: "Een oude wond in de familie wil erkenning, geen mopje.",
+    vriendschap: "Een vriendschap verwaterde: één berichtje kan al genoeg zijn."
+  },
+  "6-van-bekers": {
+    geld: "Een oude belofte of lening komt terug: sluit de cirkel netjes af.",
+    familie: "Herinneringen aan vroeger zijn de lijm tussen jullie — haal ze op.",
+    vriendschap: "Contact met een vriendin van vroeger is terug: kijk wat over is."
+  },
+  "7-van-bekers": {
+    geld: "Te veel opties op werk: kies één spoor en zet de rest op “later”.",
+    familie: "Droom over de toekomst van het gezin — maar deel de droom, projecteer hem niet.",
+    vriendschap: "Te veel sociale plannen: kies er twee en geniet met volle focus."
+  },
+  "8-van-bekers": {
+    geld: "Je stopt met iets dat betaalt maar niet voedt — dat mag echt.",
+    familie: "Neem afstand van een familiesituatie om hem helder te zien.",
+    vriendschap: "Een vriendschap die je leegtrekt: je mag eruit stappen."
+  },
+  "9-van-bekers": {
+    geld: "Wens uitgekomen in geld of werk: geniet twee dagen vóór de volgende sprint.",
+    familie: "Harmonie thuis is zelden perfect — dit moment mag je gewoon waarderen.",
+    vriendschap: "Tevredenheid in een vriendschap bestaat: markeer het moment."
+  },
+  "10-van-bekers": {
+    geld: "Financiële rust of een fijne woonsituatie groeide lang — kijk eens om.",
+    familie: "Geluk thuis voelt gewoon — dat is nou juist het punt.",
+    vriendschap: "Een vriendschap die als familie voelt is zeldzaam: koester die."
+  },
+  "page-van-bekers": {
+    geld: "Werk dat creatieve idee tot de helft uit en kijk wat er groeit.",
+    familie: "Een lief gebaar thuis: briefje, bloemetje, onverwachte knuffel.",
+    vriendschap: "Een kleine verrassing voor je vriendin — groter effect dan een speech."
+  },
+  "ridder-van-bekers": {
+    geld: "Een aanbod of cadeau komt langs — check naast de glans ook de voorwaarden.",
+    familie: "Breng ook thuis eens dat lieve gebaar mee: klein werkt hier altijd.",
+    vriendschap: "Help een vriend met die ene klus — een ridderlijk gebaar."
+  },
+  "koningin-van-bekers": {
+    geld: "Je intuïtie over een werkbesluit klopt meestal — luister er deze keer naar.",
+    familie: "Jij voelt alles thuis feilloos aan; voel ook eens naar jezelf toe.",
+    vriendschap: "De vriendin die altijd aanvoelt hoe het zit: bedank haar hardop."
+  },
+  "koning-van-bekers": {
+    geld: "Een deal sluiten mag ook warm: zakelijk en menselijk passen samen.",
+    familie: "De stabiele factor thuis blijft kalm als het tegenzit.",
+    vriendschap: "In de groep ben jij de kalmte — dat merken ze pas als je er niet is."
+  },
+
+  /* ---------- Zwaarden ---------- */
+  "aas-van-zwaarden": {
+    geld: "Inzicht over geld of werk komt in één zin op — noteer die nu.",
+    familie: "Een eerlijk gesprek in de familie lucht op: begin zonder verwijt.",
+    vriendschap: "Duidelijk zijn tegen vrienden voelt even ongemakkelijk en helpt altijd."
+  },
+  "2-van-zwaarden": {
+    geld: "Die uitgestelde geldkeuze kost elke week geld — kies vanmiddag.",
+    familie: "Wat je in de familie niet wilt zien, blijft terugkomen: kijk dan eindelijk.",
+    vriendschap: "Het uitgestelde gesprek met je vriendin maakt alles juist lichter."
+  },
+  "3-van-zwaarden": {
+    geld: "Slecht nieuws over werk zegt iets over de situatie, niet over jou.",
+    familie: "Verdriet in de familie verdient eerst ruimte, dan pas oplossingen.",
+    vriendschap: "Teleurstelling steekt — reageer vanuit wat je voelt, niet om terug te steken."
+  },
+  "4-van-zwaarden": {
+    geld: "Geen grote geldbeslissingen nu: tijd werkt soms in je voordeel.",
+    familie: "Rust in huis is soms twintig minuten zonder telefoons — neem die.",
+    vriendschap: "Je mag een sociale pauze nemen; echte vrienden overleven die vanzelf."
+  },
+  "5-van-zwaarden": {
+    geld: "De deal die “gewonnen” voelt maar niks goeds geeft: heroverweeg hem.",
+    familie: "De ruzie die je thuis “wint” kan je relatie verliezen — kies je gevecht.",
+    vriendschap: "Gelijk halen tegen een vriendin voelt als winnen en is het nooit."
+  },
+  "6-van-zwaarden": {
+    geld: "Andere kant op (team, opdracht, stad): de overstap begint rustig maar echt.",
+    familie: "De sfeer thuis verandert: dat is wind vóór, geen storm.",
+    vriendschap: "Samen uit de ruzie wegbewegen: rustiger water, betere kant."
+  },
+  "7-van-zwaarden": {
+    geld: "Strategisch mag, eerlijk werkt beter — zeker bij je eigen werkgever.",
+    familie: "Kleine geheimen binnen de familie worden zware gewichten.",
+    vriendschap: "Niet alles delen is oké; de dingen die ertoe doen wél."
+  },
+  "8-van-zwaarden": {
+    geld: "Je beperkende geldgedachte is de muur — er mag één tegel uit.",
+    familie: "Je beperkt jezelf in wat je thuis mag zeggen: test de grens een keer.",
+    vriendschap: "In de vriendschap sta je jezelf niet toe iets te vragen — vragen mag."
+  },
+  "9-van-zwaarden": {
+    geld: "Geldzorgen wegen om drie uur 's nachts zwaarder dan overdag — herzie ze bij daglicht.",
+    familie: "Zorgen om iemand thuis deel je: samen dragen is dubbelt zo licht.",
+    vriendschap: "Vertel je zorgen aan een vriendin — de nachtversie is te zwaar om alleen te dragen."
+  },
+  "10-van-zwaarden": {
+    geld: "Wat kapot is, stopt — en juist dát geeft ruimte en opluchting.",
+    familie: "Een familiehoofdstuk sluit: rouw en opluchting mogen naast elkaar.",
+    vriendschap: "Stoppen met een vriendschap mag; het steekt niemand neer."
+  },
+  "page-van-zwaarden": {
+    geld: "Nieuws over geld of werk: lees precies en check de details.",
+    familie: "Vraag thuis gewoon hoe iets werkt — nieuwsgierigheid is interesse.",
+    vriendschap: "Vraag door in de wereld van je vriendin in plaats van meteen te adviseren."
+  },
+  "ridder-van-zwaarden": {
+    geld: "Snelle beslissing over geld kan — kijk alleen even één keer om.",
+    familie: "Direct zijn thuis is prima; hard zijn hoeft niet.",
+    vriendschap: "Denk twee tellen na vóór je dat bericht naar een vriend(in) stuurt."
+  },
+  "koningin-van-zwaarden": {
+    geld: "Schrijf je geldpositie eerlijk op papier — jij kunt tegen de waarheid.",
+    familie: "In een familiekwestie zegt niemand het eerlijk — jij mag dat zijn, zacht.",
+    vriendschap: "Zeg eerlijk wat je vindt; echte vriendschappen worden er sterker van."
+  },
+  "koning-van-zwaarden": {
+    geld: "Laat bij geldkeuzes de feiten beslissen, niet je stemming.",
+    familie: "Neutrale analyse helpt thuis: helder én met een warme toon.",
+    vriendschap: "Tussen ruziënde vrienden kies je geen partij, maar helpt wel helder."
+  },
+
+  /* ---------- Pentakels ---------- */
+  "aas-van-pentakels": {
+    geld: "Die concrete kans — baan, opdracht, opleiding — pak je vandaag aan.",
+    familie: "Praktisch regelen voor het gezin: vaste hand, kleine moeite.",
+    vriendschap: "Zet eindelijk de datum in de agenda voor dat plan met je vriend(in)."
+  },
+  "2-van-pentakels": {
+    geld: "Balans op de rekening: eerst eerlijk kijken, dan schuiven.",
+    familie: "Alles tegelijk thuis? Schrijf het op en verdeel het, dan ontstaat er vanzelf overzicht.",
+    vriendschap: "Je balanceert tussen vrienden en groepen: verdeel je aandacht met beleid."
+  },
+  "3-van-pentakels": {
+    geld: "Samen bouwen betaalt: deel het werk en eerlijk de winst.",
+    familie: "Klus samen in huis — die zaterdag praat vanzelf beter dan een etentje.",
+    vriendschap: "Werk samen met een vriend aan iets praktisch: de gesprekken komen vanzelf."
+  },
+  "4-van-pentakels": {
+    geld: "Een buffer opbouwen is geen gierigheid, het is rust in je portemonnee.",
+    familie: "Oude regels thuis hoeven niet voor altijd: tijden veranderen, mensen ook.",
+    vriendschap: "Vasthouden van een vriendschap is liefde; knellen is angst."
+  },
+  "5-van-pentakels": {
+    geld: "Een krappe maand vraagt om hulpregelingen — die bestaan echt.",
+    familie: "Een moeilijke periode in het gezin: samen dragen is niet verliezen.",
+    vriendschap: "De vriendin die het zwaar heeft: aanwezig zijn telt zwaarder dan advies."
+  },
+  "6-van-pentakels": {
+    geld: "Geven én ontvangen: beide kanten van geld verdienen aandacht.",
+    familie: "Geven en nemen in de familie: check dit jaar gewoon de balans.",
+    vriendschap: "Jij geeft vaak — ontvangen mag ook: vraag er één keer om."
+  },
+  "7-van-pentakels": {
+    geld: "Het project groeit langzaam en dat is geen stilstand.",
+    familie: "Geduld met iemand thuis: sommige dingen hebben gewoon meer tijd nodig.",
+    vriendschap: "Vriendschappen groeien langzaam — dat is geen tekortkoming."
+  },
+  "8-van-pentakels": {
+    geld: "Ambacht betaalt: word elke week een beetje beter en mensen zien het.",
+    familie: "Iemand in huis is ergens druk mee: interesse is de beste brandstof.",
+    vriendschap: "Samen met een vriendin oefenen: het pad ís de beloning."
+  },
+  "9-van-pentakels": {
+    geld: "De vruchten plukken mag: geniet van wat je hebt gebouwd.",
+    familie: "Investeer één keer in gezelligheid thuis — dat betaalt in sfeer.",
+    vriendschap: "Genieten met vrienden zonder je te hoeven bewijzen: de fijnste soort vrijheid."
+  },
+  "10-van-pentakels": {
+    geld: "Je bouwt iets dat generaties meegaat: spaarpot, huis, naam.",
+    familie: "Familie is het bezit dat nooit op de rekening staat — investeer erin.",
+    vriendschap: "Een vriendschap van jaren kost weinig moeite en is veel waard."
+  },
+  "page-van-pentakels": {
+    geld: "Start die cursus: praktische kennis met voeten in de aarde betaalt zich uit.",
+    familie: "Iemand thuis studeert of leert: help met de praktische zaken eromheen.",
+    vriendschap: "Een cursus of hobby samen doen met een vriendin: sociaal én leerzaam."
+  },
+  "ridder-van-pentakels": {
+    geld: "Degelijk en gestaag: plan de vaste dingen, de rest volgt vanzelf.",
+    familie: "Ook thuis geldt altijd-er-zijn: dat schrijft je naam in huis.",
+    vriendschap: "De vriend(in) die elke week trouw hetzelfde bericht stuurt: dat is goud."
+  },
+  "koningin-van-pentakels": {
+    geld: "Je huishouden of je zaak netjes op orde is kracht, geen kleinheid.",
+    familie: "Jij regelt de zorg én de gezelligheid thuis — deel beide open.",
+    vriendschap: "Praktische warmte — een soepje, een lift, een kaarsje — is jouw vriendschapsteken."
+  },
+  "koning-van-pentakels": {
+    geld: "Denk in vermogen, niet in maanden: je bouwt een fundament.",
+    familie: "Bescherm wie thuis hoort, zonder te knellen.",
+    vriendschap: "De vriend(in) bij wie je alles kwijt kunt: zeldzaam — koester die."
+  }
 };
 
 </script>
@@ -4695,6 +5181,51 @@ const KAART_EXTRA = {
   }
 };
 
+/* ============================================================
+   Per-kaart accenttint (RGB-triplet zonder haakjes).
+   De kaart-detail-pagina kleurt hiermee subtiel mee: wash achter de
+   hero, groep-koppen, chips en journaalkaart. Kleuren: per Grote
+   Arcana-kaart een eigen tint; kleine arcana per kleur/element.
+   ============================================================ */
+const KLEUR_ACCENT = {
+  staven:    "235, 160, 96",    // vuur: warm amber
+  bekers:    "124, 184, 208",   // water: zachtaqua
+  zwaarden:  "159, 149, 225",   // lucht: koel lavendelblauw
+  pentakels: "154, 185, 138"    // aarde: salie
+};
+
+const KAART_ACCENT = {
+  "de-dwaas":            "142, 205, 200",
+  "de-magier":           "232, 200, 116",
+  "de-hogepriesteres":   "141, 152, 226",
+  "de-keizerin":         "226, 158, 178",
+  "de-keizer":           "214, 142, 98",
+  "de-hierofant":        "204, 172, 120",
+  "de-geliefden":        "231, 146, 163",
+  "de-zegewagen":        "238, 176, 98",
+  "kracht":              "236, 178, 124",
+  "de-kluizenaar":       "167, 176, 213",
+  "rad-van-fortuin":     "199, 154, 219",
+  "gerechtigheid":       "152, 170, 190",
+  "de-gehangene":        "149, 143, 205",
+  "de-dood":             "157, 132, 170",
+  "matigheid":           "154, 196, 178",
+  "de-duivel":           "199, 124, 136",
+  "de-toren":            "224, 130, 108",
+  "de-ster":             "157, 204, 216",
+  "de-maan":             "139, 158, 226",
+  "de-zon":              "240, 200, 112",
+  "het-oordeel":         "206, 183, 149",
+  "de-wereld":           "222, 195, 138"
+};
+
+// Accent bij een kaart: Grote Arcana heeft eigen tint, kleine volgt de kleur
+function kaartAccentVan(k) {
+  if (!k) return "232, 200, 116";
+  if (k.type === "groot") return KAART_ACCENT[k.id] || "232, 200, 116";
+  return KLEUR_ACCENT[k.kleur] || "232, 200, 116";
+}
+
 </script>
   <script>
 /* ============================================================
@@ -4979,6 +5510,7 @@ function toonOverlay(id) {
   Object.values(TAB_NAAR_SCHERM).forEach(sid => { document.getElementById(sid).hidden = true; });
   const el = document.getElementById(id);
   el.hidden = false;
+  actiefScherm = el;
   el.classList.remove("tab-in");
   void el.offsetWidth;
   el.classList.add("tab-in");
@@ -5246,6 +5778,7 @@ function toonTab(tabNaam, viaToetsenbord) {
     const scherm = document.getElementById(id);
     if (naam === tabNaam) {
       scherm.hidden = false;
+      actiefScherm = scherm;
       speelAnim(scherm, "tab-in", "tabIn", 300);
       scherm.scrollTop = 0;
       huidigeScroll = 0;
@@ -5307,15 +5840,21 @@ function toast(bericht) {
 /* ---------- 7b. NAVIGATIE (push/pop tussen subschermen) ---------- */
 
 const schermStack = [];
+// Het scherm dat NU actief is (tabblad of subscherm). Wordt door toonTab/
+// pushScherm/popScherm bijgehouden. NOOIT "eerste .scherm:not([hidden])" uit
+// de DOM zoeken: dat is afhankelijk van DOM-volgorde en breekt zodra er
+// meerdere zichtbaar zijn (bv. tijdens de splash of een transitie).
+let actiefScherm = document.getElementById("scherm-home");
 
 function pushScherm(id) {
-  const huidig = document.querySelector(".scherm:not([hidden])");
+  const huidig = actiefScherm;
   const nieuw = document.getElementById(id);
   if (!nieuw) return;
   if (huidig === nieuw) return; // dubbelklik: al op dit scherm → niets doen
   schermStack.push(huidig ? huidig.id : null);
   if (huidig) speelAnim(huidig, "push-out", "pushOut", 340, () => { huidig.hidden = true; });
   nieuw.hidden = false;
+  actiefScherm = nieuw;
   speelAnim(nieuw, "push-in", "pushIn", 340);
   nieuw.scrollTop = 0;
   document.getElementById("tabbalk").style.visibility = "hidden"; // tabbalk even weg op subschermen
@@ -5326,7 +5865,7 @@ function pushScherm(id) {
 function popScherm() {
   const vorigeId = schermStack.pop();
   if (!vorigeId) { toonTab("nieuw"); return; } // stack leeg/onbekend → naar home
-  const huidig = document.querySelector(".scherm:not([hidden])");
+  const huidig = actiefScherm;
   if (huidig) speelAnim(huidig, "pop-out", "popOut", 300, () => { huidig.hidden = true; });
   const tabNaam = Object.keys(TAB_NAAR_SCHERM).find(k => TAB_NAAR_SCHERM[k] === vorigeId);
   document.getElementById("gekozen-balk").hidden = (vorigeId !== "scherm-kaarten");
@@ -5337,6 +5876,7 @@ function popScherm() {
   } else if (vorigeId) {
     const el = document.getElementById(vorigeId);
     el.hidden = false;
+    actiefScherm = el;
     speelAnim(el, "rev-in", "revIn", 340);
     el.scrollTop = 0;
   }
@@ -6116,36 +6656,31 @@ function kaartDiepteRegel(kaart, soort) {
 function kaartExtraVan(id) { return (typeof KAART_EXTRA !== "undefined" && KAART_EXTRA[id]) || null; }
 function leggingExtraVan(id) { return (typeof LEGGING_EXTRA !== "undefined" && LEGGING_EXTRA[id]) || null; }
 
+// Geld/familie/vriendschap per kaart (zie js/kaart-domein.js), met terugval op kaart-extra.js
+function kaartDomeinVan(id, veld) {
+  const d = (typeof KAART_DOMEIN !== "undefined") ? KAART_DOMEIN[id] : null;
+  if (d && d[veld]) return d[veld].replace(/</g, "&lt;");
+  const ex = kaartExtraVan(id);
+  return ((ex && ex[veld]) || "").replace(/</g, "&lt;");
+}
+
 // popup-rijen met extra kaart-context
 function kaartExtraRijen(kaart) {
   const ex = kaartExtraVan(kaart.id);
-  if (!ex) return "";
   let h = "";
-  if (ex.geld) h += '<div class="popup-rij"><p class="popup-label">In geld &amp; praktische zaken</p><p>' + ex.geld + "</p></div>";
-  if (ex.familie) h += '<div class="popup-rij"><p class="popup-label">In familie</p><p>' + ex.familie + "</p></div>";
-  if (ex.vriendschap) h += '<div class="popup-rij"><p class="popup-label">In vriendschap</p><p>' + ex.vriendschap + "</p></div>";
-  if (ex.herken) h += '<div class="popup-rij"><p class="popup-label">In het echte leven</p><p>' + ex.herken + "</p></div>";
-  if (ex.samen) h += '<div class="popup-rij"><p class="popup-label">Vaak samen met</p><p>' + ex.samen + "</p></div>";
-  if (ex.vandaag) h += '<div class="popup-rij"><p class="popup-label">Vraag voor vandaag</p><p>' + ex.vandaag + "</p></div>";
+  if (kaartDomeinVan(kaart.id, "geld")) h += '<div class="popup-rij"><p class="popup-label">In geld &amp; praktische zaken</p><p>' + kaartDomeinVan(kaart.id, "geld") + "</p></div>";
+  if (kaartDomeinVan(kaart.id, "familie")) h += '<div class="popup-rij"><p class="popup-label">In familie</p><p>' + kaartDomeinVan(kaart.id, "familie") + "</p></div>";
+  if (kaartDomeinVan(kaart.id, "vriendschap")) h += '<div class="popup-rij"><p class="popup-label">In vriendschap</p><p>' + kaartDomeinVan(kaart.id, "vriendschap") + "</p></div>";
+  if (!h && !ex) return "";
+  if (ex) {
+    if (ex.herken) h += '<div class="popup-rij"><p class="popup-label">In het echte leven</p><p>' + ex.herken + "</p></div>";
+    if (ex.samen) h += '<div class="popup-rij"><p class="popup-label">Vaak samen met</p><p>' + ex.samen + "</p></div>";
+    if (ex.vandaag) h += '<div class="popup-rij"><p class="popup-label">Vraag voor vandaag</p><p>' + ex.vandaag + "</p></div>";
+  }
   return h;
 }
 
-// kd-blokken met extra kaart-context (Bibliotheek kaart-detail)
-function kaartExtraBlokken(k) {
-  const ex = kaartExtraVan(k.id);
-  if (!ex) return "";
-  let h = "";
-  if (ex.herken) h += '<div class="kd-blok" style="--i:7"><p class="kd-label">In het echte leven</p><p>' + ex.herken + "</p></div>";
-  const dom = [
-    ex.geld ? "<strong>Geld:</strong> " + ex.geld : "",
-    ex.familie ? "<strong>Familie:</strong> " + ex.familie : "",
-    ex.vriendschap ? "<strong>Vriendschap:</strong> " + ex.vriendschap : ""
-  ].filter(Boolean).join("<br>");
-  if (dom) h += '<div class="kd-blok" style="--i:8"><p class="kd-label">Geld · familie · vriendschap</p><p>' + dom + "</p></div>";
-  if (ex.samen) h += '<div class="kd-blok" style="--i:9"><p class="kd-label">Vaak samen met</p><p>' + ex.samen + "</p></div>";
-  if (ex.vandaag) h += '<div class="kd-blok" style="--i:10"><p class="kd-label">Vraag voor in je journaal</p><p>' + ex.vandaag + "</p></div>";
-  return h;
-}
+// (extra kaart-context zit sinds v52 direct in renderKaartDetail — zie daar)
 
 function toonKaartPopup(id) {
   const kaart = kaartVind(id);
@@ -6194,7 +6729,7 @@ function slaReadingOp(reading) {
   toast("Reading opgeslagen — zie het tabblad Geschiedenis");
   // terug naar het startscherm
   schermStack.length = 0;
-  const huidig = document.querySelector(".scherm:not([hidden])");
+  const huidig = actiefScherm;
   if (huidig) huidig.hidden = true;
   document.getElementById("tabbalk").style.visibility = "visible";
   toonTab("nieuw");
@@ -6706,8 +7241,18 @@ function renderBibliotheek() {
   }
 }
 
-// Kaart-detail subscherm
-function openKaartDetail(id) {
+// Kaart-detail subscherm — geheel per kaart opgebouwd, mét eigen accenttint
+const KAART_ROMEINS = ["0","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX","XXI"];
+const ELEMENT_EMOJI = { vuur: "🔥", water: "💧", lucht: "🌬️", aarde: "🌍" };
+
+function kaartNummerLabel(k) {
+  if (k.type === "groot") return "Grote Arcana " + KAART_ROMEINS[k.nummer];
+  const n = k.nummer;
+  const naam = n === 1 ? "Aas" : n === 11 ? "Page" : n === 12 ? "Ridder" : n === 13 ? "Koningin" : n === 14 ? "Koning" : String(n);
+  return k.kleur.charAt(0).toUpperCase() + k.kleur.slice(1) + " · " + naam;
+}
+
+function renderKaartDetail(id) {
   const k = kaartVind(id);
   const favs = lees("tarot_favorieten", []);
   const isFav = favs.includes(id);
@@ -6725,24 +7270,93 @@ function openKaartDetail(id) {
     if (bibFilter === "favorieten" || bibFilter === "alle") renderBibliotheek();
   };
 
-  document.getElementById("kd-inhoud").innerHTML =
-    '<div class="kd-hero"><div class="scene3d" id="kd-scene"><div class="card3d kd-kaart" id="kd-kaart">' +
-      kaartBeeld(k) + '<span class="chip-en">' + k.naam_en + '</span><span class="chip-naam">' + k.naam_nl + '</span><div class="glare" id="kd-glare"></div></div></div>' +
-    '<p class="kd-kernwoord">' + k.kernwoord + '</p>' +
-    '<p class="kd-vertaling">“' + k.vertaling + '”</p></div>' +
-    '<p class="kd-tilt-hint">beweeg over de kaart voor 3D</p>' +
-    '<div class="kd-blok rechtop" style="--i:1"><p class="kd-label">Rechtop</p><p>' + k.betekenis_rechtop + "</p></div>" +
-    '<div class="kd-blok omgekeerd" style="--i:2"><p class="kd-label">Ondersteboven</p><p>' + k.betekenis_omgekeerd + "</p></div>" +
-    '<div class="kd-blok" style="--i:3"><p class="kd-label">Kijkrichting</p><p>' + k.kijkrichting + "</p></div>" +
-    '<div class="kd-blok" style="--i:4"><p class="kd-label">Reflectievraag</p><p>' + k.reflectievraag + "</p></div>" +
-    '<div class="kd-blok" style="--i:5"><p class="kd-label">In liefde &amp; in werk</p><p><strong>' + kaartDiepteRegel(k, "liefde") + "</strong><br>" + kaartDiepteRegel(k, "werk") + "</p></div>" +
-    '<div class="kd-blok" style="--i:6"><p class="kd-label">Thema & fase</p><p>' + themaVan(k) + "<br>" + faseVan(k) + "</p></div>" +
-    kaartExtraBlokken(k);
+  const ex = kaartExtraVan(id);
+  const inhoud = document.getElementById("kd-inhoud");
+  inhoud.style.setProperty("--kd-tint", kaartAccentVan(k));
+  const fase = k.type === "klein" ? faseVan(k).split(" — ")[0] : null;
+  const minis = [
+    ["💞", "Liefde", kaartDiepteRegel(k, "liefde")],
+    ["💼", "Werk & studie", kaartDiepteRegel(k, "werk")],
+    ["🪙", "Geld", kaartDomeinVan(id, "geld")],
+    ["🏡", "Familie", kaartDomeinVan(id, "familie")],
+    ["🫂", "Vriendschap", kaartDomeinVan(id, "vriendschap")]
+  ].filter(m => m[2]);
+
+  inhoud.innerHTML =
+    '<div class="kd-hero" data-symbool="' + symboolVan(k) + '">' +
+      '<div class="scene3d kd-scene" id="kd-scene" role="button" tabindex="0" aria-pressed="false" aria-label="Kaart omdraaien naar ondersteboven of rechtop">' +
+        '<div class="card3d kd-kaart" id="kd-kaart">' +
+          kaartBeeld(k) + '<span class="chip-en">' + k.naam_en + '</span><span class="chip-naam">' + k.naam_nl + '</span><div class="glare" id="kd-glare"></div>' +
+        "</div>" +
+      "</div>" +
+      '<div class="kd-chips">' +
+        '<span class="kd-chip">' + symboolVan(k) + " " + kaartNummerLabel(k) + "</span>" +
+        (k.type === "klein" ? '<span class="kd-chip">' + ELEMENT_EMOJI[k.element] + " " + k.element + "</span>" : "") +
+        (fase ? '<span class="kd-chip">✦ ' + fase + "</span>" : "") +
+      "</div>" +
+      '<span class="kd-kernwoord">✦ ' + k.kernwoord + "</span>" +
+      '<p class="kd-citaat">' + k.vertaling + "</p>" +
+      '<p class="kd-stand" id="kd-stand">▲ Rechtop · tik de kaart om te draaien</p>' +
+    "</div>" +
+    '<section class="kd-groep" style="--i:1"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>De betekenis</h3>' +
+      '<div class="kd-blik kd-blik-rech"><p class="kd-blik-label">▲ Rechtop</p><p>' + k.betekenis_rechtop + "</p></div>" +
+      '<div class="kd-blik kd-blik-omg"><p class="kd-blik-label">↧ Ondersteboven</p><p>' + k.betekenis_omgekeerd + "</p></div>" +
+    "</section>" +
+    '<section class="kd-groep" style="--i:2"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Op de kaart</h3>' +
+      '<div class="kd-blik"><p>' + k.kijkrichting + "</p></div>" +
+    "</section>" +
+    '<section class="kd-groep" style="--i:3"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>In je leven</h3>' +
+      '<div class="kd-mini-grid">' +
+        minis.map(m => '<div class="kd-mini"><p class="kd-mini-label">' + m[0] + " " + m[1] + "</p><p>" + m[2] + "</p></div>").join("") +
+      "</div>" +
+      (ex && ex.herken ? '<div class="kd-blik kd-herken"><p class="kd-blik-label">In het echte leven</p><p>' + ex.herken + "</p></div>" : "") +
+    "</section>" +
+    (ex && ex.samen ?
+      '<section class="kd-groep" style="--i:4"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Vaak samen met</h3>' +
+      '<div class="kd-blik"><p>' + ex.samen + "</p></div></section>" : "") +
+    '<section class="kd-groep" style="--i:5"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>In je journaal</h3>' +
+      '<div class="kd-journaal">' +
+        '<p class="kd-mini-label">Reflectievraag</p>' +
+        '<p class="reflectie"><span class="reflectie-vraagteken">?</span><span>' + k.reflectievraag + "</span></p>" +
+        (ex && ex.vandaag ? '<p class="kd-mini-label" style="margin-top:12px">Vraag voor vandaag</p><p class="kd-dagvraag">' + ex.vandaag + "</p>" : "") +
+      "</div>" +
+    "</section>";
+
+  // omdraaien: rechtop ↔ ondersteboven (foto roteert, blijft mooi leesbaar)
+  const kaart3d = document.getElementById("kd-kaart");
+  const scene = document.getElementById("kd-scene");
+  const stand = document.getElementById("kd-stand");
+  const zetOm = () => {
+    const om = kaart3d.classList.toggle("omgekeerd");
+    scene.setAttribute("aria-pressed", String(om));
+    stand.innerHTML = om ? "↧ Ondersteboven · tik om rechtop te zetten" : "▲ Rechtop · tik de kaart om te draaien";
+  };
+  scene.onclick = zetOm;
+  scene.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); zetOm(); } };
+
+  // vorige / volgende kaart (wrap rond de hele 78)
+  const idx = KAARTEN.findIndex(c => c.id === id);
+  const prev = KAARTEN[(idx - 1 + KAARTEN.length) % KAARTEN.length];
+  const volg = KAARTEN[(idx + 1) % KAARTEN.length];
+  const nav = document.createElement("nav");
+  nav.className = "kd-nav";
+  nav.style.setProperty("--i", 6);
+  nav.innerHTML =
+    '<button class="kd-nav-knop" id="kd-vorige"><span class="kd-nav-richting">‹ Vorige kaart</span><span class="kd-nav-naam">' + prev.naam_nl + "</span></button>" +
+    '<button class="kd-nav-knop volg" id="kd-volgende"><span class="kd-nav-richting">Volgende kaart ›</span><span class="kd-nav-naam">' + volg.naam_nl + "</span></button>";
+  inhoud.appendChild(nav);
+  document.getElementById("kd-vorige").onclick = () => { renderKaartDetail(prev.id); document.getElementById("scherm-kaartdetail").scrollTop = 0; };
+  document.getElementById("kd-volgende").onclick = () => { renderKaartDetail(volg.id); document.getElementById("scherm-kaartdetail").scrollTop = 0; };
+
   // afbeeldingen vóór de schermanimatie laten decoderen (img.decode is async)
   // — zonder dit decodeert iOS ze midden in de push-animatie: eerste frames haperen
   document.querySelectorAll("#kd-inhoud img.kaart-foto").forEach(im => { if (im.decode) im.decode().catch(() => {}); });
   bindTilt(document.getElementById("kd-scene"), document.getElementById("kd-kaart"), document.getElementById("kd-glare"));
-  pushScherm("scherm-kaartdetail");
+}
+
+function openKaartDetail(id) {
+  renderKaartDetail(id);
+  if (document.getElementById("scherm-kaartdetail").hidden) pushScherm("scherm-kaartdetail");
 }
 
 const bibZoekVeld = document.getElementById("bib-zoek");
