@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="55">
+<html lang="nl" data-versie="57">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=55 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=57 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 /* ============================================================
    LETTERTYPES (ingebed — de app blijft 100% offline)
@@ -1154,12 +1154,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 #kd-ster.actief .ster-pad { fill: currentColor; }
 /* --- Kaart-detail: per-kaart tint (--kd-tint), hero met wash + watermerk --- */
 .kd-hero { position: relative; text-align: center; padding: 4px 0 6px; animation: fadeUp 0.35s ease both; }
-.kd-hero::before {
-  content: ""; position: absolute; left: 50%; top: 42%; width: 310px; height: 310px;
-  transform: translate(-50%, -50%); z-index: -1; pointer-events: none; border-radius: 50%;
-  background: radial-gradient(circle, rgba(var(--kd-tint, 232, 200, 116), 0.20), transparent 66%);
-  filter: blur(16px);
-}
+/* geen glow/waas rond de kaart: de scan spreekt voor zich (héél zachte tint zit in .kd-stand) */
 .kd-hero::after {
   content: attr(data-symbool); position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%);
   font-size: 200px; line-height: 1; opacity: 0.05; z-index: -1; pointer-events: none;
@@ -1458,17 +1453,29 @@ body.licht .meer-groep-titel, body.licht .grid-sectie { color: var(--lav); }
 }
 .card3d .chip-naam { border-radius: 0 0 var(--r-m) var(--r-m); }
 body.licht .kaart-chip .chip-naam, body.licht .chip-face .chip-naam, body.licht .card3d .chip-naam { color: #F4DE9E; }
-/* fijn goud randje om elke kaart-foto — uniform kader */
+/* ---------- KAART-FRAME SYSTEEM ----------
+   Strak, fysiek kader — bewust GEEN glazen rand/gloed rond de scan:
+   de foto's hebben hun eigen kaartrand, het frame voegt alleen een
+   bijna onzichtbare hairline (tegen rafeligheid) + een echte,
+   gelaagde slagschaduw toe. Nacht en licht hebben eigen waarden. */
+:root {
+  --kaart-hairline: rgba(255, 255, 255, 0.045);
+  --kaart-schaduw-kort: 0 1px 3px rgba(0, 0, 0, 0.38);
+  --kaart-schaduw-lang: 0 18px 40px rgba(0, 0, 0, 0.50);
+}
+body.licht {
+  --kaart-hairline: rgba(42, 36, 64, 0.09);
+  --kaart-schaduw-kort: 0 1px 3px rgba(42, 36, 64, 0.16);
+  --kaart-schaduw-lang: 0 14px 30px rgba(42, 36, 64, 0.20);
+}
 .kaart-chip .chip-symbool::after, .chip-face .chip-symbool::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+  box-shadow: inset 0 0 0 1px var(--kaart-hairline);
 }
-body.licht .kaart-chip .chip-symbool::after, body.licht .chip-face .chip-symbool::after { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
 .card3d::after {
   content: ""; position: absolute; inset: 0; border-radius: var(--r-m); pointer-events: none;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+  box-shadow: inset 0 0 0 1px var(--kaart-hairline);
 }
-body.licht .card3d::after { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
 .chip-en {
   position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 3;
   max-width: 96%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -1499,12 +1506,12 @@ body.licht .card3d::after { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
 .card3d .layer { transform: translateZ(var(--z, 0px)); transform-style: preserve-3d; }
 .glare {
   position: absolute; inset: 0; border-radius: var(--r-m); pointer-events: none;
-  transform: translateZ(90px); mix-blend-mode: screen;
-  background: linear-gradient(115deg, transparent 32%, rgba(255,255,255,.16) 46%, rgba(255,255,255,.05) 52%, transparent 64%);
+  transform: translateZ(90px); mix-blend-mode: soft-light;
+  background: linear-gradient(115deg, transparent 36%, rgba(255,255,255,.08) 48%, rgba(255,255,255,.03) 54%, transparent 66%);
   background-size: 250% 250%; background-position: 50% 50%;
 }
-.kd-kaart { width: min(240px, 64vw); aspect-ratio: 3 / 5; margin: 6px auto 10px; box-shadow: 0 24px 40px rgba(0, 0, 0, 0.55); will-change: transform; }
-.popup-kaart3d { width: 150px; aspect-ratio: 3 / 5; margin: 0 auto 12px; box-shadow: 0 16px 30px rgba(0, 0, 0, 0.5); will-change: transform; }
+.kd-kaart { width: min(240px, 64vw); aspect-ratio: 3 / 5; margin: 6px auto 10px; box-shadow: var(--kaart-schaduw-kort), var(--kaart-schaduw-lang); will-change: transform; }
+.popup-kaart3d { width: 150px; aspect-ratio: 3 / 5; margin: 0 auto 12px; box-shadow: var(--kaart-schaduw-kort), 0 10px 26px rgba(0,0,0,.42); will-change: transform; }
 .kd-tilt-hint { text-align: center; color: var(--sec); font-size: calc(0.6875rem * var(--tekst-schaal)); margin: -6px 0 12px; }
 @media (prefers-reduced-motion: reduce) { .card3d { transition: none; } }
 
@@ -1516,8 +1523,9 @@ body.licht .card3d::after { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
 .spread-kaart {
   position: absolute; transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
   aspect-ratio: 3 / 5; border-radius: var(--r-s); overflow: visible;
-  box-shadow: 0 6px 16px rgba(0,0,0,.5), inset 0 0 0 1px rgba(232,200,116,.35);
+  box-shadow: 0 4px 12px rgba(0,0,0,.45), inset 0 0 0 1px var(--kaart-hairline);
 }
+body.licht .spread-kaart { box-shadow: 0 4px 12px rgba(42,36,64,.16), inset 0 0 0 1px var(--kaart-hairline); }
 .spread-kaart .kaart-foto { width: 100%; height: 100%; object-fit: cover; border-radius: var(--r-s); display: block; }
 .spread-kaart.omgekeerd .kaart-foto { transform: rotate(180deg); }
 .spread-num {
@@ -1580,7 +1588,7 @@ body.licht .journaal-item { background: rgba(255, 255, 255, 0.72); border-color:
 .leer-open-knop { margin: 4px 0 14px; }
 .leer-kaart-scene { display: flex; justify-content: center; margin: 10px 0 6px; }
 .leer-kaart { width: min(190px, 52vw); aspect-ratio: 3 / 5; border-radius: var(--r-s); overflow: hidden;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(var(--goud-rgb), 0.35); }
+  box-shadow: inset 0 0 0 1px var(--kaart-hairline), var(--kaart-schaduw-kort), var(--kaart-schaduw-lang); }
 .leer-kaart .kaart-foto { width: 100%; height: 100%; object-fit: cover; display: block; }
 .leer-stand { text-align: center; color: var(--sec); font-size: calc(0.75rem * var(--tekst-schaal)); margin-bottom: 14px; }
 .leer-opties { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -1718,7 +1726,6 @@ p, .mix-uitleg, .sub-uitleg, .journaal-tekst, .verhaal { text-wrap: pretty; }
 
 /* --- v52: kaart-detail in Aurora (licht) — zachte pastel-tints op ivoor --- */
 body.licht .kd-chip { background: rgba(42, 36, 64, 0.05); border-color: rgba(42, 36, 64, 0.12); color: var(--sec); }
-body.licht .kd-hero::before { background: radial-gradient(closest-side, rgba(var(--kd-tint, 138, 100, 32), 0.16), transparent 76%); }
 body.licht .kd-journaal { background: rgba(var(--kd-tint, 138, 100, 32), 0.07); }
 body.licht .kd-stand { color: var(--tekst); }
 html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }

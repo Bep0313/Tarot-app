@@ -15,7 +15,7 @@
      het matchen), anders netwerk. Nooit meer HTML teruggeven als
      JS/CSS — dat gaf een wit scherm.
    ============================================================ */
-const CACHE_NAAM = "tarot-van-samir-v55";
+const CACHE_NAAM = "tarot-van-samir-v57";
 
 // Kernbestanden die altijd offline beschikbaar moeten zijn
 const KERN_BESTANDEN = [
