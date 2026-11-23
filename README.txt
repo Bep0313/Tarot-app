@@ -1,56 +1,58 @@
-v58 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
+v59 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
   - index.html
   - sw.js
 
-v58 = UI-HERBOUW (ground-up design-systeem, ponytail-stijl: minder is meer)
+v59 = "ATELIER DE CARTES" — de échte ground-up rebrand + DE DIEPE LAGEN
 
-AANPAK
-"Ground up ALLES omgooien" heb ik gedaan waar het werkelijk mis zat:
-het VISUELE SYSTEEM van zwevende tekst-bubbels en plaatjes-plaatsing.
-De motor (data, logica, flows) was al 100% groen over 64 stappen —
-die is ongemoeid gelaten (ponytail: kleinste complete verandering).
-Wat nieuw is, is de visuele taal: bubbles zijn vervangen door
-rustige tekst-regels en kalme blokken.
+Waarom deze versie er écht ánders uitziet (dit is geen nieuwe laklaag):
+Helemaal nieuw palet, hele nieuwe typografie-houding, hele nieuwe vorm-taal.
+De sterrenhemel, het navy-paars en de glazen pillen zijn VERBANNEN. In hun
+plaats: een warm atelier. Licht heet nu PAPIER (linnen-ivoor + terracotta),
+donker heet nu ESPRESSO (warm bruin-zwart + kaarslicht-amber + oud-roze).
+Balken zitten MUUR-MUUR vast (docked, hairline bovenrand) in plaats van
+te zweven. Knoppen zijn SOLIDE accentkleur — geen glas-goud meer.
+Kaartpagina-koppen tellen zichzelf als 01 t/m 09 — editorial atelier-stijl.
 
-CONCREET VERANDERD IN v58:
+EN: de app is inhoudelijk x een factor gigantisch gegroeid.
 
-1) KAARTPAGINA — DE CHIPS-ZWERM IS WEG
-   Was: 4 zwevende pills in 2 rijen onder de citaat (kernwoord,
-   nummer, element, onderwerpen). Nu: één kalme gecentreerde
-   meta-regel, bv:
-     "Grote Arcana I · manifestatie · focus · talent"
-   (kernwoord in goud). Nul pills, maximale rust rond de kaart.
+CONCREET NIEUW IN v59:
 
-2) LEZINGS-UITLEG — PATROON-PILLS ZIJN EEN BLOK GEWORDEN
-   Was: alle patronen ("3× Grote Arcana — dit is een thema-gedreven
-   reading, niet alleen 'een kaart'" etc.) als grote gouden pill-
-   zinnen die door elkaar zweefden. Nu: één kalm blok ("patronen-
-   blok") met die regels onder elkaar als normale tekstregels.
-   Zinnen horen in tekst, niet in pills.
+A) COMPLETE REBRAND (css/style.css 100% nieuw, motor ongemoeid)
+   - Palet: Papier #F1EAD9 & Espresso #211811, accenten terracotta/amber
+   - Geen sterren (#sterren uit), geen nevel, geen zwevende pills
+   - Tabbalk + gekozen-balk + sheet: docked over de volle breedte
+   - Knoppen: solid (amber/terracotta) in plaats van glas-effect
+   - Kaart-frames: hairline + warme schaduw (v56-systeem, atelier-waarden)
+   - Thema-knoppen in Meer heten nu "Papier" en "Espresso"
+     (Papier = standaard licht, Espresso = donker)
+   - iOS-statusbalk kleurt mee (#F1EAD9 / #211811)
 
-3) KAART-NAAM-CHIP OP DE KAART SUBTIELER
-   "THE MAGICIAN" op de kaart: gouden rand weg, zachter donker
-   labeltje — de illustratie ademt.
+B) DE DIEPE LAGEN — 78/78 kaarten met volledig kapittel (js/inhoud-verhaal-*.js)
+   Elke kaart kreeg een écht hoofdstuk (niks weggegooid, alles erbij):
+     1. Zo werkt deze kaart     (beginners-laag — was er al)
+     2. De betekenis            (kort — was er al)
+     3. DE DIEPERE LAGEN       (NIEUW: rechtop voluit + omgekeerd voluit)
+     4. Op de kaart             (NIEUW: symbolengids per symbool met uitleg)
+     5. WAT TE DOEN             (NIEUW: 4 concrete stappen + signatuur-mantra)
+     6. HERKENBAAR?             (NIEUW: 2-3 herkenbare 2026-situaties)
+     7. In je leven             (liefde/werk/geld/familie/vrienden — was er al)
+     8. Vaak samen met          (NIEUW: combinaties met andere kaarten)
+     9. In je journaal          (NIEUW: extra schrijf-prompts)
+   Gemiddeld 687 woorden per kaart (was ~250) — laagste kaart: 569 woorden.
 
-4) CSS OPGERUIMD
-   .kd-chips/.kd-chip/.kd-chip-kern/.kd-chip-onderwerp/kd-kernwoord
-   verwijderd (dodeCode weg), vervangen door .kd-meta +
-   .patroon-blok/.patroon-regel — ook in Aurora (licht).
-  shortcut: sectie-afstanden zijn bewust ongemoeid; die waren al
-   consistent (24px ritme) — niet breken wat werkt.
+C) GETEST (Playwright, iPhone 15 Pro Max viewport 430x932)
+   - Alle 78 kaartpagina's: 9 secties, geen JS-errors
+   - Complete flow: legging -> vraag -> kaart kiezen -> uitleg -> groen
+   - 9/9 skin-controles: palet, sterren-uit, docked balk, thema-wissel,
+     toast, labels, meta-kleuren — alles groen
+   - dist smoke-test: 78 kaarten, 78 verhalen, v59, geen errors
 
-GETEST (alles groen):
-- Volledige 32-stappen app-audit opnieuw gedraaid in beide thema's
-  (Nacht + Aurora): alle schermen, flows, quiz, journaal,
-  geschiedenis, instellingen — 0 uitsteeksels, 0 horizontale
-  scroll, 0 console-errors
-- Kaartpagina De Magiër/De Zegewagen: meta-regel aanwezig,
-  0 oude chips, citaat + stand intact
-- Uitleg energiescan: patroon-blok (1 blok, meerdere regels),
-  0 oude pill-zinnen
-- dist single-file v58 geladen en gecheckt: zelfde resultaat, 0 errors
-
-Na upload: app openen -> auto-reload -> "Versie v58" bij Meer.
-Kijk vooral: Bibliotheek -> eender welke kaart (de rustige regel
-onder de citaat) en trek een legging met veel patronen (bv.
-Keltisch Kruis) -> rustige patroon-regels in plaats van pill-wolk.
+UPLOAD (vergeet niet):
+  1. Ga naar github.com/Bep0313/Tarot-app
+  2. Add file -> Upload files
+  3. Sleep ALLEEN index.html en sw.js uit deze map
+  4. Commit
+  5. Op je iPhone: open de app -> sluit de tab volledig af ->
+     open opnieuw (de service worker wisselt dan naar v59)
+  6. Voelt het oude aan? Safari: deel-paneel -> "Voeg toe aan beginscherm"
+     opnieuw, of cache legen via Instellingen -> Safari -> Websitegegevens
