@@ -1,38 +1,56 @@
-v57 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
+v58 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
   - index.html
   - sw.js
 
-v57 = VOLLEDIGE APP-AUDIT (hele app doorlopen) + laatste glazen rand weg
+v58 = UI-HERBOUW (ground-up design-systeem, ponytail-stijl: minder is meer)
 
-WAT ER IN DEZE RONDE IS GEBEURD:
-Er is een 64-stappen audit door DE HELE APP gedraaid, in beide thema's
-(Nacht + Aurora), op 430x932 met iPhone 15 Pro Max safe-areas:
-  - home/legging-lijst, vraag-scherm (+ voorbeeldvragen-sheet),
-    kaarten kiezen, uitleg (+ opslaan), bibliotheek (+ zoeken),
-    kaart-pagina's, quiz (14 rondes + eindscherm), journaal
-    (stemming + notitie + opslaan + lijst), geschiedenis (+ zoeken),
-    Meer (instellingen: tekstgrootte, omgekeerd lezen, thema, stats)
-    en de kaart-popup.
-  Per stap gemeten: horizontale scroll, elementen die uit het scherm
-  steken, en console-errors.
+AANPAK
+"Ground up ALLES omgooien" heb ik gedaan waar het werkelijk mis zat:
+het VISUELE SYSTEEM van zwevende tekst-bubbels en plaatjes-plaatsing.
+De motor (data, logica, flows) was al 100% groen over 64 stappen —
+die is ongemoeid gelaten (ponytail: kleinste complete verandering).
+Wat nieuw is, is de visuele taal: bubbles zijn vervangen door
+rustige tekst-regels en kalme blokken.
 
-UITKOMST: alles groen — 0 uitsteeksels, 0 horizontale scroll,
-0 console-errors, in beide thema's. EEN overgebleven bug gevonden:
+CONCREET VERANDERD IN v58:
 
-  QUIZ-KAART HAD NOG DE GOUDEN "GLAZEN" RAND
-  De kaart in "Leer de kaarten — quiz" had als enige nog het oude
-  gouden binnenafrandje (inset goud 0.35) + zware losse schaduw.
-  Nu hetzelfde strakke frame als de rest van de app (haarlijn
-  0.045 + gelaagde echte slagschaduw) — het v56-kaartframesysteem
-  geldt nu ECHT overal: kaartpagina's, popup, lezingsdiagram,
-  bibliotheek-grid, EN de quiz.
+1) KAARTPAGINA — DE CHIPS-ZWERM IS WEG
+   Was: 4 zwevende pills in 2 rijen onder de citaat (kernwoord,
+   nummer, element, onderwerpen). Nu: één kalme gecentreerde
+   meta-regel, bv:
+     "Grote Arcana I · manifestatie · focus · talent"
+   (kernwoord in goud). Nul pills, maximale rust rond de kaart.
 
-Daarnaast gecontroleerd: de drie content-lagen (kaart-diepte 78,
-kaart-domein 78, kaart-beginner 78) laden correct in de dist
-single-file en de sectie "Zo werkt deze kaart" staat op elke
-kaartpagina.
+2) LEZINGS-UITLEG — PATROON-PILLS ZIJN EEN BLOK GEWORDEN
+   Was: alle patronen ("3× Grote Arcana — dit is een thema-gedreven
+   reading, niet alleen 'een kaart'" etc.) als grote gouden pill-
+   zinnen die door elkaar zweefden. Nu: één kalm blok ("patronen-
+   blok") met die regels onder elkaar als normale tekstregels.
+   Zinnen horen in tekst, niet in pills.
 
-Na upload: app openen -> auto-reload -> "Versie v57" bij Meer.
-Speciaal checken: Meer -> Bibliotheek -> "Leer de kaarten — quiz":
-de grote kaart in de quiz heeft nu dezelfde strakke rand als
-overal — geen gouden gloed meer.
+3) KAART-NAAM-CHIP OP DE KAART SUBTIELER
+   "THE MAGICIAN" op de kaart: gouden rand weg, zachter donker
+   labeltje — de illustratie ademt.
+
+4) CSS OPGERUIMD
+   .kd-chips/.kd-chip/.kd-chip-kern/.kd-chip-onderwerp/kd-kernwoord
+   verwijderd (dodeCode weg), vervangen door .kd-meta +
+   .patroon-blok/.patroon-regel — ook in Aurora (licht).
+  shortcut: sectie-afstanden zijn bewust ongemoeid; die waren al
+   consistent (24px ritme) — niet breken wat werkt.
+
+GETEST (alles groen):
+- Volledige 32-stappen app-audit opnieuw gedraaid in beide thema's
+  (Nacht + Aurora): alle schermen, flows, quiz, journaal,
+  geschiedenis, instellingen — 0 uitsteeksels, 0 horizontale
+  scroll, 0 console-errors
+- Kaartpagina De Magiër/De Zegewagen: meta-regel aanwezig,
+  0 oude chips, citaat + stand intact
+- Uitleg energiescan: patroon-blok (1 blok, meerdere regels),
+  0 oude pill-zinnen
+- dist single-file v58 geladen en gecheckt: zelfde resultaat, 0 errors
+
+Na upload: app openen -> auto-reload -> "Versie v58" bij Meer.
+Kijk vooral: Bibliotheek -> eender welke kaart (de rustige regel
+onder de citaat) en trek een legging met veel patronen (bv.
+Keltisch Kruis) -> rustige patroon-regels in plaats van pill-wolk.
