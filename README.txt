@@ -1,58 +1,52 @@
-v59 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
+v60 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
   - index.html
   - sw.js
 
-v59 = "ATELIER DE CARTES" — de échte ground-up rebrand + DE DIEPE LAGEN
+v60 = "DE OVERLAP-REPARATIE" — alles wat in v59 door elkaar heen zat, zit nu strak.
 
-Waarom deze versie er écht ánders uitziet (dit is geen nieuwe laklaag):
-Helemaal nieuw palet, hele nieuwe typografie-houding, hele nieuwe vorm-taal.
-De sterrenhemel, het navy-paars en de glazen pillen zijn VERBANNEN. In hun
-plaats: een warm atelier. Licht heet nu PAPIER (linnen-ivoor + terracotta),
-donker heet nu ESPRESSO (warm bruin-zwart + kaarslicht-amber + oud-roze).
-Balken zitten MUUR-MUUR vast (docked, hairline bovenrand) in plaats van
-te zweven. Knoppen zijn SOLIDE accentkleur — geen glas-goud meer.
-Kaartpagina-koppen tellen zichzelf als 01 t/m 09 — editorial atelier-stijl.
+Gefixt ten opzichte van v59 (allemaal keihard getest op iPhone 15 Pro Max-formaat):
 
-EN: de app is inhoudelijk x een factor gigantisch gegroeid.
+1. GEKOZEN-BALK ZAT OVER DE TABBALK HEEN
+   De balk met je gekozen kaarten dekte de onderste tabbalk af (zowel op
+   "Kaarten" als overal waar hij verscholen stond). Nu docked de gekozen-balk
+   strak BOVEN de tabbalk (hoogte wordt live gemeten via --tab-h), beide
+   balken muur-muur en altijd zichtbaar. Gemeten: 0px overlap.
 
-CONCREET NIEUW IN v59:
+2. "NAAR DE UITLEG"-KNOP VREET DE Gekozen KAARTJES OP
+   De knop had width:100% binnen de flex-balk en duwde de mini-kaartjes weg.
+   Nu: knop flex:1, kaartjes blijven 46px breed zichtbaar.
 
-A) COMPLETE REBRAND (css/style.css 100% nieuw, motor ongemoeid)
-   - Palet: Papier #F1EAD9 & Espresso #211811, accenten terracotta/amber
-   - Geen sterren (#sterren uit), geen nevel, geen zwevende pills
-   - Tabbalk + gekozen-balk + sheet: docked over de volle breedte
-   - Knoppen: solid (amber/terracotta) in plaats van glas-effect
-   - Kaart-frames: hairline + warme schaduw (v56-systeem, atelier-waarden)
-   - Thema-knoppen in Meer heten nu "Papier" en "Espresso"
-     (Papier = standaard licht, Espresso = donker)
-   - iOS-statusbalk kleurt mee (#F1EAD9 / #211811)
+3. KAART-AFBEELDINGEN WAREN ONZICHTBAAR (26px) IN GRIDS
+   De foto zat gevangen in een 26px symbool-span. De span vult nu de hele
+   kaart-kaart (bibliotheek, kaarten-kiezen, geschiedenis, gekozen-balk).
+   Gemeten: img 121px in een 123px chip, natural size geladen.
 
-B) DE DIEPE LAGEN — 78/78 kaarten met volledig kapittel (js/inhoud-verhaal-*.js)
-   Elke kaart kreeg een écht hoofdstuk (niks weggegooid, alles erbij):
-     1. Zo werkt deze kaart     (beginners-laag — was er al)
-     2. De betekenis            (kort — was er al)
-     3. DE DIEPERE LAGEN       (NIEUW: rechtop voluit + omgekeerd voluit)
-     4. Op de kaart             (NIEUW: symbolengids per symbool met uitleg)
-     5. WAT TE DOEN             (NIEUW: 4 concrete stappen + signatuur-mantra)
-     6. HERKENBAAR?             (NIEUW: 2-3 herkenbare 2026-situaties)
-     7. In je leven             (liefde/werk/geld/familie/vrienden — was er al)
-     8. Vaak samen met          (NIEUW: combinaties met andere kaarten)
-     9. In je journaal          (NIEUW: extra schrijf-prompts)
-   Gemiddeld 687 woorden per kaart (was ~250) — laagste kaart: 569 woorden.
+4. SPREAD-KAART IN DE UITLEG WAS ENORM EN LIEP OVER DE TEKST
+   De mini-kaart in de legging miste transform/aspect/foto-regels en renderde
+   op natuurlijke grootte (630px) dwars over de titel. Nu: 129px, gecentreerd,
+   met nummer-badge en label eronder.
 
-C) GETEST (Playwright, iPhone 15 Pro Max viewport 430x932)
-   - Alle 78 kaartpagina's: 9 secties, geen JS-errors
-   - Complete flow: legging -> vraag -> kaart kiezen -> uitleg -> groen
-   - 9/9 skin-controles: palet, sterren-uit, docked balk, thema-wissel,
-     toast, labels, meta-kleuren — alles groen
-   - dist smoke-test: 78 kaarten, 78 verhalen, v59, geen errors
+5. STER/DEEL-KNOP WAS EEN GIGANTISCHE RECHTHOEK
+   (.deel-knop was per ongeluk een full-width balk geworden). Weer een nette
+   40px ronde knop rechtsboven, zoals het hoort.
 
-UPLOAD (vergeet niet):
-  1. Ga naar github.com/Bep0313/Tarot-app
-  2. Add file -> Upload files
-  3. Sleep ALLEEN index.html en sw.js uit deze map
-  4. Commit
-  5. Op je iPhone: open de app -> sluit de tab volledig af ->
-     open opnieuw (de service worker wisselt dan naar v59)
-  6. Voelt het oude aan? Safari: deel-paneel -> "Voeg toe aan beginscherm"
-     opnieuw, of cache legen via Instellingen -> Safari -> Websitegegevens
+6. "RECHTOP"-BADGE HING HALF BUITEN HET SCHERM
+   (.stand was absolute geworden). Nu een inline pill next to de kaartnaam —
+   alleen op de mini-kaartjes in de gekozen-balk staat hij in de hoek.
+
+7. ZOEK-ICOON WAS 300px GROOT
+   (.zoek-balk miste flex + svg-maat). Nu een 18px icoon ín de zoekbalk.
+
+8. EN-NAAM OVERLAPTE NL-NAAM OP KAARTEN
+   "THE FOOL" lag over "De Dwaas" heen onderaan de grid-kaarten. EN-chip is
+   nu verborgen op grid-kaarten (wel zichtbaar op de detailpagina).
+
+9. KAART OP DETAILPAGINA: 240px, ratio 3/5, geen overlap met titel (gemeten).
+
+Getest: 78/78 kaarten, 78/78 diepe verhalen, 0 JS-errors, 0 overlap, beide
+thema's (Espresso + Papier) doorlopen: home, vraag, kaarten, gekozen-balk,
+uitleg, kaartdetail, bibliotheek, journaal, geschiedenis, meer.
+
+Upload-instructie: ALLEEN index.html + sw.js uit deze map naar de repo-root,
+dan de app op je iPhone sluiten (volledig uit het geheugen) en opnieuw
+openen — de service worker pakt anders de oude versie.

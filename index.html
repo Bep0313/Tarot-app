@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="59">
+<html lang="nl" data-versie="60">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=59 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=60 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 @font-face {
   font-family: "Fraunces";
@@ -520,6 +520,12 @@ body.licht .veil { background: rgba(54, 42, 28, 0.34); }
 @keyframes fadeInChip { from { opacity: 0; } to { opacity: 1; } }
 .kaart-chip:active { transform: scale(0.94); }
 .kaart-chip img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.kaart-chip svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* de kaart-foto zit in een chip-symbool-span: die moet de HELE kaart vullen, niet 26px */
+.kaart-chip .chip-symbool, .chip-face .chip-symbool, .hist-kaart-chip .chip-symbool {
+  left: 0; bottom: 0; transform: none; width: 100%; height: 100%; opacity: 1;
+}
+.kaart-chip .chip-symbool::after, .chip-face .chip-symbool::after, .hist-kaart-chip .chip-symbool::after { display: none; }
 .kaart-chip::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit;
   box-shadow: inset 0 0 0 1px var(--kaart-hairline);
@@ -567,17 +573,21 @@ body.licht .veil { background: rgba(54, 42, 28, 0.34); }
   background: rgba(14, 10, 4, 0.55); padding: 2px 6px; border-radius: 999px;
 }
 .kaart-chip.omgekeerd img { transform: rotate(180deg); }
+.kaart-chip .chip-en { display: none; } /* NL-naam is genoeg op grid-kaarten */
 
 /* ---------- 16. GEKOZEN-BALK — DOCKED boven de tabbalk ---------- */
 .gekozen-balk {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 42;
+  position: fixed; left: 0; right: 0;
+  bottom: calc(env(safe-area-inset-bottom) + var(--tab-h, 58px));
+  z-index: 42;
   display: flex; align-items: center; gap: 10px;
-  padding: 10px 14px calc(env(safe-area-inset-bottom) + 78px);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
   border-top: 1px solid var(--rand);
   max-height: 200px; overflow-y: auto; scrollbar-width: none;
 }
+.gekozen-balk .knop { width: auto; flex: 1 1 150px; min-height: 44px; }
 .gekozen-balk::-webkit-scrollbar { display: none; }
 .gekozen-balk[hidden] { display: none; }
 .gekozen-info { flex-shrink: 0; display: flex; flex-direction: column; gap: 2px; min-width: 44px; padding-right: 10px; border-right: 1px solid var(--rand); }
@@ -603,11 +613,12 @@ body.licht .veil { background: rgba(54, 42, 28, 0.34); }
 .chip-face.back::after { content: ""; position: absolute; inset: 3px; border-radius: 4px; border: 1px solid rgba(210, 154, 91, 0.4); }
 .chip-face::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--kaart-hairline); pointer-events: none; }
 .stand {
-  position: absolute; right: -4px; top: -4px; z-index: 3;
-  font-size: 8.5px; font-weight: 800; letter-spacing: 0.04em; padding: 2px 5px;
+  flex-shrink: 0;
+  font-size: 9px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 8px;
   border-radius: 999px; color: #241A10; background: var(--goud);
 }
 .stand.omgekeerd { color: #F6EEDF; background: var(--roze); }
+.chip-face .stand { position: absolute; right: -4px; top: -4px; z-index: 3; }
 .chip-positie {
   position: absolute; left: 50%; bottom: -18px; transform: translateX(-50%);
   font-size: 9px; font-weight: 700; color: var(--sec); letter-spacing: 0.04em;
@@ -635,15 +646,18 @@ body.licht .veil { background: rgba(54, 42, 28, 0.34); }
 
 /* ---------- 17. UITLEG-SCREEN (trekking) ---------- */
 .deel-knop {
-  width: 100%; min-height: 46px;
-  background: var(--vlak); border: 1px solid var(--rand); border-radius: var(--r-s);
-  color: var(--tekst); font-family: var(--sans); font-size: 15px; font-weight: 600;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  cursor: pointer; margin: 4px 0 0;
-  transition: transform 0.2s cubic-bezier(0.34, 1.45, 0.64, 1), border-color 0.2s ease;
+  flex-shrink: 0; width: 40px; height: 40px; margin-top: 2px;
+  border-radius: 50%;
+  border: 1px solid var(--rand-sterk);
+  background: var(--vlak);
+  color: var(--goud);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.deel-knop:active { transform: scale(0.97); border-color: var(--rand-sterk); }
+.deel-knop svg { width: 19px; height: 19px; }
+.deel-knop:active { transform: scale(0.94); background: color-mix(in srgb, var(--goud) 14%, var(--vlak)); }
 .positie-blok { border-left: 2px solid var(--rand); padding-left: 14px; margin: 18px 0; }
 .positie-blok.open { border-left-color: var(--goud); }
 .blok-kop {
@@ -717,19 +731,32 @@ body.licht .tag-chip.actief { color: #FBF6EA; background: var(--accent); }
 }
 
 /* ---------- 18. SPREAD-DIAGRAM ---------- */
-.spread-diagram { position: relative; height: 150px; margin: 10px 0 6px; }
+.spread-diagram { position: relative; margin: 12px 0 26px; }
 .spread-kaart {
-  position: absolute; width: 56px; height: 90px; border-radius: 7px;
+  position: absolute; transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+  aspect-ratio: 3 / 5; border-radius: var(--r-s); overflow: visible;
   background: var(--vlak-2); border: 1px solid var(--rand-sterk);
   box-shadow: var(--kaart-schaduw-kort);
   animation: spBlink 2.2s ease-in-out infinite; animation-delay: calc(var(--i) * 0.25s);
 }
 @keyframes spBlink { 0%, 100% { border-color: var(--rand-sterk); } 50% { border-color: var(--goud); } }
-.spread-num {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  color: var(--goud); font-weight: 800; font-size: 15px;
+.spread-kaart .kaart-foto, .spread-kaart svg {
+  width: 100%; height: 100%; object-fit: cover; border-radius: var(--r-s); display: block;
 }
-.spread-label { position: absolute; font-size: 10px; color: var(--sec); font-weight: 600; white-space: nowrap; }
+.spread-kaart.omgekeerd .kaart-foto { transform: rotate(180deg); }
+.spread-num {
+  position: absolute; top: -8px; left: -8px; z-index: 3;
+  min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
+  background: var(--goud); color: var(--bg);
+  font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--kaart-schaduw-kort);
+}
+.spread-label {
+  position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%);
+  white-space: nowrap; font-size: 9.5px; color: var(--sec); font-weight: 600; letter-spacing: 0.02em;
+  max-width: 140%; overflow: hidden; text-overflow: ellipsis;
+}
 
 /* ---------- 19. POPUP ---------- */
 .popup-achtergrond {
@@ -761,11 +788,18 @@ body.licht .popup-achtergrond { background: rgba(54, 42, 28, 0.34); }
 .popup-kaart3d { width: 150px; aspect-ratio: 3 / 5; margin: 0 auto 12px; will-change: transform; box-shadow: var(--kaart-schaduw-kort), var(--kaart-schaduw-lang); }
 
 /* ---------- 20. GESCHIEDENIS ---------- */
-.zoek-balk { position: sticky; top: -34px; z-index: 21; background: var(--bg); padding: 12px 0 10px; }
+.zoek-balk {
+  position: sticky; top: 10px; z-index: 21;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--vlak); border: 1px solid var(--rand); border-radius: var(--r-s);
+  padding: 0 14px; margin: 12px 0 10px;
+  box-shadow: var(--kaart-schaduw-kort);
+}
+.zoek-balk svg { width: 18px; height: 18px; color: var(--sec); flex-shrink: 0; }
 .zoek-invoer {
   width: 100%; font-family: var(--sans); font-size: 15px;
-  background: var(--vlak); border: 1px solid var(--rand); border-radius: var(--r-s);
-  padding: 11px 14px; color: var(--tekst); outline: none;
+  background: none; border: none; box-shadow: none;
+  padding: 12px 0; color: var(--tekst); outline: none;
 }
 .zoek-invoer::placeholder { color: var(--sec); opacity: 0.7; }
 .zoek-invoer:focus { border-color: var(--goud); }
@@ -809,7 +843,7 @@ body.licht .popup-achtergrond { background: rgba(54, 42, 28, 0.34); }
 .kd-citaat::before { content: "„ "; color: var(--goud); }
 .kd-citaat::after { content: " ”"; color: var(--goud); }
 .kd-kaart {
-  width: min(58vw, 230px); aspect-ratio: 5 / 8; margin: 14px auto 4px;
+  width: min(64vw, 240px); aspect-ratio: 3 / 5; margin: 14px auto 4px;
   border-radius: var(--r-s); position: relative; perspective: 900px;
   background: var(--vlak-2); box-shadow: var(--kaart-schaduw-lang);
 }
@@ -7788,6 +7822,15 @@ function sterrenLoop(t) {
 
 maakSterren();
 window.addEventListener("resize", maakSterren);
+
+// hoogte van de tabbalk doorgeven als CSS-var, zodat de gekozen-balk erboven docked
+function syncTabHoogte() {
+  const t = document.getElementById("tabbalk");
+  if (t) document.documentElement.style.setProperty("--tab-h", t.offsetHeight + "px");
+}
+window.addEventListener("resize", syncTabHoogte);
+window.addEventListener("load", syncTabHoogte);
+syncTabHoogte();
 if (MINDER_BEWEGING) {
   tekenSterren(0); // één keer statisch tekenen, geen animatielus
 } else {
