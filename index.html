@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="60">
+<html lang="nl" data-versie="61">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=60 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=61 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 @font-face {
   font-family: "Fraunces";
@@ -78,8 +78,8 @@
   --goud-donker: #8A5B23;
   --lav: #C88B7E;             /* accent 2: oud-roze */
   --lav-rgb: 200, 139, 126;
-  --roze: #C96A5E;
-  --roze-rgb: 201, 106, 94;
+  --roze: #D07366;
+  --roze-rgb: 208, 115, 102;
   --accent: #D29A5B;
   --accent-deep: #B67C3F;
   --accent-rgb: 210, 154, 91;
@@ -105,17 +105,17 @@ body.licht {
   --rand: rgba(43, 33, 24, 0.12);
   --rand-sterk: rgba(43, 33, 24, 0.22);
   --tekst: #2B2118;
-  --sec: #7C6E5C;
-  --goud: #A6552F;
-  --goud-rgb: 166, 85, 47;
-  --goud-donker: #7E3E1E;
-  --lav: #6E7D5C;
-  --lav-rgb: 110, 125, 92;
+  --sec: #6E604E;
+  --goud: #9D4F2C;
+  --goud-rgb: 157, 79, 44;
+  --goud-donker: #7E3A1D;
+  --lav: #5A6948;
+  --lav-rgb: 90, 105, 72;
   --roze: #A83D32;
   --roze-rgb: 168, 61, 50;
-  --accent: #A6552F;
-  --accent-deep: #8C4423;
-  --accent-rgb: 166, 85, 47;
+  --accent: #9D4F2C;
+  --accent-deep: #7E3A1D;
+  --accent-rgb: 157, 79, 44;
   --vlak-schaduw: 0 8px 22px rgba(60, 42, 24, 0.10);
   --kaart-hairline: rgba(43, 33, 24, 0.10);
   --kaart-schaduw-kort: 0 1px 3px rgba(43, 33, 24, 0.14);
@@ -250,7 +250,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .home-datum {
   display: inline-flex; align-items: center; gap: 7px;
   margin-bottom: 14px; padding: 6px 0 6px 0;
-  color: var(--sec); font-size: calc(0.6875rem * var(--tekst-schaal));
+  color: var(--sec); font-size: calc(0.75rem * var(--tekst-schaal));
   font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;
 }
 .home-datum svg { width: 12px; height: 12px; color: var(--goud); }
@@ -267,7 +267,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 @keyframes twinkel { 0%, 100% { opacity: 0.55; transform: scale(0.85) rotate(0deg); } 50% { opacity: 1; transform: scale(1.12) rotate(18deg); } }
 .home-ondertitel {
   color: var(--sec); margin-top: 4px;
-  font-size: calc(0.875rem * var(--tekst-schaal));
+  font-size: calc(0.9375rem * var(--tekst-schaal));
   max-height: 26px; overflow: hidden;
   transition: opacity 0.25s ease, max-height 0.3s ease, margin-top 0.3s ease;
 }
@@ -313,7 +313,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .legging-naam { font-family: var(--serif); font-size: calc(1.25rem * var(--tekst-schaal)); letter-spacing: -0.01em; display: block; line-height: 1.2; }
 .legging-wanneer { color: var(--sec); font-size: calc(0.8125rem * var(--tekst-schaal)); display: block; margin-top: 4px; line-height: 1.35; }
 .legging-badge {
-  flex-shrink: 0; font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700;
+  flex-shrink: 0; font-size: calc(0.75rem * var(--tekst-schaal)); font-weight: 700;
   color: var(--sec); text-transform: uppercase; letter-spacing: 0.08em;
   white-space: nowrap; padding-left: 12px; border-left: 1px solid var(--rand);
 }
@@ -344,7 +344,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
   padding: 4px 0; min-height: 44px;
   background: none; border: none;
-  color: var(--sec); font-family: var(--sans); font-size: 10px; cursor: pointer;
+  color: var(--sec); font-family: var(--sans); font-size: 11px; cursor: pointer;
   transition: color 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -445,7 +445,7 @@ body.licht .knop { color: #FBF6EA; background: var(--accent); }
 .sub-kop .terug:active { transform: scale(0.9); }
 .sub-kop .terug svg { width: 18px; height: 18px; }
 .sub-kicker {
-  font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700;
+  font-size: calc(0.75rem * var(--tekst-schaal)); font-weight: 700;
   letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--sec);
 }
@@ -562,13 +562,13 @@ body.licht .veil { background: rgba(54, 42, 28, 0.34); }
 .chip-symbool::after { content: ""; position: absolute; inset: -7px; border-radius: 999px; border: 1px solid rgba(243, 234, 218, 0.35); }
 .chip-naam {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 1;
-  padding: 18px 8px 7px; font-size: 11px; font-weight: 600; line-height: 1.25;
+  padding: 22px 8px 7px; font-size: 12px; font-weight: 700; line-height: 1.3;
   color: #F3EADA; text-align: center;
   background: linear-gradient(transparent, rgba(14, 10, 4, 0.86));
 }
 .chip-en {
   position: absolute; right: 6px; bottom: 6px; z-index: 1;
-  font-size: 8.5px; font-weight: 600; letter-spacing: 0.06em;
+  font-size: 9.5px; font-weight: 600; letter-spacing: 0.06em;
   color: rgba(243, 234, 218, 0.75); text-transform: uppercase;
   background: rgba(14, 10, 4, 0.55); padding: 2px 6px; border-radius: 999px;
 }
@@ -614,7 +614,7 @@ body.licht .veil { background: rgba(54, 42, 28, 0.34); }
 .chip-face::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--kaart-hairline); pointer-events: none; }
 .stand {
   flex-shrink: 0;
-  font-size: 9px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 8px;
+  font-size: 10.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 10px;
   border-radius: 999px; color: #241A10; background: var(--goud);
 }
 .stand.omgekeerd { color: #F6EEDF; background: var(--roze); }
@@ -669,19 +669,19 @@ body.licht .veil { background: rgba(54, 42, 28, 0.34); }
 .blok-inhoud { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.34s cubic-bezier(0.32, 0.72, 0, 1); }
 .positie-blok.open .blok-inhoud { grid-template-rows: 1fr; }
 .blok-binnen { overflow: hidden; }
-.positie-label { font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sec); transition: color 0.2s ease; }
+.positie-label { font-size: calc(0.75rem * var(--tekst-schaal)); font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tekst); transition: color 0.2s ease; }
 .positie-blok.open .positie-label { color: var(--goud); }
 .positie-kaart-rij { display: flex; align-items: center; gap: 12px; margin: 10px 0 12px; }
 .kaart-naam-klik { font-family: var(--serif); font-size: calc(1.25rem * var(--tekst-schaal)); letter-spacing: -0.01em; }
-.kernwoord { display: inline-block; margin-top: 3px; color: var(--goud); font-size: calc(0.875rem * var(--tekst-schaal)); font-weight: 600; }
+.kernwoord { display: inline-block; margin-top: 3px; color: var(--goud); font-size: calc(1rem * var(--tekst-schaal)); font-weight: 800; letter-spacing: 0.01em; }
 .vertaling { display: inline-block; font-size: calc(0.75rem * var(--tekst-schaal)); color: var(--sec); margin-left: 6px; }
-.betekenis { font-size: calc(0.9375rem * var(--tekst-schaal)); line-height: 1.6; color: var(--tekst); opacity: 0.92; }
-.context-lijn { margin-top: 10px; font-size: calc(0.875rem * var(--tekst-schaal)); color: var(--sec); line-height: 1.5; font-style: italic; }
+.betekenis { font-size: calc(1rem * var(--tekst-schaal)); line-height: 1.65; color: var(--tekst); }
+.context-lijn { margin-top: 10px; font-size: calc(0.9375rem * var(--tekst-schaal)); color: var(--sec); line-height: 1.55; font-style: italic; }
 .reflectie-vraagteken { color: var(--lav); font-weight: 800; }
 .uitleg-sectie { margin-top: 34px; }
 .sectie-titel {
-  font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.12em; color: var(--sec); margin-bottom: 12px;
+  font-size: calc(0.75rem * var(--tekst-schaal)); font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--tekst); margin-bottom: 12px;
   display: flex; align-items: center; gap: 8px;
 }
 .sectie-titel::before { content: ""; width: 18px; height: 1px; background: var(--goud); flex-shrink: 0; }
@@ -712,11 +712,12 @@ body.licht .veil { background: rgba(54, 42, 28, 0.34); }
 }
 .tag-chip.actief { background: var(--goud); border-color: transparent; color: #241A10; }
 body.licht .tag-chip.actief { color: #FBF6EA; background: var(--accent); }
-.positie-extra { margin-top: 12px; padding: 12px 14px; background: var(--vlak-2); border: 1px solid var(--rand); border-radius: var(--r-s); font-size: calc(0.875rem * var(--tekst-schaal)); line-height: 1.55; color: var(--sec); }
+.positie-extra { margin-top: 12px; padding: 12px 14px; background: var(--vlak-2); border: 1px solid var(--rand); border-radius: var(--r-s); font-size: calc(0.9375rem * var(--tekst-schaal)); line-height: 1.6; color: var(--tekst); }
 .sterBurst {
   position: fixed; z-index: 70; width: 14px; height: 14px; color: var(--goud); opacity: 0; pointer-events: none;
   animation: sterBurst 0.7s cubic-bezier(0.22, 0.9, 0.28, 1) forwards;
 }
+.sterBurst svg { width: 100%; height: 100%; display: block; }
 @keyframes sterBurst {
   0% { opacity: 0; transform: scale(0.2) rotate(0deg); }
   35% { opacity: 1; }
@@ -754,7 +755,7 @@ body.licht .tag-chip.actief { color: #FBF6EA; background: var(--accent); }
 }
 .spread-label {
   position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%);
-  white-space: nowrap; font-size: 9.5px; color: var(--sec); font-weight: 600; letter-spacing: 0.02em;
+  white-space: nowrap; font-size: 11px; color: var(--sec); font-weight: 700; letter-spacing: 0.01em;
   max-width: 140%; overflow: hidden; text-overflow: ellipsis;
 }
 
@@ -835,11 +836,11 @@ body.licht .popup-achtergrond { background: rgba(54, 42, 28, 0.34); }
 #kd-ster { color: var(--sec); transition: transform 0.2s ease, color 0.2s ease; }
 #kd-ster.actief { color: var(--goud); animation: badgePop 0.5s cubic-bezier(0.34, 1.65, 0.64, 1); }
 .kd-hero { position: relative; background: var(--vlak); border: 1px solid var(--rand); border-radius: var(--r-m); padding: 22px 18px 18px; text-align: center; counter-reset: kdsectie; }
-.kd-stand { display: inline-flex; align-items: center; gap: 6px; font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sec); margin-top: 8px; }
+.kd-stand { display: inline-flex; align-items: center; gap: 6px; font-size: calc(0.75rem * var(--tekst-schaal)); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sec); margin-top: 8px; }
 .kd-stand svg { width: 12px; height: 12px; }
 .kd-meta { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 8px; font-size: calc(0.875rem * var(--tekst-schaal)); color: var(--sec); flex-wrap: wrap; }
 .kd-meta .sep { opacity: 0.4; }
-.kd-citaat { font-style: italic; font-family: var(--serif); color: var(--sec); margin-top: 12px; font-size: calc(0.9375rem * var(--tekst-schaal)); line-height: 1.5; }
+.kd-citaat { font-style: italic; font-family: var(--serif); color: var(--sec); margin-top: 12px; font-size: calc(1.0625rem * var(--tekst-schaal)); line-height: 1.55; }
 .kd-citaat::before { content: "„ "; color: var(--goud); }
 .kd-citaat::after { content: " ”"; color: var(--goud); }
 .kd-kaart {
@@ -850,8 +851,8 @@ body.licht .popup-achtergrond { background: rgba(54, 42, 28, 0.34); }
 .kd-kaart .card3d { width: 100%; height: 100%; }
 .kd-scene { margin: 16px 0 10px; display: flex; flex-direction: column; align-items: center; }
 .kd-blik {
-  font-size: calc(0.9375rem * var(--tekst-schaal)); line-height: 1.6; color: var(--tekst); opacity: 0.95;
-  padding-left: 12px; margin: 8px 0;
+  font-size: calc(1rem * var(--tekst-schaal)); line-height: 1.65; color: var(--tekst);
+  padding-left: 14px; margin: 10px 0;
 }
 .kd-blik.rech, .kd-blik.omg { border-inline-start: 3px solid var(--goud); }
 .kd-blik.omg { border-inline-start: 3px solid var(--roze); }
@@ -860,31 +861,35 @@ body.licht .popup-achtergrond { background: rgba(54, 42, 28, 0.34); }
 .kd-groep-kop {
   counter-increment: kdsectie;
   display: flex; align-items: center; gap: 10px;
-  font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700;
-  letter-spacing: 0.12em; text-transform: uppercase; color: var(--sec);
-  padding-top: 12px;
+  font-family: var(--serif);
+  font-size: calc(1.0625rem * var(--tekst-schaal)); font-weight: 700;
+  letter-spacing: 0.005em; color: var(--tekst);
+  padding-top: 16px; padding-bottom: 8px;
 }
 .kd-groep-kop .kd-punt { display: none; }
 .kd-groep-kop::before {
   content: counter(kdsectie, decimal-leading-zero);
-  color: var(--goud); font-family: var(--serif);
-  font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+  color: var(--goud); font-family: var(--sans);
+  font-size: 11px; font-weight: 800; letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
+  padding: 2px 7px; margin-top: 1px;
+  border: 1px solid rgba(var(--goud-rgb), 0.4); border-radius: 999px;
+  background: rgba(var(--goud-rgb), 0.10);
 }
 .kd-groep-kop::after {
   content: ""; flex: 1; border-top: 1px solid var(--rand);
 }
-.kd-punt { position: relative; font-size: calc(0.9375rem * var(--tekst-schaal)); line-height: 1.6; color: var(--tekst); opacity: 0.94; margin: 10px 0 10px 16px; }
+.kd-punt { position: relative; font-size: calc(1rem * var(--tekst-schaal)); line-height: 1.65; color: var(--tekst); margin: 11px 0 11px 18px; }
 .kd-punt::before {
   content: "✧"; position: absolute; left: -16px; top: 1px;
   color: var(--goud); font-size: 10px; opacity: 0.85;
 }
 .kd-mini-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0 4px; }
 .kd-mini { background: var(--vlak-2); border: 1px solid var(--rand); border-radius: var(--r-s); padding: 12px 14px; }
-.kd-mini p { font-size: calc(0.8438rem * var(--tekst-schaal)); line-height: 1.5; }
-.kd-mini-label { color: var(--lav); font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700; text-transform: uppercase; letter-spacing: 0.11em; margin-bottom: 5px; line-height: 1.3; }
+.kd-mini p { font-size: calc(0.875rem * var(--tekst-schaal)); line-height: 1.55; }
+.kd-mini-label { color: var(--lav); font-size: calc(0.75rem * var(--tekst-schaal)); font-weight: 700; text-transform: uppercase; letter-spacing: 0.11em; margin-bottom: 5px; line-height: 1.3; }
 .kd-journaal { margin-top: 20px; padding: 16px 18px; border-radius: var(--r-s); background: rgba(var(--kd-tint, 210, 154, 91), 0.07); border: 1px solid rgba(var(--kd-tint, 210, 154, 91), 0.30); }
-.kd-dagvraag { font-family: var(--serif); font-style: italic; font-size: calc(0.9375rem * var(--tekst-schaal)); line-height: 1.55; margin-top: 12px; color: var(--tekst); opacity: 0.95; }
+.kd-dagvraag { font-family: var(--serif); font-style: italic; font-size: calc(1.0625rem * var(--tekst-schaal)); line-height: 1.6; margin-top: 12px; color: var(--tekst); opacity: 0.95; }
 .kd-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; animation: fadeUp 0.4s cubic-bezier(0.22, 0.9, 0.28, 1) 330ms both; }
 .kd-nav-knop {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
@@ -895,10 +900,10 @@ body.licht .popup-achtergrond { background: rgba(54, 42, 28, 0.34); }
 .kd-nav-knop:active { transform: scale(0.95); }
 .kd-nav-knop.volg { border-color: var(--rand-sterk); }
 .kd-nav-knop svg { width: 17px; height: 17px; color: var(--goud); }
-.kd-nav-richting { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sec); font-weight: 700; }
+.kd-nav-richting { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sec); font-weight: 700; }
 .kd-nav-naam { font-family: var(--serif); font-size: 15px; line-height: 1.15; text-align: center; }
-.kd-tilt-hint { text-align: center; color: var(--sec); font-size: calc(0.6875rem * var(--tekst-schaal)); margin: -6px 0 12px; opacity: 0.9; }
-.kd-blik-label { color: var(--lav); font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700; text-transform: uppercase; letter-spacing: 0.13em; margin-bottom: 6px; }
+.kd-tilt-hint { text-align: center; color: var(--sec); font-size: calc(0.75rem * var(--tekst-schaal)); margin: -6px 0 12px; opacity: 0.9; }
+.kd-blik-label { color: var(--sec); font-size: calc(0.75rem * var(--tekst-schaal)); font-weight: 800; text-transform: uppercase; letter-spacing: 0.11em; margin-bottom: 7px; }
 .kd-blik-rech { border-inline-start: 3px solid var(--goud); }
 .kd-blik-omg  { border-inline-start: 3px solid var(--roze); }
 .kd-herken   { border-inline-start: 3px solid rgb(var(--kd-tint, 210, 154, 91)); margin-top: 10px; }
@@ -915,8 +920,8 @@ body.licht .popup-achtergrond { background: rgba(54, 42, 28, 0.34); }
 /* ---------- 22. MEER ---------- */
 .meer-groep { margin-bottom: 22px; }
 .meer-groep-titel {
-  font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.12em; color: var(--sec); margin: 0 4px 8px;
+  font-size: calc(0.75rem * var(--tekst-schaal)); font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--tekst); margin: 0 4px 8px;
 }
 .meer-rij {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -1059,6 +1064,30 @@ body {
 }
 h1, h2, h3, .sub-titel, .home-titel, .positie-label, .sectie-titel, .kd-groep-kop { text-wrap: balance; }
 p, .betekenis, .kd-punt, .mix-uitleg, .context-lijn, .hist-vraag { text-wrap: pretty; }
+
+
+/* ---------- SKIM-WOORDEN: de dikgedrukte kern die springt ---------- */
+.kd-blik-rech .kd-blik-label { color: var(--goud); }
+.kd-blik-omg .kd-blik-label { color: var(--roze); }
+.kd-herken .kd-blik-label { color: var(--lav); }
+.kd-blik b, .kd-punt b, .kd-mini p b, .kd-dagvraag b, .kd-journaal p b,
+.betekenis b, .positie-extra b, .context-lijn b,
+.kd-scenario-tekst b, .patroon-blok p b, .verhaal b {
+  font-weight: 800; color: var(--tekst); font-style: normal;
+  background-image: linear-gradient(transparent 60%, rgba(var(--goud-rgb), 0.22) 60%, rgba(var(--goud-rgb), 0.22) 92%, transparent 92%);
+  border-radius: 3px;
+  padding: 0 1px;
+}
+.kd-scenario-titel { font-family: var(--serif); font-weight: 700; font-size: calc(1rem * var(--tekst-schaal)); line-height: 1.35; }
+.kd-scenario-tekst { font-size: calc(0.9375rem * var(--tekst-schaal)); line-height: 1.62; color: var(--tekst); opacity: 0.94; margin-top: 5px; }
+body.licht .stand { color: #FDF8EE; }
+body.licht .knop { color: #FDFAF2; }
+
+/* PAPIER: naam-chips op de kaartfoto's krijgen een extra diepe gradient zodat
+   de witte NL-naam ook op lichte kaartscans kraakhelder blijft. */
+body.licht .chip-naam { background: linear-gradient(transparent, rgba(22, 14, 6, 0.92)); }
+body.licht .chip-en { background: rgba(22, 14, 6, 0.62); }
+body.licht .leer-stand, body.licht .hist-vraag { color: var(--sec); }
 
 </style>
   <script>
@@ -7686,6 +7715,123 @@ Object.assign(window.INHOUD_VERHAAL, {
 
 </script>
   <script>
+// ============================================================================
+// SKIM-WOORDEN — het leeshulpsysteem van de app
+// ----------------------------------------------------------------------------
+// Doel: wie snel over een tekst scrolt, ziet in één oogopslag welke woorden
+// het verhaal dragen. Die woorden worden dikgedrukt en krijgen een zachte
+// goud-glans, zodat je in 3 seconden de kern van een kaart pakt.
+//
+// markeer(tekst, extraTermen) loopt met één gecombineerde regex over de tekst
+// en wikkelt de eerste maxAantal treffers in <b>…</b>. Overal dikgedrukt is
+// nergens dikgedrukt — daarom een limiet per tekstblok.
+//
+// Het woordenboek is hand-gecurateerd op de échte tekst van alle 78 kaarten
+// (frequentieanalyse over inhoud-verhaal*.js en kaarten.js).
+// ============================================================================
+
+const SKIM_WOORDEN = [
+  // -- gevoel & innerlijk --
+  "intuitie", "intuïtie", "intuïtief", "gevoel", "gevoelens", "gevoelig",
+  "vertrouwen", "vertrouw", "zelfvertrouwen", "onrust", "twijfel", "onzeker",
+  "angst", "bang", "moed", "dapper", "durf",
+  "geduld", "haast", "rust", "rustig", "kalm", "stilte", "ademhalen", "ademen", "adem",
+  "pauze", "rustmoment",
+  "vreugde", "blij", "geluk", "plezier", "speels", "lachen",
+  "verdriet", "tranen", "pijnlijk", "pijn", "wonden", "wond",
+  "boos", "boosheid", "irritatie", "frustratie", "jaloezie", "wrok",
+  "teleurstelling", "verlies", "gemis", "rouw",
+  "helen", "herstel", "herstellen", "vergeven", "vergeving",
+  "warmte", "warm", "zachtaardig", "zachte", "zacht", "troost",
+  "liefde", "liefdevol", "verliefd", "romantiek", "hartje", "harten", "hart",
+  "geborgen", "veiligheid", "veilig", "thuis", "vrijheid", "vrij",
+  // -- relaties & mensen --
+  "verbinding", "verbind", "verbonden", "samenwerking", "samen",
+  "relatie", "partner", "vriendschap", "vrienden", "vriendin",
+  "familie", "moeder", "vader", "broer", "zus", "kinderen", "kind",
+  "grenzen", "grens", "nee zeggen", "afstand", "dichtbij", "eenzaam", "alleen",
+  "empathie", "luisteren", "gesprek", "praten",
+  "delen", "geven", "ontvangen",
+  // -- hoofd, hart & wijsheid --
+  "hoofd", "redeneren", "ratio", "verstand", "logica",
+  "wijsheid", "kennis", "leren", "lessen", "les", "ervaring",
+  "helderheid", "helder", "duidelijk", "waarheid", "eerlijkheid", "eerlijke", "eerlijk",
+  "onecht", "masker", "echt", "jezelf", "mezelf",
+  "spiegel", "erkenning", "erkennen", "bewust", "onbewust", "aandacht",
+  // -- keuze & richting --
+  "kiezen", "keuze", "kies", "besluiten", "besluit", "beslissing", "opties",
+  "richting", "koers", "kruispunt", "wending",
+  "beginnen", "begin", "nieuwe start", "eerste stap", "stap", "sprong",
+  "risico", "kansen", "kans", "mogelijkheid",
+  "verandering", "veranderen", "verandert", "beweging",
+  // -- werk, geld & groei --
+  "carrière", "baan", "werk", "studie", "examen", "projecten", "project",
+  "inkomen", "geld", "uitgaven", "budget", "overvloed", "schaarste", "tekort",
+  "groeien", "groeit", "groei", "bloeien", "bloei", "zaadjes", "zaad", "oogst",
+  "wortels", "aarden", "geaard", "aarde", "grond",
+  "vooruitgang", "succes", "prestatie", "doelen", "doel",
+  "structuur", "planning", "agenda", "plannen", "plan", "routine", "ritme",
+  "discipline", "focus", "concentratie", "afronden", "afmaken", "afsluiten",
+  // -- energie & polariteit --
+  "energie", "krachtig", "kracht", "moeheid", "moe", "uitputting",
+  "in balans", "balans", "evenwicht", "harmonie", "matiging", "genoeg",
+  "vuur", "water", "storm", "zon", "maan", "sterren", "nacht",
+  "lichtpunt", "licht", "schemer", "duister", "donker", "schaduw",
+  "orde", "chaos", "stroming", "stroom", "vloeien",
+  "deuren", "deur", "venster", "raam",
+  "patronen", "patroon", "gewoontes", "gewoonte", "herhaling",
+  "vasthouden", "vastgelopen", "vastloopt", "loslaten", "bevrijd",
+  "verwachtingen", "verwachten", "dromen", "droom", "wensen", "wens", "hoop", "verlangen",
+  // -- tijd --
+  "moment", "heden", "toekomst", "verleden", "morgen", "gisteren",
+  "seizoen", "cyclus", "timing"
+];
+
+// uniek, en langste eerst: zo matcht "grenzen" vóór "grens"
+const SKIM_UNIEK = [...new Set(SKIM_WOORDEN)]
+  .map(w => w.trim())
+  .filter(w => w.length >= 3)
+  .sort((a, b) => b.length - a.length);
+
+const SKIM_ESCAP = w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const SKIM_DRUP = "\\p{L}"; // lettergrens die ook é/ï/koń snapt
+const SKIM_REGEX = new RegExp("(?<!\\p{L})(?:" + SKIM_UNIEK.map(SKIM_ESCAP).join("|") + ")(?!\\p{L})", "giu");
+
+// de kern van een tekst dik onderstrepen (hooguit maxAantal keer)
+function markeer(tekst, extraTermen, maxAantal) {
+  if (!tekst) return tekst;
+  const max = maxAantal || 6;
+  let regex = SKIM_REGEX;
+  if (extraTermen && extraTermen.length) {
+    const extra = [...new Set(extraTermen
+      .map(t => String(t || "").trim().toLowerCase())
+      .filter(t => t.length >= 3 && !/[<>]/.test(t))
+    )];
+    if (extra.length) {
+      regex = new RegExp("(?<!\\p{L})(?:" + [...extra, ...SKIM_UNIEK].map(SKIM_ESCAP).join("|") + ")(?!\\p{L})", "giu");
+    }
+  }
+  let n = 0;
+  return String(tekst).replace(regex, m => (n++ < max ? "<b>" + m + "</b>" : m));
+}
+
+// termen die bij déze kaart horen (kernwoord + onderwerpen)
+function skimTermenVan(kaart, beg) {
+  const termen = [];
+  if (kaart && kaart.kernwoord) {
+    String(kaart.kernwoord).split(",").forEach(w => termen.push(w.trim().toLowerCase()));
+  }
+  if (beg && beg.onderwerpen) {
+    String(beg.onderwerpen).split(",").forEach(w => termen.push(w.trim().toLowerCase()));
+  }
+  return termen.filter(t => t && t.length >= 3);
+}
+
+window.markeer = markeer;
+window.skimTermenVan = skimTermenVan;
+
+</script>
+  <script>
 /* ============================================================
    js/app.js — de "motor" van de app
    ------------------------------------------------------------
@@ -8673,8 +8819,8 @@ function bouwUitleg(reading, alleenLezen) {
       '<p class="kernwoord">' + kaart.kernwoord + "</p>" +
       '<p class="vertaling">“' + kaart.vertaling + "”</p>" +
       '<p class="context-lijn">' + contextRegel(legging, reading, i) + "</p>" +
-      '<p class="betekenis">' + betekenis + "</p>" +
-      (ex && ex.herken ? '<p class="positie-extra">In het echte leven: ' + ex.herken + "</p>" : "") +
+      '<p class="betekenis">' + markeer(betekenis, [String(kaart.kernwoord || "")]) + "</p>" +
+      (ex && ex.herken ? '<p class="positie-extra">In het echte leven: ' + markeer(ex.herken, [String(kaart.kernwoord || "")], 4) + "</p>" : "") +
       '<p class="reflectie"><span class="reflectie-vraagteken">?</span><span>' + kaart.reflectievraag + "</span></p>";
 
     const blok = document.createElement("article");
@@ -9659,6 +9805,7 @@ function renderKaartDetail(id) {
   const iv = (window.INHOUD_VERHAAL || {})[id] || null;
   const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
   const beg = kaartBeginnerVan(id);
+  const extraTermen = window.skimTermenVan ? skimTermenVan(k, beg) : [];
   const inhoud = document.getElementById("kd-inhoud");
   inhoud.style.setProperty("--kd-tint", kaartAccentVan(k));
   const fase = k.type === "klein" ? faseVan(k).split(" — ")[0] : null;
@@ -9687,46 +9834,46 @@ function renderKaartDetail(id) {
       '<p class="kd-stand" id="kd-stand">▲ Rechtop · tik de kaart om te draaien</p>' +
     "</div>" +
     (beg ? '<section class="kd-groep" style="--i:1"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Zo werkt deze kaart</h3>' +
-      '<div class="kd-blik"><p class="kd-blik-label">Wat je ziet</p><p>' + beg.zien + "</p></div>" +
-      '<div class="kd-blik"><p class="kd-blik-label">In het kort</p><p>' + beg.simpel + "</p></div>" +
-      '<div class="kd-blik"><p class="kd-blik-label">In het echt</p><p>' + beg.voorbeeld + "</p></div>" +
+      '<div class="kd-blik"><p class="kd-blik-label">Wat je ziet</p><p>' + markeer(esc(beg.zien), extraTermen) + "</p></div>" +
+      '<div class="kd-blik"><p class="kd-blik-label">In het kort</p><p>' + markeer(esc(beg.simpel), extraTermen, 4) + "</p></div>" +
+      '<div class="kd-blik kd-herken"><p class="kd-blik-label">In het echt</p><p>' + markeer(esc(beg.voorbeeld), extraTermen, 4) + "</p></div>" +
     "</section>" : "") +
     '<section class="kd-groep" style="--i:2"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>De betekenis</h3>' +
-      '<div class="kd-blik kd-blik-rech"><p class="kd-blik-label">▲ Rechtop</p><p>' + k.betekenis_rechtop + "</p></div>" +
-      '<div class="kd-blik kd-blik-omg"><p class="kd-blik-label">↧ Ondersteboven</p><p>' + k.betekenis_omgekeerd + "</p></div>" +
+      '<div class="kd-blik kd-blik-rech"><p class="kd-blik-label">▲ Rechtop</p><p>' + markeer(esc(k.betekenis_rechtop), extraTermen) + "</p></div>" +
+      '<div class="kd-blik kd-blik-omg"><p class="kd-blik-label">↧ Ondersteboven</p><p>' + markeer(esc(k.betekenis_omgekeerd), extraTermen) + "</p></div>" +
     "</section>" +
     (iv && iv.diepte ?
       '<section class="kd-groep"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>De diepere laag</h3>' +
-        '<div class="kd-blik kd-blik-rech"><p class="kd-blik-label">▲ Rechtop, voluit</p><p>' + esc(iv.diepte) + "</p></div>" +
-        (iv.diepteOmg ? '<div class="kd-blik kd-blik-omg"><p class="kd-blik-label">↧ Ondersteboven, voluit</p><p>' + esc(iv.diepteOmg) + "</p></div>" : "") +
+        '<div class="kd-blik kd-blik-rech"><p class="kd-blik-label">▲ Rechtop, voluit</p><p>' + markeer(esc(iv.diepte), extraTermen) + "</p></div>" +
+        (iv.diepteOmg ? '<div class="kd-blik kd-blik-omg"><p class="kd-blik-label">↧ Ondersteboven, voluit</p><p>' + markeer(esc(iv.diepteOmg), extraTermen) + "</p></div>" : "") +
       "</section>" : "") +
     '<section class="kd-groep" style="--i:3"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Op de kaart</h3>' +
       (iv && iv.symbolen && iv.symbolen.length
-        ? iv.symbolen.map(sym => '<div class="kd-blik"><p class="kd-blik-label">' + esc(sym[0]) + '</p><p>' + esc(sym[1]) + "</p></div>").join("")
+        ? iv.symbolen.map(sym => '<div class="kd-blik"><p class="kd-blik-label">' + esc(sym[0]) + '</p><p>' + markeer(esc(sym[1]), extraTermen, 3) + "</p></div>").join("")
         : '<div class="kd-blik"><p>' + k.kijkrichting + "</p></div>") +
     "</section>" +
     (iv && iv.doen && iv.doen.length ?
       '<section class="kd-groep"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Wat te doen</h3>' +
-        iv.doen.map(d => '<p class="kd-punt">' + esc(d) + "</p>").join("") +
+        iv.doen.map(d => '<p class="kd-punt">' + markeer(esc(d), extraTermen, 3) + "</p>").join("") +
         (iv.signatuur ? '<div class="patroon-blok" style="margin-top:12px"><p class="verhaal" style="opacity:1">“' + esc(iv.signatuur) + '”</p></div>' : "") +
       "</section>" : "") +
     (iv && iv.scenarios && iv.scenarios.length ?
       '<section class="kd-groep"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Herkenbaar?</h3>' +
-        iv.scenarios.map(sc => '<div class="patroon-blok"><p style="font-weight:700;font-size:calc(0.875rem * var(--tekst-schaal))">' + esc(sc[0]) + '</p><p style="font-size:calc(0.875rem * var(--tekst-schaal));line-height:1.55;color:var(--sec);margin-top:4px">' + esc(sc[1]) + "</p></div>").join("") +
+        iv.scenarios.map(sc => '<div class="patroon-blok"><p class="kd-scenario-titel">' + esc(sc[0]) + '</p><p class="kd-scenario-tekst">' + markeer(esc(sc[1]), extraTermen, 4) + "</p></div>").join("") +
       "</section>" : "") +
     '<section class="kd-groep" style="--i:4"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>In je leven</h3>' +
       '<div class="kd-mini-grid">' +
-        minis.map(m => '<div class="kd-mini"><p class="kd-mini-label">' + m[0] + " " + m[1] + "</p><p>" + m[2] + "</p></div>").join("") +
+        minis.map(m => '<div class="kd-mini"><p class="kd-mini-label">' + m[0] + " " + m[1] + "</p><p>" + markeer(esc(m[2]), extraTermen, 2) + "</p></div>").join("") +
       "</div>" +
-      (ex && ex.herken ? '<div class="kd-blik kd-herken"><p class="kd-blik-label">In het echte leven</p><p>' + ex.herken + "</p></div>" : "") +
+      (ex && ex.herken ? '<div class="kd-blik kd-herken"><p class="kd-blik-label">In het echte leven</p><p>' + markeer(esc(ex.herken), extraTermen, 4) + "</p></div>" : "") +
     "</section>" +
     (iv && iv.combos && iv.combos.length ?
       '<section class="kd-groep" style="--i:5"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Vaak samen met</h3>' +
-        iv.combos.map(cb => '<div class="kd-blik"><p class="kd-blik-label">✧ Met ' + esc(cb[0]) + '</p><p>' + esc(cb[1]) + "</p></div>").join("") +
+        iv.combos.map(cb => '<div class="kd-blik"><p class="kd-blik-label">✧ Met ' + esc(cb[0]) + '</p><p>' + markeer(esc(cb[1]), extraTermen, 2) + "</p></div>").join("") +
       "</section>" :
       (ex && ex.samen ?
       '<section class="kd-groep" style="--i:5"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Vaak samen met</h3>' +
-      '<div class="kd-blik"><p>' + ex.samen + "</p></div></section>" : "")) +
+      '<div class="kd-blik"><p>' + markeer(esc(ex.samen), extraTermen) + "</p></div></section>" : "")) +
     '<section class="kd-groep" style="--i:6"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>In je journaal</h3>' +
       '<div class="kd-journaal">' +
         '<p class="kd-mini-label">Reflectievraag</p>' +

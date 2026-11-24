@@ -1,52 +1,47 @@
-v60 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
+v61 ALLEEN CODE — upload ALLEEN deze 2 bestanden naar de root van Tarot-app:
   - index.html
   - sw.js
 
-v60 = "DE OVERLAP-REPARATIE" — alles wat in v59 door elkaar heen zat, zit nu strak.
+v61 = "LEESBAAR" — de tekst-laag van de app compleet opgeknapt.
 
-Gefixt ten opzichte van v59 (allemaal keihard getest op iPhone 15 Pro Max-formaat):
+Gemeten, niet gedroomd: elke tekst op elk scherm is door een contrast-audit
+gehaald (WCAG-ratio tegen de ECHTE achtergrond, beide thema's):
 
-1. GEKOZEN-BALK ZAT OVER DE TABBALK HEEN
-   De balk met je gekozen kaarten dekte de onderste tabbalk af (zowel op
-   "Kaarten" als overal waar hij verscholen stond). Nu docked de gekozen-balk
-   strak BOVEN de tabbalk (hoogte wordt live gemeten via --tab-h), beide
-   balken muur-muur en altijd zichtbaar. Gemeten: 0px overlap.
+1) LEESBAARHEID — CONTRAST (Papier-thema had 60 penetrerende fails, nu 0)
+   - Papier: sec-tekst donkerder (#6E604E), terracotta donkerder (#9D4F2C),
+     oud-groen donkerder (#5A6948), knoptekst+badges aangepast.
+     Gerekend: alle paren > 4.5:1 (kern zelfs > 5:1).
+   - Espresso: alles was al goed; roze iets lichter voor de gevaar-knop (4.32→4.79).
+   - Witte naam-chips op de kaartfoto's: in Papier extra diepe gradient (0.92).
 
-2. "NAAR DE UITLEG"-KNOP VREET DE Gekozen KAARTJES OP
-   De knop had width:100% binnen de flex-balk en duwde de mini-kaartjes weg.
-   Nu: knop flex:1, kaartjes blijven 46px breed zichtbaar.
+2) LEESBAARHEID — GROOTTE (veel was 9-11px, nu leesbaar)
+   Tablabels 10→11px · kickers/labels 11→12px · chip-naam 11→12px · spread-label
+   9.5→11px · rechtop-badge 9→10.5px · lopende tekst 15→16px (lijnhoogte 1.65,
+   volle opacity i.p.v. 0.92-0.95) · citaat 17px · kernwoord 16px dik.
 
-3. KAART-AFBEELDINGEN WAREN ONZICHTBAAR (26px) IN GRIDS
-   De foto zat gevangen in een 26px symbool-span. De span vult nu de hele
-   kaart-kaart (bibliotheek, kaarten-kiezen, geschiedenis, gekozen-balk).
-   Gemeten: img 121px in een 123px chip, natural size geladen.
+3) SKIM-WOORDEN — de klacht "veel tekst weinig inhoud, alles droog": de
+   DRAGENDE woorden zijn nu dikgedrukt met een zachte goud-glans (marker
+   effect). Nieuw systeem (js/skim-woorden.js, meetsysteem in de app):
+   - 200+ zorgvuldig gekozen kernwoorden (intuïtie, grenzen, loslaten,
+     overvloed, rust, focussen...) op frequentie-analyse van alle 78 teksten
+   - per kaart bovendien het kernwoord + onderwerpen als extra termen
+   - max 6 markeertreffers per blok (overal dikgedrukt = nergens dikgedrukt)
+   - Massascan: 3.365 gemarkeerde kernwoorden over 78 kaarten (gem. 43/kaart)
 
-4. SPREAD-KAART IN DE UITLEG WAS ENORM EN LIEP OVER DE TEKST
-   De mini-kaart in de legging miste transform/aspect/foto-regels en renderde
-   op natuurlijke grootte (630px) dwars over de titel. Nu: 129px, gecentreerd,
-   met nummer-badge en label eronder.
+4) TITELS DIE ERUIT SPRINGEN (de "waar zijn de titels"-klacht)
+   - Sectiekoppen op de kaartpagina: ECHTE serif-titels (Fraunces 17px) met
+     amber teller-badge (01 t/m 09) i.p.v. 11px lettertjes
+   - Labels (WAT JE ZIET / ▲ RECHTOP / ↧ ONDERSTEBOVEN / IN HET ECHT): 12px
+     extra-dik + per type gekleurd (amber / roze / oud-groen)
+   - Uitleg: positie-titels 12px dik in tekstkleur, sectiekoppen zwaarder
 
-5. STER/DEEL-KNOP WAS EEN GIGANTISCHE RECHTHOEK
-   (.deel-knop was per ongeluk een full-width balk geworden). Weer een nette
-   40px ronde knop rechtsboven, zoals het hoort.
+5) KLEINE REPARATIES
+   - sterBurst-decoratie kreeg svg-maat (kon als halve plasmascherm sterren verschijnen)
+   - quiz-scenario's hebben nette classes i.p.v. inline-rommel
 
-6. "RECHTOP"-BADGE HING HALF BUITEN HET SCHERM
-   (.stand was absolute geworden). Nu een inline pill next to de kaartnaam —
-   alleen op de mini-kaartjes in de gekozen-balk staat hij in de hoek.
+Getest op 430×932 (iPhone 15 Pro Max-formaat): 78/78 kaarten, 9 secties per
+kaart, 0 JS-errors, 0 overlap balken/bars, 0 contrast-fails op home/bib/
+journaal/geschiedenis/meer/quiz/uitleg/kdetail in beide thema's.
 
-7. ZOEK-ICOON WAS 300px GROOT
-   (.zoek-balk miste flex + svg-maat). Nu een 18px icoon ín de zoekbalk.
-
-8. EN-NAAM OVERLAPTE NL-NAAM OP KAARTEN
-   "THE FOOL" lag over "De Dwaas" heen onderaan de grid-kaarten. EN-chip is
-   nu verborgen op grid-kaarten (wel zichtbaar op de detailpagina).
-
-9. KAART OP DETAILPAGINA: 240px, ratio 3/5, geen overlap met titel (gemeten).
-
-Getest: 78/78 kaarten, 78/78 diepe verhalen, 0 JS-errors, 0 overlap, beide
-thema's (Espresso + Papier) doorlopen: home, vraag, kaarten, gekozen-balk,
-uitleg, kaartdetail, bibliotheek, journaal, geschiedenis, meer.
-
-Upload-instructie: ALLEEN index.html + sw.js uit deze map naar de repo-root,
-dan de app op je iPhone sluiten (volledig uit het geheugen) en opnieuw
-openen — de service worker pakt anders de oude versie.
+Upload: ALLEEN index.html + sw.js naar de repo-root, app op iPhone volledig
+sluiten en opnieuw openen (soft reset tabbladeren-cache via de sw).
