@@ -13,7 +13,7 @@
     sw.js               service worker: cacht alles lokaal zodat de app offline werkt
   Alles staat in localStorage op jouw eigen telefoon. Er gaat niets het internet op.
 -->
-<html lang="nl" data-versie="61">
+<html lang="nl" data-versie="65">
 <head>
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de app schuift onder de notch/home-indicator door, zodat de tabbalk echt onderaan kleeft.
@@ -37,7 +37,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-  <!-- ?v=61 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
+  <!-- ?v=65 is een versienummer: zo voit de browser (en de service worker) niet per ongeluk een oude versie uit het geheugen -->
   <style>
 @font-face {
   font-family: "Fraunces";
@@ -157,7 +157,7 @@ body.licht::before { background: radial-gradient(120% 60% at 50% 0%, rgba(166, 8
   inset: 0;
   overflow-y: auto;
   overscroll-behavior-y: contain;
-  padding: calc(env(safe-area-inset-top) + 24px) 16px calc(env(safe-area-inset-bottom) + 108px);
+  padding: calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 98px);
   scrollbar-width: none;
 }
 .scherm::-webkit-scrollbar { display: none; }
@@ -243,20 +243,20 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 }
 
 /* ---------- 5. HOME ---------- */
-.home-kop { margin-bottom: 20px; }
+.home-kop { margin-bottom: 12px; }
 .home-kop.compact { margin-bottom: 12px; }
 .home-kop.compact .home-titel { transform: scale(0.8); }
 .home-kop.compact .home-ondertitel { opacity: 0; pointer-events: none; }
 .home-datum {
   display: inline-flex; align-items: center; gap: 7px;
-  margin-bottom: 14px; padding: 6px 0 6px 0;
+  margin-bottom: 6px; padding: 3px 0 3px 0;
   color: var(--sec); font-size: calc(0.75rem * var(--tekst-schaal));
   font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;
 }
 .home-datum svg { width: 12px; height: 12px; color: var(--goud); }
 .home-titel {
   font-family: var(--serif);
-  font-size: calc(2.5rem * var(--tekst-schaal));
+  font-size: calc(2.125rem * var(--tekst-schaal));
   font-weight: 600; letter-spacing: -0.02em;
   font-variation-settings: "opsz" 144;
   transform-origin: left center;
@@ -266,21 +266,21 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 .titel-ster { width: 17px; height: 17px; margin-left: 10px; color: var(--goud); vertical-align: 2px; animation: twinkel 2.6s ease-in-out infinite; }
 @keyframes twinkel { 0%, 100% { opacity: 0.55; transform: scale(0.85) rotate(0deg); } 50% { opacity: 1; transform: scale(1.12) rotate(18deg); } }
 .home-ondertitel {
-  color: var(--sec); margin-top: 4px;
-  font-size: calc(0.9375rem * var(--tekst-schaal));
+  color: var(--sec); margin-top: 2px;
+  font-size: calc(0.875rem * var(--tekst-schaal));
   max-height: 26px; overflow: hidden;
   transition: opacity 0.25s ease, max-height 0.3s ease, margin-top 0.3s ease;
 }
 .dagspreuk {
-  margin: 10px 2px 0; font-family: var(--serif); font-style: italic;
-  font-size: calc(0.9375rem * var(--tekst-schaal)); color: var(--goud); line-height: 1.4;
+  margin: 4px 2px 0; font-family: var(--serif); font-style: italic;
+  font-size: calc(0.875rem * var(--tekst-schaal)); color: var(--goud); line-height: 1.4;
 }
 .dag-melding {
   display: flex; align-items: center; gap: 10px;
   background: var(--vlak); border: 1px solid var(--rand);
   border-left: 3px solid var(--goud);
   border-radius: var(--r-s);
-  padding: 12px 14px; margin-bottom: 18px;
+  padding: 8px 12px; margin-bottom: 10px;
   font-size: calc(0.875rem * var(--tekst-schaal));
   animation: fadeUp 0.5s cubic-bezier(0.22, 0.9, 0.28, 1) both;
 }
@@ -292,32 +292,45 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
 }
 .melding-sluit:active { color: var(--roze); }
 
-/* ---------- 6. LEGGING-LIJST ---------- */
-.legging-lijst { display: flex; flex-direction: column; gap: 10px; }
+/* ---------- 6. LEGGING-LIJST (v62: compact 2-koloms tegelgrid) ---------- */
+.legging-lijst { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
 .legging {
-  display: flex; align-items: center; gap: 12px;
+  display: flex; flex-direction: column; gap: 2px;
   width: 100%; text-align: left; font-family: var(--sans);
   background: var(--vlak);
   border: 1px solid var(--rand);
   border-radius: var(--r-s);
-  padding: 16px;
+  padding: 7px 10px;
   color: var(--tekst); cursor: pointer;
-  transition: transform 0.24s cubic-bezier(0.34, 1.45, 0.64, 1), border-color 0.24s ease;
+  transition: transform 0.24s cubic-bezier(0.34, 1.45, 0.64, 1), border-color 0.24s ease, background 0.24s ease;
   animation: fadeUp 0.5s cubic-bezier(0.22, 0.9, 0.28, 1) both;
-  animation-delay: calc(var(--i) * 55ms);
+  animation-delay: calc(var(--i) * 40ms);
   -webkit-tap-highlight-color: transparent;
-  min-height: 44px; will-change: transform;
+  min-height: 44px; will-change: transform; min-width: 0;
 }
-.legging:active { transform: scale(0.97); border-color: var(--rand-sterk); }
-.legging-info { flex: 1; min-width: 0; }
-.legging-naam { font-family: var(--serif); font-size: calc(1.25rem * var(--tekst-schaal)); letter-spacing: -0.01em; display: block; line-height: 1.2; }
-.legging-wanneer { color: var(--sec); font-size: calc(0.8125rem * var(--tekst-schaal)); display: block; margin-top: 4px; line-height: 1.35; }
+.legging:active { transform: scale(0.96); border-color: var(--rand-sterk); }
+.legging-top { min-width: 0; }
+.legging-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.legging-top .legging-naam { flex: 1; }
+.legging-naam {
+  font-family: var(--serif); font-size: calc(0.875rem * var(--tekst-schaal));
+  font-weight: 600; letter-spacing: -0.01em; line-height: 1.18;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+  min-width: 0; hyphens: auto;
+}
+.legging-wanneer {
+  color: var(--sec); font-size: calc(0.71875rem * var(--tekst-schaal));
+  display: block; line-height: 1.28;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .legging-badge {
-  flex-shrink: 0; font-size: calc(0.75rem * var(--tekst-schaal)); font-weight: 700;
-  color: var(--sec); text-transform: uppercase; letter-spacing: 0.08em;
-  white-space: nowrap; padding-left: 12px; border-left: 1px solid var(--rand);
+  flex-shrink: 0; font-size: calc(0.71875rem * var(--tekst-schaal)); font-weight: 700;
+  color: var(--goud); text-transform: uppercase; letter-spacing: 0.06em;
+  white-space: nowrap;
+  border: 1px solid rgba(var(--goud-rgb), 0.35); border-radius: 999px;
+  padding: 2px 7px; background: rgba(var(--goud-rgb), 0.08);
 }
-.legging-pijl { flex-shrink: 0; width: 16px; height: 16px; color: var(--sec); }
+.legging-eigen { grid-column: 1 / -1; align-items: center; justify-content: center; text-align: center; font-weight: 600; color: var(--goud); min-height: 40px; padding: 9px 11px; font-size: calc(0.875rem * var(--tekst-schaal)); }
 
 /* ---------- 7. LEEGE SCHERMEN ---------- */
 .scherm-leeg { display: flex; align-items: center; justify-content: center; }
@@ -344,7 +357,7 @@ button, .tab, input, textarea, .kaart-chip, .sheet-vraag { touch-action: manipul
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
   padding: 4px 0; min-height: 44px;
   background: none; border: none;
-  color: var(--sec); font-family: var(--sans); font-size: 11px; cursor: pointer;
+  color: var(--sec); font-family: var(--sans); font-size: 11.5px; cursor: pointer;
   transition: color 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -568,7 +581,7 @@ body.licht .veil { background: rgba(54, 42, 28, 0.34); }
 }
 .chip-en {
   position: absolute; right: 6px; bottom: 6px; z-index: 1;
-  font-size: 9.5px; font-weight: 600; letter-spacing: 0.06em;
+  font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em;
   color: rgba(243, 234, 218, 0.75); text-transform: uppercase;
   background: rgba(14, 10, 4, 0.55); padding: 2px 6px; border-radius: 999px;
 }
@@ -814,7 +827,7 @@ body.licht .popup-achtergrond { background: rgba(54, 42, 28, 0.34); }
 }
 .hist-item:active { transform: scale(0.98); border-color: var(--rand-sterk); }
 .hist-kop { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 3px; }
-.hist-datum { font-size: calc(0.6875rem * var(--tekst-schaal)); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sec); }
+.hist-datum { font-size: calc(0.71875rem * var(--tekst-schaal)); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sec); }
 .hist-legging { font-family: var(--serif); font-size: calc(1.0625rem * var(--tekst-schaal)); }
 .hist-verwijder { background: none; border: none; color: var(--sec); cursor: pointer; font-size: 14px; padding: 6px; opacity: 0.7; -webkit-tap-highlight-color: transparent; }
 .hist-verwijder.bevestig { color: var(--roze); opacity: 1; font-weight: 700; }
@@ -843,6 +856,15 @@ body.licht .popup-achtergrond { background: rgba(54, 42, 28, 0.34); }
 .kd-citaat { font-style: italic; font-family: var(--serif); color: var(--sec); margin-top: 12px; font-size: calc(1.0625rem * var(--tekst-schaal)); line-height: 1.55; }
 .kd-citaat::before { content: "„ "; color: var(--goud); }
 .kd-citaat::after { content: " ”"; color: var(--goud); }
+/* v63: de punchy one-liner — groot serif, dé Reels-caption van de kaart */
+.kd-kernzin {
+  font-family: var(--serif); font-weight: 700; letter-spacing: -0.015em;
+  font-size: calc(1.375rem * var(--tekst-schaal)); line-height: 1.28;
+  color: var(--tekst); margin: 14px auto 2px; max-width: 30ch;
+  font-variation-settings: "opsz" 60;
+}
+.kd-kernzin::before { content: "✦ "; color: var(--goud); font-size: 0.8em; vertical-align: 0.12em; }
+body.licht .kd-kernzin { color: #2A2016; }
 .kd-kaart {
   width: min(64vw, 240px); aspect-ratio: 3 / 5; margin: 14px auto 4px;
   border-radius: var(--r-s); position: relative; perspective: 900px;
@@ -900,7 +922,7 @@ body.licht .popup-achtergrond { background: rgba(54, 42, 28, 0.34); }
 .kd-nav-knop:active { transform: scale(0.95); }
 .kd-nav-knop.volg { border-color: var(--rand-sterk); }
 .kd-nav-knop svg { width: 17px; height: 17px; color: var(--goud); }
-.kd-nav-richting { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sec); font-weight: 700; }
+.kd-nav-richting { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sec); font-weight: 700; }
 .kd-nav-naam { font-family: var(--serif); font-size: 15px; line-height: 1.15; text-align: center; }
 .kd-tilt-hint { text-align: center; color: var(--sec); font-size: calc(0.75rem * var(--tekst-schaal)); margin: -6px 0 12px; opacity: 0.9; }
 .kd-blik-label { color: var(--sec); font-size: calc(0.75rem * var(--tekst-schaal)); font-weight: 800; text-transform: uppercase; letter-spacing: 0.11em; margin-bottom: 7px; }
@@ -918,10 +940,10 @@ body.licht .popup-achtergrond { background: rgba(54, 42, 28, 0.34); }
 @media (pointer: coarse) { .kd-tilt-hint { display: none; } }
 
 /* ---------- 22. MEER ---------- */
-.meer-groep { margin-bottom: 22px; }
+.meer-groep { margin-bottom: 24px; }
 .meer-groep-titel {
-  font-size: calc(0.75rem * var(--tekst-schaal)); font-weight: 800; text-transform: uppercase;
-  letter-spacing: 0.1em; color: var(--tekst); margin: 0 4px 8px;
+  font-size: calc(0.72rem * var(--tekst-schaal)); font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--sec); margin: 0 6px 8px;
 }
 .meer-rij {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -938,10 +960,26 @@ body.licht .popup-achtergrond { background: rgba(54, 42, 28, 0.34); }
 .meer-rij.bevestig { background: var(--roze); border-color: var(--roze); color: #F6EEDF; font-weight: 700; }
 .meer-waarde { color: var(--sec); font-size: calc(0.875rem * var(--tekst-schaal)); display: flex; align-items: center; gap: 8px; }
 .meer-pijl { width: 14px; height: 14px; color: var(--sec); opacity: 0.7; flex-shrink: 0; }
-.seg { display: inline-flex; background: var(--vlak-2); border: 1px solid var(--rand); border-radius: var(--r-s); padding: 3px; }
-.seg span { padding: 6px 12px; border-radius: 7px; font-size: calc(0.8125rem * var(--tekst-schaal)); color: var(--sec); cursor: pointer; font-weight: 600; transition: all 0.18s ease; }
-.seg span.actief { background: var(--goud); color: #241A10; }
-body.licht .seg span.actief { background: var(--accent); color: #FBF6EA; }
+.seg {
+  display: inline-flex; gap: 2px;
+  background: var(--vlak-2); border: 1px solid var(--rand);
+  border-radius: 999px; padding: 3px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.18);
+}
+.seg button {
+  appearance: none; border: none; background: transparent; cursor: pointer;
+  padding: 6px 13px; border-radius: 999px;
+  font-family: var(--sans); font-size: calc(0.78125rem * var(--tekst-schaal));
+  font-weight: 600; color: var(--sec); white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.seg button.actief {
+  background: var(--goud); color: #241A10;
+  box-shadow: 0 1px 4px rgba(var(--goud-rgb), 0.4);
+}
+body.licht .seg button.actief { background: var(--accent); color: #FBF6EA; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
+.seg button:active { transform: scale(0.95); }
 .meer-versie { text-align: center; color: var(--sec); opacity: 0.7; font-size: 12px; margin: 26px 0 8px; letter-spacing: 0.04em; }
 
 /* ---------- 23. STREAK, EIGEN LEGGING & VERBANDEN ---------- */
@@ -1078,6 +1116,12 @@ p, .betekenis, .kd-punt, .mix-uitleg, .context-lijn, .hist-vraag { text-wrap: pr
   border-radius: 3px;
   padding: 0 1px;
 }
+/* tier 2: vet zónder goudglans — de support-cast van de tekst */
+.kd-blik strong, .kd-punt strong, .kd-mini p strong, .kd-dagvraag strong, .kd-journaal p strong,
+.betekenis strong, .positie-extra strong, .context-lijn strong,
+.kd-scenario-tekst strong, .patroon-blok p strong, .verhaal strong {
+  font-weight: 700; color: var(--tekst); font-style: normal;
+}
 .kd-scenario-titel { font-family: var(--serif); font-weight: 700; font-size: calc(1rem * var(--tekst-schaal)); line-height: 1.35; }
 .kd-scenario-tekst { font-size: calc(0.9375rem * var(--tekst-schaal)); line-height: 1.62; color: var(--tekst); opacity: 0.94; margin-top: 5px; }
 body.licht .stand { color: #FDF8EE; }
@@ -1088,6 +1132,60 @@ body.licht .knop { color: #FDFAF2; }
 body.licht .chip-naam { background: linear-gradient(transparent, rgba(22, 14, 6, 0.92)); }
 body.licht .chip-en { background: rgba(22, 14, 6, 0.62); }
 body.licht .leer-stand, body.licht .hist-vraag { color: var(--sec); }
+
+
+/* ---------- v64: RITUEEL-LAAG (affirmatie, astro & timing chips) ---------- */
+.kd-chip-astro, .kd-chip-timing { color: var(--sec); }
+body.licht .kd-chip-astro, body.licht .kd-chip-timing { color: var(--sec); }
+.kd-affirmatie { text-align: center; margin-top: 12px; }
+.affirmatie-tekst {
+  font-family: var(--serif); font-style: italic; font-weight: 600;
+  font-size: calc(1.1875rem * var(--tekst-schaal)); line-height: 1.45;
+  color: var(--goud); text-align: center; max-width: 32ch; margin: 4px auto 0;
+}
+body.licht .affirmatie-tekst { color: var(--accent); }
+
+/* ---------- v64: COMBINATIE-CHECK ---------- */
+.combi-open-knop { width: 100%; margin-bottom: 10px; }
+.combi-uitleg { color: var(--sec); font-size: calc(0.9375rem * var(--tekst-schaal)); line-height: 1.5; margin: 4px 2px 14px; }
+.combi-formulier { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.combi-label {
+  font-size: calc(0.72rem * var(--tekst-schaal)); font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--sec); margin: 4px 2px -2px;
+}
+.combi-select {
+  appearance: none; -webkit-appearance: none;
+  background: var(--vlak); border: 1px solid var(--rand); border-radius: var(--r-s);
+  color: var(--tekst); font-family: var(--sans); font-size: calc(1rem * var(--tekst-schaal));
+  padding: 12px 38px 12px 12px; cursor: pointer;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
+}
+.combi-kaart {
+  background: var(--vlak); border: 1px solid var(--rand); border-radius: var(--r-s);
+  padding: 14px 16px; margin-bottom: 10px; animation: fadeUp 0.45s cubic-bezier(0.22, 0.9, 0.28, 1) both;
+}
+.combi-kaart-naam { font-family: var(--serif); font-weight: 700; font-size: calc(1.0625rem * var(--tekst-schaal)); }
+.combi-kernzin { color: var(--goud); font-style: italic; font-family: var(--serif); margin-top: 4px; font-size: calc(0.9375rem * var(--tekst-schaal)); }
+body.licht .combi-kernzin { color: var(--accent); }
+.combi-kort { color: var(--tekst); opacity: 0.94; margin-top: 6px; font-size: calc(0.9375rem * var(--tekst-schaal)); line-height: 1.55; }
+.combi-plus { text-align: center; color: var(--goud); font-size: 18px; margin: 2px 0 10px; animation: twinkel 2.6s ease-in-out infinite; }
+.combi-synthese { margin-top: 4px; }
+.combi-links { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+
+/* ---------- v65: geschiedenis mini-kaartjes ---------- */
+.hist-thumbs { display: flex; gap: 7px; margin: 10px 0 2px; flex-wrap: wrap; }
+.hist-thumb {
+  position: relative; width: 46px; aspect-ratio: 3 / 5; border-radius: 6px;
+  overflow: hidden; background: var(--vlak-2); border: 1px solid var(--rand);
+  flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+.hist-thumb .kaart-foto { position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover; }
+.hist-thumb.omg .kaart-foto { transform: rotate(180deg); }
+.hist-thumb.omg::after {
+  content: "↧"; position: absolute; top: 1px; right: 3px; font-size: 10px; font-weight: 700;
+  color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
 
 </style>
   <script>
@@ -1178,8 +1276,31 @@ body.licht .leer-stand, body.licht .hist-vraag { color: var(--sec); }
           <input type="search" id="bib-zoek" class="invoer zoek-invoer" aria-label="Zoek in de bibliotheek" placeholder="Zoek op NL/EN naam of kernwoord…">
         </div>
         <div class="tags-rij" id="bib-filters"></div>
+        <button class="knop knop-secundair combi-open-knop" id="combi-knop">✦ Combinatie-check — 2 kaarten samen</button>
         <button class="knop knop-secundair leer-open-knop" id="leer-knop">Leer de kaarten — quiz</button>
         <div id="bib-lijst"></div>
+      </section>
+
+      <!-- Combinatie-check (subscherm, v64) -->
+      <section class="scherm scherm-sub" id="scherm-combinatie" hidden>
+        <header class="sub-kop">
+          <button class="terug" data-terug aria-label="Terug">
+            <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div style="flex:1">
+            <p class="sub-kicker">TWEE KAARTEN SAMEN</p>
+            <h1 class="sub-titel">Combinatie-check</h1>
+          </div>
+        </header>
+        <p class="combi-uitleg">Kies twee kaarten die je samen trok (of waar je nieuwsgierig naar bent) en zie wat ze samen betekenen.</p>
+        <div class="combi-formulier">
+          <label class="combi-label" for="combi-a">Kaart 1</label>
+          <select id="combi-a" class="invoer combi-select"></select>
+          <label class="combi-label" for="combi-b">Kaart 2</label>
+          <select id="combi-b" class="invoer combi-select"></select>
+          <button class="knop" id="combi-bekijk">✦ Betekenis samen bekijken</button>
+        </div>
+        <div id="combi-resultaat"></div>
       </section>
 
       <!-- Kaart-detail (subscherm) -->
@@ -7716,103 +7837,145 @@ Object.assign(window.INHOUD_VERHAAL, {
 </script>
   <script>
 // ============================================================================
-// SKIM-WOORDEN — het leeshulpsysteem van de app
+// SKIM-WOORDEN — het leeshulpsysteem van de app (v62: twee tiers)
 // ----------------------------------------------------------------------------
 // Doel: wie snel over een tekst scrolt, ziet in één oogopslag welke woorden
-// het verhaal dragen. Die woorden worden dikgedrukt en krijgen een zachte
-// goud-glans, zodat je in 3 seconden de kern van een kaart pakt.
+// het verhaal dragen.
 //
-// markeer(tekst, extraTermen) loopt met één gecombineerde regex over de tekst
-// en wikkelt de eerste maxAantal treffers in <b>…</b>. Overal dikgedrukt is
-// nergens dikgedrukt — daarom een limiet per tekstblok.
+// Tier 1 (POWER + per-kaart kernwoord/onderwerpen) -> <b> met goud-glans.
+//         Max 3 per tekstblok. Dit zijn de échte signaalwoorden.
+// Tier 2 (brede gecurateerde lijst, ruiswoorden eruit) -> <strong> vet,
+//         zónder glans. Max de rest van het budget per blok.
 //
-// Het woordenboek is hand-gecurateerd op de échte tekst van alle 78 kaarten
-// (frequentieanalyse over inhoud-verhaal*.js en kaarten.js).
+// Eén gecombineerde regex met twee capture-groepen = single pass, dus nooit
+// geneste tags. Overal vet is nergens vet — daarom het limiet per blok.
 // ============================================================================
 
+// Tier 1 — woorden die een kaart écht dragen (emotie, kern, omslagpunt)
+const SKIM_POWER = [
+  "intuïtie", "intuïtief",
+  "vertrouwen", "zelfvertrouwen",
+  "grenzen", "nee zeggen",
+  "loslaten", "bevrijd",
+  "angst", "moed", "durf",
+  "pijn", "verdriet", "rouw", "verlies", "gemis",
+  "liefde", "verliefd", "romantiek",
+  "vriendschap", "relatie", "partner",
+  "eenzaam", "eenzaamheid",
+  "geborgen", "veiligheid", "veilig",
+  "vrijheid", "vrij",
+  "hoop", "dromen", "droom", "verlangen",
+  "rust", "stilte", "kalm",
+  "balans", "evenwicht", "harmonie",
+  "herstel", "helen", "vergeven",
+  "waarheid", "eerlijkheid", "eerlijk",
+  "keuze", "beslissing", "kruispunt",
+  "begin", "nieuwe start", "eerste stap", "sprong",
+  "richting", "koers",
+  "focus", "geduld", "wilskracht", "discipline",
+  "energie", "kracht",
+  "verandering", "groei", "groeien"
+];
+
+// Tier 2 — contextwoorden: vet, maar zonder glans. Generieke filler
+// (plan, samen, alleen, echt, moment, kies, licht, water, ...) zit hier
+// expres NIET in — die vervuilen het skimmen.
 const SKIM_WOORDEN = [
   // -- gevoel & innerlijk --
-  "intuitie", "intuïtie", "intuïtief", "gevoel", "gevoelens", "gevoelig",
-  "vertrouwen", "vertrouw", "zelfvertrouwen", "onrust", "twijfel", "onzeker",
-  "angst", "bang", "moed", "dapper", "durf",
-  "geduld", "haast", "rust", "rustig", "kalm", "stilte", "ademhalen", "ademen", "adem",
+  "intuitie", "gevoel", "gevoelens", "gevoelig",
+  "vertrouw", "onrust", "twijfel", "onzeker",
+  "bang", "dapper",
+  "geduld", "haast", "rustig", "ademhalen", "ademen", "adem",
   "pauze", "rustmoment",
   "vreugde", "blij", "geluk", "plezier", "speels", "lachen",
-  "verdriet", "tranen", "pijnlijk", "pijn", "wonden", "wond",
+  "tranen", "pijnlijk", "wonden", "wond",
   "boos", "boosheid", "irritatie", "frustratie", "jaloezie", "wrok",
-  "teleurstelling", "verlies", "gemis", "rouw",
-  "helen", "herstel", "herstellen", "vergeven", "vergeving",
+  "teleurstelling",
+  "herstellen", "vergeving",
   "warmte", "warm", "zachtaardig", "zachte", "zacht", "troost",
-  "liefde", "liefdevol", "verliefd", "romantiek", "hartje", "harten", "hart",
-  "geborgen", "veiligheid", "veilig", "thuis", "vrijheid", "vrij",
+  "liefdevol", "hartje", "harten", "hart",
+  "thuis",
   // -- relaties & mensen --
-  "verbinding", "verbind", "verbonden", "samenwerking", "samen",
-  "relatie", "partner", "vriendschap", "vrienden", "vriendin",
+  "verbinding", "verbind", "verbonden", "samenwerking",
+  "vriendin", "vrienden",
   "familie", "moeder", "vader", "broer", "zus", "kinderen", "kind",
-  "grenzen", "grens", "nee zeggen", "afstand", "dichtbij", "eenzaam", "alleen",
+  "grens", "afstand", "dichtbij",
   "empathie", "luisteren", "gesprek", "praten",
-  "delen", "geven", "ontvangen",
+  "delen", "ontvangen",
   // -- hoofd, hart & wijsheid --
   "hoofd", "redeneren", "ratio", "verstand", "logica",
   "wijsheid", "kennis", "leren", "lessen", "les", "ervaring",
-  "helderheid", "helder", "duidelijk", "waarheid", "eerlijkheid", "eerlijke", "eerlijk",
-  "onecht", "masker", "echt", "jezelf", "mezelf",
+  "helderheid", "helder", "duidelijk",
+  "onecht", "masker", "jezelf", "mezelf",
   "spiegel", "erkenning", "erkennen", "bewust", "onbewust", "aandacht",
   // -- keuze & richting --
-  "kiezen", "keuze", "kies", "besluiten", "besluit", "beslissing", "opties",
-  "richting", "koers", "kruispunt", "wending",
-  "beginnen", "begin", "nieuwe start", "eerste stap", "stap", "sprong",
+  "besluiten", "besluit",
+  "wending",
+  "beginnen",
+  "stap",
   "risico", "kansen", "kans", "mogelijkheid",
-  "verandering", "veranderen", "verandert", "beweging",
+  "veranderen", "verandert", "beweging",
   // -- werk, geld & groei --
   "carrière", "baan", "werk", "studie", "examen", "projecten", "project",
   "inkomen", "geld", "uitgaven", "budget", "overvloed", "schaarste", "tekort",
-  "groeien", "groeit", "groei", "bloeien", "bloei", "zaadjes", "zaad", "oogst",
-  "wortels", "aarden", "geaard", "aarde", "grond",
+  "bloeien", "bloei", "zaadjes", "zaad", "oogst",
+  "wortels", "geaard", "grond",
   "vooruitgang", "succes", "prestatie", "doelen", "doel",
-  "structuur", "planning", "agenda", "plannen", "plan", "routine", "ritme",
-  "discipline", "focus", "concentratie", "afronden", "afmaken", "afsluiten",
+  "structuur", "agenda", "routine", "ritme",
+  "concentratie", "afronden", "afmaken", "afsluiten",
   // -- energie & polariteit --
-  "energie", "krachtig", "kracht", "moeheid", "moe", "uitputting",
-  "in balans", "balans", "evenwicht", "harmonie", "matiging", "genoeg",
-  "vuur", "water", "storm", "zon", "maan", "sterren", "nacht",
-  "lichtpunt", "licht", "schemer", "duister", "donker", "schaduw",
+  "krachtig", "moeheid", "moe", "uitputting",
+  "in balans", "matiging", "genoeg",
+  "lichtpunt", "schemer", "schaduw",
   "orde", "chaos", "stroming", "stroom", "vloeien",
   "deuren", "deur", "venster", "raam",
   "patronen", "patroon", "gewoontes", "gewoonte", "herhaling",
-  "vasthouden", "vastgelopen", "vastloopt", "loslaten", "bevrijd",
-  "verwachtingen", "verwachten", "dromen", "droom", "wensen", "wens", "hoop", "verlangen",
+  "vasthouden", "vastgelopen", "vastloopt",
+  "verwachtingen", "verwachten", "wensen", "wens",
   // -- tijd --
-  "moment", "heden", "toekomst", "verleden", "morgen", "gisteren",
+  "heden", "toekomst", "morgen", "gisteren",
   "seizoen", "cyclus", "timing"
 ];
 
-// uniek, en langste eerst: zo matcht "grenzen" vóór "grens"
+// uniek + langste eerst: zo matcht "grenzen" vóór "grens"
 const SKIM_UNIEK = [...new Set(SKIM_WOORDEN)]
   .map(w => w.trim())
   .filter(w => w.length >= 3)
   .sort((a, b) => b.length - a.length);
 
 const SKIM_ESCAP = w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const SKIM_DRUP = "\\p{L}"; // lettergrens die ook é/ï/koń snapt
-const SKIM_REGEX = new RegExp("(?<!\\p{L})(?:" + SKIM_UNIEK.map(SKIM_ESCAP).join("|") + ")(?!\\p{L})", "giu");
+const SKIM_LC = w => String(w || "").trim().toLowerCase();
 
-// de kern van een tekst dik onderstrepen (hooguit maxAantal keer)
+// markeer(tekst, extraTermen, maxAantal):
+//   tier 1 (extraTermen + SKIM_POWER) -> <b>…</b>   (max 3)
+//   tier 2 (SKIM_WOORDEN)              -> <strong>…</strong> (rest van budget)
 function markeer(tekst, extraTermen, maxAantal) {
   if (!tekst) return tekst;
-  const max = maxAantal || 6;
-  let regex = SKIM_REGEX;
-  if (extraTermen && extraTermen.length) {
-    const extra = [...new Set(extraTermen
-      .map(t => String(t || "").trim().toLowerCase())
+  const maxTotaal = maxAantal || 6;
+  const maxB = Math.min(3, maxTotaal);
+  const maxS = Math.max(0, maxTotaal - maxB);
+
+  const t1 = [...new Set(
+    [...(extraTermen || []), ...SKIM_POWER]
+      .map(SKIM_LC)
       .filter(t => t.length >= 3 && !/[<>]/.test(t))
-    )];
-    if (extra.length) {
-      regex = new RegExp("(?<!\\p{L})(?:" + [...extra, ...SKIM_UNIEK].map(SKIM_ESCAP).join("|") + ")(?!\\p{L})", "giu");
+  )].sort((a, b) => b.length - a.length);
+  const t1set = new Set(t1);
+  const t2 = SKIM_UNIEK.filter(w => !t1set.has(w));
+
+  const rx = new RegExp(
+    "(?<!\\p{L})(?:(" + t1.map(SKIM_ESCAP).join("|") + ")|(" + t2.map(SKIM_ESCAP).join("|") + "))(?!\\p{L})",
+    "giu"
+  );
+
+  let nB = 0, nS = 0;
+  return String(tekst).replace(rx, (m, g1) => {
+    if (g1 !== undefined) {
+      if (nB < maxB) { nB++; return "<b>" + m + "</b>"; }
     }
-  }
-  let n = 0;
-  return String(tekst).replace(regex, m => (n++ < max ? "<b>" + m + "</b>" : m));
+    if (nS < maxS) { nS++; return "<strong>" + m + "</strong>"; }
+    return m;
+  });
 }
 
 // termen die bij déze kaart horen (kernwoord + onderwerpen)
@@ -7829,6 +7992,263 @@ function skimTermenVan(kaart, beg) {
 
 window.markeer = markeer;
 window.skimTermenVan = skimTermenVan;
+
+</script>
+  <script>
+// ============================================================================
+// KERNZINNEN — de ene punchy one-liner per kaart (v63)
+// ----------------------------------------------------------------------------
+// De "Reels-stijl" kaarttekst: kort, bold, in één oogopslag te vatten —
+// staat GROOT bovenaan de kaartpagina. Daaronder volgt de uitgebreide uitleg.
+// Niet gekopieerd, wel in die vibe: direct, Gen-Z-NL, incidenteel Engels.
+// ============================================================================
+
+const KERNZINNEN = {
+  // ---- Grote Arcana ----
+  "de-dwaas": "Nieuw begin, zero fear. Stap erin.",
+  "de-magier": "Alles wat je nodig hebt ligt al op tafel.",
+  "de-hogepriesteres": "Vertrouw je gut, niet je appjes.",
+  "de-keizerin": "Maak je eigen overvloed. Serieus.",
+  "de-keizer": "Structuur is ook self-care.",
+  "de-hierofant": "De les? Soms gelden de regels gewoon.",
+  "de-geliefden": "Kies met je hart, check met je hoofd.",
+  "de-zegewagen": "Focus. De wagen rijdt niet vanzelf.",
+  "kracht": "Zacht zijn mag. Zwak niet.",
+  "de-kluizenaar": "Even offline. Het antwoord zit binnenin.",
+  "rad-van-fortuin": "Het rad draait — en jij zit aan de knop.",
+  "gerechtigheid": "Eerlijk zijn is een power move.",
+  "de-gehangene": "Loslaten is soms het productiefste.",
+  "de-dood": "Iets eindigt, iets anders begint. Drama én bevrijding.",
+  "matigheid": "Balans is niet saai. Het is sustainable.",
+  "de-duivel": "Je weet dat het een bad idea is. Toch.",
+  "de-toren": "Het valt uit elkaar — in fairness: het zat al los.",
+  "de-ster": "Hoop is hot. Echt waar.",
+  "de-maan": "Niet alles is wat het lijkt. Check de vibes.",
+  "de-zon": "Main character energie. Geen discussie.",
+  "het-oordeel": "Tijd om eerlijk tegen jezelf te zijn.",
+  "de-wereld": "Level complete. Wat is je volgende quest?",
+  // ---- Staven (vuur / actie) ----
+  "aas-van-staven": "Nieuwe spark? Steek 'm aan.",
+  "2-van-staven": "Kijk verder dan je neus lang is.",
+  "3-van-staven": "Je plannen hebben vleugels gekregen.",
+  "4-van-staven": "Feestje — je hebt het verdiend.",
+  "5-van-staven": "Chaos, maar make it fashion.",
+  "6-van-staven": "De hype is verdiend.",
+  "7-van-staven": "Verdedig je plek. Je staat sterk.",
+  "8-van-staven": "Het gaat fast. Hou bij.",
+  "9-van-staven": "Nog één push. Bijna daar.",
+  "10-van-staven": "Je draagt te veel. Leg neer.",
+  "page-van-staven": "Grootse plannen, nul geduld.",
+  "ridder-van-staven": "Actie. Nu.",
+  "koningin-van-staven": "Warm, charismatisch, in charge.",
+  "koning-van-staven": "Vision plus actie is alles.",
+  // ---- Bekers (water / gevoel) ----
+  "aas-van-bekers": "Je hart loopt over. Mooi, toch?",
+  "2-van-bekers": "Jullie clicken. Serieus.",
+  "3-van-bekers": "Reden genoeg voor een toast.",
+  "4-van-bekers": "Die kans liet je liggen? Er komt een betere.",
+  "5-van-bekers": "Zie de twee volle glazen.",
+  "6-van-bekers": "Nostalgie hits different.",
+  "7-van-bekers": "Dromen zat. Kies er één.",
+  "8-van-bekers": "Weg bij wat niet meer voedt.",
+  "9-van-bekers": "Je zit er bijna. Geniet ervan.",
+  "10-van-bekers": "Het plaatje klopt. Echt.",
+  "page-van-bekers": "Voel alles. Alles.",
+  "ridder-van-bekers": "Romantiek incoming. Of drama. Check eerst.",
+  "koningin-van-bekers": "Intuïtie met fluwelen handschoen.",
+  "koning-van-bekers": "Rustig maar zeker. Het komt goed.",
+  // ---- Zwaarden (lucht / denken) ----
+  "aas-van-zwaarden": "Eindelijk: een helder idee.",
+  "2-van-zwaarden": "Je weet het antwoord al. Zeg het.",
+  "3-van-zwaarden": "Hart gebroken? Het groeit terug.",
+  "4-van-zwaarden": "Pauze. Je hoofd heeft rust nodig.",
+  "5-van-zwaarden": "Winnen ten koste van alles? Niet cool.",
+  "6-van-zwaarden": "Door naar iets beters. Letterlijk.",
+  "7-van-zwaarden": "Slim of sluw? De grens is dun.",
+  "8-van-zwaarden": "Vast in je eigen gedachten. Stap eruit.",
+  "9-van-zwaarden": "3 uur 's nachts paniek? Niet serieus.",
+  "10-van-zwaarden": "Het ergste is voorbij. Echt.",
+  "page-van-zwaarden": "Nieuws! Lees het twee keer.",
+  "ridder-van-zwaarden": "Charge — check eerst of het het waard is.",
+  "koningin-van-zwaarden": "Scherp, eerlijk, soft waar het telt.",
+  "koning-van-zwaarden": "Logica met een pokerface.",
+  // ---- Pentakels (aarde / materieel) ----
+  "aas-van-pentakels": "Nieuwe kans, tastbaar. Pak 'm.",
+  "2-van-pentakels": "Juggling, maar je houdt het vol.",
+  "3-van-pentakels": "Teamwork maakt de dream work.",
+  "4-van-pentakels": "Houd vast — niet té strak.",
+  "5-van-pentakels": "Koud van buiten, warm van binnen.",
+  "6-van-pentakels": "Geven en ontvangen in balans.",
+  "7-van-pentakels": "Geduld. De oogst komt.",
+  "8-van-pentakels": "Grind season. Zet 'm neer.",
+  "9-van-pentakels": "Dit heb je zelf gebuild. Geniet ervan.",
+  "10-van-pentakels": "Alles wat telt, zit goed.",
+  "page-van-pentakels": "Nieuwe skill incoming. Leer 'm.",
+  "ridder-van-pentakels": "Langzaam, gestaag — wél gestaag.",
+  "koningin-van-pentakels": "Zorg goed voor jezelf. En je planten.",
+  "koning-van-pentakels": "Succes smaakt naar meer. Proef ervan."
+};
+
+window.KERNZINNEN = KERNZINNEN;
+
+</script>
+  <script>
+// ============================================================================
+// KAART-RITUEEL — affirmaties, astro & timing per kaart (v64 "ULTIMATE")
+// ----------------------------------------------------------------------------
+// De ritueel-laag van elke kaart:
+//  - AFFIRMATIES: één "Zeg hardop: …"-mantra per kaart, in de stijl van de app
+//  - ASTRO: klassieke Golden Dawn-attributen voor de Grote Arcana + de
+//    hofkaart-rollen (aarde/lucht/water/vuur binnen hun kleur)
+//  - TIMING: hoe snel deze kaart zich aandient (per kleur/nummer/type)
+// ============================================================================
+
+const AFFIRMATIES = {
+  // ---- Grote Arcana ----
+  "de-dwaas": "Ik durf te springen voordat ik alles weet.",
+  "de-magier": "Ik heb alles wat ik nodig heb al in huis.",
+  "de-hogepriesteres": "Mijn gevoel is informatie — ik luister ernaar.",
+  "de-keizerin": "Ik groei door te verzorgen, mezelf incluis.",
+  "de-keizer": "Ik maak structuur en dat voelt als vrijheid.",
+  "de-hierofant": "Ik leer van wat al werkt.",
+  "de-geliefden": "Ik kies vanuit liefde, niet uit angst.",
+  "de-zegewagen": "Ik houd de teugels van mijn eigen richting.",
+  "kracht": "Mijn zachtheid is een kracht, geen zwakte.",
+  "de-kluizenaar": "In stilte hoor ik mijn eigen wijsheid.",
+  "rad-van-fortuin": "Ik vertrouw op de wisseling van mijn seizoenen.",
+  "gerechtigheid": "Ik kies eerlijk, ook als het pijn doet.",
+  "de-gehangene": "Ik kijk anders en zie opeens alles.",
+  "de-dood": "Ik maak ruimte voor wat komen gaat.",
+  "matigheid": "Ik mix mijn energie tot het precies goed voelt.",
+  "de-duivel": "Ik breek met wat mij klein houdt.",
+  "de-toren": "Ik laat instorten wat nooit echt stond.",
+  "de-ster": "Ik geloof in wat nog niet zichtbaar is.",
+  "de-maan": "Ik vertrouw het pad, ook als het mistig is.",
+  "de-zon": "Ik sta in mijn eigen licht.",
+  "het-oordeel": "Ik sta op en kies mijn volgende hoofdstuk.",
+  "de-wereld": "Ik rond af — en vier het.",
+  // ---- Staven ----
+  "aas-van-staven": "Ik steek mijn vonk aan.",
+  "2-van-staven": "Ik kijk over de horizon zonder te twijfelen.",
+  "3-van-staven": "Mijn plannen krijgen vleugels.",
+  "4-van-staven": "Ik vier wat er goed gaat.",
+  "5-van-staven": "Ik kies mijn gevechten met zorg.",
+  "6-van-staven": "Ik verdien mijn plekje in de picture.",
+  "7-van-staven": "Ik blijf staan voor wat belangrijk is.",
+  "8-van-staven": "Ik ga mee in de snelheid van het moment.",
+  "9-van-staven": "Ik geef niet op — ik ben bijna daar.",
+  "10-van-staven": "Ik leg neer wat niet van mij is.",
+  "page-van-staven": "Ik probeer het gewoon — zonder het allemaal te weten.",
+  "ridder-van-staven": "Ik ga voor het avontuur.",
+  "koningin-van-staven": "Ik straal en mensen voelen dat.",
+  "koning-van-staven": "Ik maak van mijn visie realiteit.",
+  // ---- Bekers ----
+  "aas-van-bekers": "Ik laat mijn hart stromen.",
+  "2-van-bekers": "Ik ontmoet de ander écht.",
+  "3-van-bekers": "Ik vier mijn vriendschappen.",
+  "4-van-bekers": "Ik kies wat wél bij me past.",
+  "5-van-bekers": "Ik zie wat er nog overeind staat.",
+  "6-van-bekers": "Ik glimlach naar wat ooit was.",
+  "7-van-bekers": "Ik kies één droom en ga ervoor.",
+  "8-van-bekers": "Ik loop weg van wat mij niet voedt.",
+  "9-van-bekers": "Mijn wens is dichterbij dan ik denk.",
+  "10-van-bekers": "Ik bouw aan het plaatje dat klopt.",
+  "page-van-bekers": "Ik ben nieuwsgierig naar wat ik voel.",
+  "ridder-van-bekers": "Ik rijd uit op mijn gevoel.",
+  "koningin-van-bekers": "Ik zorg met compassie, ook voor mezelf.",
+  "koning-van-bekers": "Ik blijf rustig, wat er ook gebeurt.",
+  // ---- Zwaarden ----
+  "aas-van-zwaarden": "Ik denk helder en spreek het uit.",
+  "2-van-zwaarden": "Ik kies — en daarmee klaar.",
+  "3-van-zwaarden": "Ik geef mijn verdriet ruimte om te helen.",
+  "4-van-zwaarden": "Ik rust omdat ik het verdien.",
+  "5-van-zwaarden": "Ik win zonder de ander te breken.",
+  "6-van-zwaarden": "Ik vaar naar stiller water.",
+  "7-van-zwaarden": "Ik kies slim, niet sluw.",
+  "8-van-zwaarden": "Ik haal de banden eraf die ik zelf omdeed.",
+  "9-van-zwaarden": "Mijn angsten zijn gedachten, geen feiten.",
+  "10-van-zwaarden": "Het ergste is geweest — ik sta op.",
+  "page-van-zwaarden": "Ik vraag door tot ik snap wat er speelt.",
+  "ridder-van-zwaarden": "Ik rijd snel, maar ik rijd bewust.",
+  "koningin-van-zwaarden": "Ik spreek de waarheid met een zachte rand.",
+  "koning-van-zwaarden": "Ik denk helder en beslis met rust.",
+  // ---- Pentakels ----
+  "aas-van-pentakels": "Ik pak de kans met beide handen.",
+  "2-van-pentakels": "Ik houd de ballen in de lucht met een glimlach.",
+  "3-van-pentakels": "Ik werk samen en het wordt mooier.",
+  "4-van-pentakels": "Ik bewaar wat waardevol is, zonder te knijpen.",
+  "5-van-pentakels": "Ik zoek de warmte die er wél is.",
+  "6-van-pentakels": "Ik geef en ontvang in balans.",
+  "7-van-pentakels": "Ik geef mijn zaadjes de tijd.",
+  "8-van-pentakels": "Ik word beter met elke herhaling.",
+  "9-van-pentakels": "Ik geniet van wat ik zelf heb gebouwd.",
+  "10-van-pentakels": "Ik koester mijn rijkdom: mensen, plek, werk.",
+  "page-van-pentakels": "Ik leer iets nieuws, stap voor stap.",
+  "ridder-van-pentakels": "Ik kom er écht aan — betrouwbaar.",
+  "koningin-van-pentakels": "Ik zorg voor mijn lichaam, huis en tuin.",
+  "koning-van-pentakels": "Ik ben koning van mijn eigen basis."
+};
+
+// Golden Dawn-attributen (klassieke koppeling kaart ↔ sterrenbeeld/planeet)
+const ASTRO = {
+  "de-dwaas": "Uranus · lucht",
+  "de-magier": "Mercurius",
+  "de-hogepriesteres": "De Maan",
+  "de-keizerin": "Venus",
+  "de-keizer": "Ram · Mars",
+  "de-hierofant": "Stier",
+  "de-geliefden": "Tweelingen",
+  "de-zegewagen": "Kreeft",
+  "kracht": "Leeuw",
+  "de-kluizenaar": "Maagd",
+  "rad-van-fortuin": "Jupiter",
+  "gerechtigheid": "Weegschaal",
+  "de-gehangene": "Neptunus",
+  "de-dood": "Schorpioen",
+  "matigheid": "Boogschutter",
+  "de-duivel": "Steenbok",
+  "de-toren": "Mars",
+  "de-ster": "Waterman",
+  "de-maan": "Vissen",
+  "de-zon": "De Zon",
+  "het-oordeel": "Pluto",
+  "de-wereld": "Saturnus"
+};
+
+// astro-label voor elke kaart (Grote Arcana: GD-attribuut, hofkaart: rol-element)
+function astroVan(k) {
+  if (ASTRO[k.id]) return ASTRO[k.id];
+  if (k.type === "klein" && k.nummer >= 11) {
+    const rol = { 11: "aarde-energie", 12: "lucht-energie", 13: "water-energie", 14: "vuur-energie" }[k.nummer];
+    return "de " + rol + " van " + (k.kleur || "dit kleur");
+  }
+  return "";
+}
+
+// hoe snel deze kaart zich aandient — per kleur/nummer/type
+function timingVan(k) {
+  if (k.type === "groot") return "✨ Grote les — dit speelt maanden tot jaren";
+  if (k.nummer >= 11) {
+    return {
+      11: "💬 Iets nieuws komt je way — binnenkort",
+      12: "⚡ Beweging — gebeurt nú",
+      13: "🌊 Energie die blijft",
+      14: "👑 Volwassen vorm — blijvend"
+    }[k.nummer];
+  }
+  return {
+    staven: "🔥 Snel — dagen tot een paar weken",
+    bekers: "💧 Vloeiend — weken",
+    zwaarden: "🌬️ Vlijmsnel — dagen, maar scherp",
+    pentakels: "🌍 Traag — maanden, maar blijvend"
+  }[k.kleur] || "";
+}
+
+function affirmatieVan(id) {
+  return AFFIRMATIES[id] || "";
+}
+
+window.RITUELEN = { affirmatieVan, astroVan, timingVan, AFFIRMATIES, ASTRO };
 
 </script>
   <script>
@@ -8217,12 +8637,11 @@ function bouwLeggingLijst() {
     knop.className = "legging";
     knop.style.setProperty("--i", i); // voor de staggered fade-in
     knop.innerHTML =
-      '<span class="legging-info">' +
+      '<span class="legging-top">' +
         '<span class="legging-naam">' + legging.naam + "</span>" +
-        '<span class="legging-wanneer">' + legging.wanneer + "</span>" +
+        '<span class="legging-badge">' + legging.aantal + (legging.aantal === 1 ? " kaart" : " kaarten") + "</span>" +
       "</span>" +
-      '<span class="legging-badge">' + legging.aantal + (legging.aantal === 1 ? " kaart" : " kaarten") + "</span>" +
-      '<svg class="legging-pijl" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      '<span class="legging-wanneer">' + legging.wanneer + "</span>";
     // Open de legging: eerst het (optionele) vraag-vak, dan het kaartgrid
     knop.addEventListener("click", () => openLegging(legging.id));
     lijst.appendChild(knop);
@@ -9590,6 +10009,75 @@ function renderLeerEinde() {
 
 document.getElementById("leer-knop").addEventListener("click", startLeerSessie);
 
+/* ---------- Combinatie-check: twee kaarten samen lezen (v64) ---------- */
+(function () {
+  const selA = document.getElementById("combi-a");
+  const selB = document.getElementById("combi-b");
+  const openKnop = document.getElementById("combi-knop");
+  if (!selA || !selB || !openKnop) return;
+  const groepen = [
+    ["Grote Arcana", k => k.type === "groot"],
+    ["Staven", k => k.kleur === "staven"],
+    ["Bekers", k => k.kleur === "bekers"],
+    ["Zwaarden", k => k.kleur === "zwaarden"],
+    ["Pentakels", k => k.kleur === "pentakels"]
+  ];
+  [selA, selB].forEach(sel => {
+    sel.innerHTML = groepen.map(g =>
+      '<optgroup label="' + g[0] + '">' +
+      KAARTEN.filter(g[1]).map(k => '<option value="' + k.id + '">' + k.naam_nl + " — " + k.kernwoord + "</option>").join("") +
+      "</optgroup>").join("");
+  });
+  selA.value = KAARTEN[0].id;
+  selB.value = KAARTEN[22].id;
+
+  openKnop.addEventListener("click", () => pushScherm("scherm-combinatie"));
+
+  document.getElementById("combi-bekijk").addEventListener("click", () => {
+    const a = kaartVind(selA.value), b = kaartVind(selB.value);
+    if (!a || !b) return;
+    if (a.id === b.id) { toast("Kies twee verschillende kaarten"); return; }
+    const kz = window.KERNZINNEN || {};
+    const schoneTekst = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    const eersteZin = t => (String(t).match(/[^.!?]+[.!?]/) || [t])[0].trim();
+    // handgeschreven combo-tekst uit de kaartgids (zo die er is)
+    let comboTekst = "";
+    const zoekCombo = (bron, doel) => {
+      const iv = (window.INHOUD_VERHAAL || {})[bron.id] || null;
+      if (iv && iv.combos) {
+        const hit = iv.combos.find(cb => cb[0] === doel.naam_nl);
+        if (hit) return hit[1];
+      }
+      return "";
+    };
+    comboTekst = zoekCombo(a, b) || zoekCombo(b, a);
+    const verband = verbandTussen(a, false, b, false, null, null);
+    const kaartBlok = (k, rij) =>
+      '<div class="combi-kaart ' + rij + '">' +
+        '<p class="combi-kaart-naam">' + k.symbool + " " + k.naam_nl + '</p>' +
+        (kz[k.id] ? '<p class="combi-kernzin">' + schoneTekst(kz[k.id]) + "</p>" : "") +
+        '<p class="combi-kort">' + schoneTekst(eersteZin(k.betekenis_rechtop)) + "</p>" +
+      "</div>";
+    const el = document.getElementById("combi-resultaat");
+    el.innerHTML =
+      kaartBlok(a, "rij-a") +
+      '<p class="combi-plus" aria-hidden="true">✦</p>' +
+      kaartBlok(b, "rij-b") +
+      '<div class="patroon-blok combi-synthese">' +
+        '<p class="kd-scenario-titel">Samen gelezen</p>' +
+        '<p class="kd-scenario-tekst">' + schoneTekst(verband) + "</p>" +
+        (comboTekst ? '<p class="kd-scenario-tekst" style="margin-top:10px"><strong>Uit de kaartgids:</strong> ' + schoneTekst(comboTekst) + "</p>" : "") +
+      "</div>" +
+      '<div class="combi-links">' +
+        '<button class="knop knop-secundair" data-open="' + a.id + '">Open ' + a.naam_nl + "</button>" +
+        '<button class="knop knop-secundair" data-open="' + b.id + '">Open ' + b.naam_nl + "</button>" +
+      "</div>";
+    el.querySelectorAll("[data-open]").forEach(knop =>
+      knop.addEventListener("click", () => openKaartDetail(knop.dataset.open)));
+    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+})();
+
 /* ---------- 7g. GESCHIEDENIS (tabblad) ---------- */
 
 let histZoek = "";
@@ -9644,12 +10132,18 @@ function renderGeschiedenis() {
       const k = kaartVind(c.id);
       return '<span class="hist-kaart-chip">' + (k ? k.symbool + " " + k.naam_nl : "?") + (c.omgekeerd ? ' <span class="omg">↧</span>' : "") + "</span>";
     }).join("");
+    const thumbsHtml = r.kaarten.map(c => {
+      const k = kaartVind(c.id);
+      if (!k) return "";
+      return '<span class="hist-thumb' + (c.omgekeerd ? " omg" : "") + '" title="' + k.naam_nl + '">' + kaartBeeld(k) + "</span>";
+    }).join("");
     item.innerHTML =
       '<div class="hist-kop"><span class="hist-datum">' + datum + "</span>" +
       '<span class="hist-legging">' + (legging ? legging.naam : r.leggingId) + "</span>" +
       (r.voorWie ? '<span class="hist-tag" style="color:var(--lav);border-color:rgba(185,167,232,.4);background:rgba(185,167,232,.10)">voor ' + r.voorWie + "</span>" : "") +
       '<button class="hist-verwijder" aria-label="Verwijder reading"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5v2M6.5 7l1 13h9l1-13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>' +
       (r.vraag ? '<p class="hist-vraag">“' + r.vraag + "”</p>" : "") +
+      (thumbsHtml ? '<div class="hist-thumbs">' + thumbsHtml + "</div>" : "") +
       '<div class="hist-kaarten">' + kaartenHtml + "</div>" +
       (r.notitie ? '<p class="hist-notitie">' + r.notitie + "</p>" : "") +
       ((r.tags && r.tags.length) ? '<div class="hist-tags">' + r.tags.map(t => '<span class="hist-tag">' + t + "</span>").join("") + "</div>" : "");
@@ -9817,6 +10311,11 @@ function renderKaartDetail(id) {
     ["🫂", "Vriendschap", kaartDomeinVan(id, "vriendschap")]
   ].filter(m => m[2]);
 
+  const kz = (window.KERNZINNEN || {})[id] || "";
+  const R = window.RITUELEN || null;
+  const astro = R ? R.astroVan(k) : "";
+  const timing = R ? R.timingVan(k) : "";
+  const affirm = R ? R.affirmatieVan(id) : "";
   inhoud.innerHTML =
     '<div class="kd-hero" data-symbool="' + symboolVan(k) + '">' +
       '<div class="scene3d kd-scene" id="kd-scene" role="button" tabindex="0" aria-pressed="false" aria-label="Kaart omdraaien naar ondersteboven of rechtop">' +
@@ -9824,57 +10323,70 @@ function renderKaartDetail(id) {
           kaartBeeld(k) + '<span class="chip-en">' + k.naam_en + '</span><span class="chip-naam">' + k.naam_nl + '</span><div class="glare" id="kd-glare"></div>' +
         "</div>" +
       "</div>" +
+      (kz ? '<p class="kd-kernzin">' + esc(kz) + "</p>" : "") +
       '<p class="kd-meta">' + symboolVan(k) + " " + kaartNummerLabel(k) +
         (k.type === "klein" ? " · " + k.element : "") +
         (fase ? " · " + fase : "") +
         " · <b>✦ " + k.kernwoord + "</b>" +
         (beg && beg.onderwerpen ? " · " + beg.onderwerpen.split(",").map(o => o.trim()).filter(o => o.toLowerCase() !== String(k.kernwoord).toLowerCase()).join(" · ") : "") +
+        (astro ? " · <span class='kd-chip-astro'>🪐 " + esc(astro) + "</span>" : "") +
+        (timing ? " · <span class='kd-chip-timing'>⏱ " + esc(timing) + "</span>" : "") +
       "</p>" +
       '<p class="kd-citaat">' + k.vertaling + "</p>" +
       '<p class="kd-stand" id="kd-stand">▲ Rechtop · tik de kaart om te draaien</p>' +
     "</div>" +
+    // 1 — eerst de kaart zelf begrijpen
     (beg ? '<section class="kd-groep" style="--i:1"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Zo werkt deze kaart</h3>' +
       '<div class="kd-blik"><p class="kd-blik-label">Wat je ziet</p><p>' + markeer(esc(beg.zien), extraTermen) + "</p></div>" +
       '<div class="kd-blik"><p class="kd-blik-label">In het kort</p><p>' + markeer(esc(beg.simpel), extraTermen, 4) + "</p></div>" +
       '<div class="kd-blik kd-herken"><p class="kd-blik-label">In het echt</p><p>' + markeer(esc(beg.voorbeeld), extraTermen, 4) + "</p></div>" +
     "</section>" : "") +
-    '<section class="kd-groep" style="--i:2"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>De betekenis</h3>' +
-      '<div class="kd-blik kd-blik-rech"><p class="kd-blik-label">▲ Rechtop</p><p>' + markeer(esc(k.betekenis_rechtop), extraTermen) + "</p></div>" +
-      '<div class="kd-blik kd-blik-omg"><p class="kd-blik-label">↧ Ondersteboven</p><p>' + markeer(esc(k.betekenis_omgekeerd), extraTermen) + "</p></div>" +
+    // 2 — de kern: rechtop vs omgekeerd, duidelijk apart
+    '<section class="kd-groep" style="--i:2"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Betekenis — rechtop & omgekeerd</h3>' +
+      '<div class="kd-blik kd-blik-rech"><p class="kd-blik-label">▲ Rechtop — zo dus nu</p><p>' + markeer(esc(k.betekenis_rechtop), extraTermen) + "</p></div>" +
+      '<div class="kd-blik kd-blik-omg"><p class="kd-blik-label">↧ Ondersteboven — zo als het kantelt</p><p>' + markeer(esc(k.betekenis_omgekeerd), extraTermen) + "</p></div>" +
+      (affirm ? '<div class="patroon-blok kd-affirmatie"><p class="kd-blik-label" style="text-align:center">✨ Zeg hardop</p><p class="affirmatie-tekst">“' + esc(affirm) + '”</p></div>' : "") +
     "</section>" +
-    (iv && iv.diepte ?
-      '<section class="kd-groep"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>De diepere laag</h3>' +
-        '<div class="kd-blik kd-blik-rech"><p class="kd-blik-label">▲ Rechtop, voluit</p><p>' + markeer(esc(iv.diepte), extraTermen) + "</p></div>" +
-        (iv.diepteOmg ? '<div class="kd-blik kd-blik-omg"><p class="kd-blik-label">↧ Ondersteboven, voluit</p><p>' + markeer(esc(iv.diepteOmg), extraTermen) + "</p></div>" : "") +
-      "</section>" : "") +
-    '<section class="kd-groep" style="--i:3"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Op de kaart</h3>' +
-      (iv && iv.symbolen && iv.symbolen.length
-        ? iv.symbolen.map(sym => '<div class="kd-blik"><p class="kd-blik-label">' + esc(sym[0]) + '</p><p>' + markeer(esc(sym[1]), extraTermen, 3) + "</p></div>").join("")
-        : '<div class="kd-blik"><p>' + k.kijkrichting + "</p></div>") +
-    "</section>" +
-    (iv && iv.doen && iv.doen.length ?
-      '<section class="kd-groep"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Wat te doen</h3>' +
-        iv.doen.map(d => '<p class="kd-punt">' + markeer(esc(d), extraTermen, 3) + "</p>").join("") +
-        (iv.signatuur ? '<div class="patroon-blok" style="margin-top:12px"><p class="verhaal" style="opacity:1">“' + esc(iv.signatuur) + '”</p></div>' : "") +
-      "</section>" : "") +
-    (iv && iv.scenarios && iv.scenarios.length ?
-      '<section class="kd-groep"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Herkenbaar?</h3>' +
-        iv.scenarios.map(sc => '<div class="patroon-blok"><p class="kd-scenario-titel">' + esc(sc[0]) + '</p><p class="kd-scenario-tekst">' + markeer(esc(sc[1]), extraTermen, 4) + "</p></div>").join("") +
-      "</section>" : "") +
-    '<section class="kd-groep" style="--i:4"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>In je leven</h3>' +
+    // 3 — per levensgebied
+    '<section class="kd-groep" style="--i:3"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Waar raakt deze kaart je?</h3>' +
       '<div class="kd-mini-grid">' +
         minis.map(m => '<div class="kd-mini"><p class="kd-mini-label">' + m[0] + " " + m[1] + "</p><p>" + markeer(esc(m[2]), extraTermen, 2) + "</p></div>").join("") +
       "</div>" +
       (ex && ex.herken ? '<div class="kd-blik kd-herken"><p class="kd-blik-label">In het echte leven</p><p>' + markeer(esc(ex.herken), extraTermen, 4) + "</p></div>" : "") +
     "</section>" +
+    // 4 — actie
+    (iv && iv.doen && iv.doen.length ?
+      '<section class="kd-groep" style="--i:4"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Wat te doen</h3>' +
+        iv.doen.map(d => '<p class="kd-punt">' + markeer(esc(d), extraTermen, 3) + "</p>").join("") +
+        (iv.signatuur ? '<div class="patroon-blok" style="margin-top:12px"><p class="verhaal" style="opacity:1">“' + esc(iv.signatuur) + '”</p></div>' : "") +
+      "</section>" : "") +
+    // 5 — deeper dive
+    (iv && iv.diepte ?
+      '<section class="kd-groep" style="--i:5"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>De diepere laag</h3>' +
+        '<div class="kd-blik kd-blik-rech"><p class="kd-blik-label">▲ Rechtop, voluit</p><p>' + markeer(esc(iv.diepte), extraTermen) + "</p></div>" +
+        (iv.diepteOmg ? '<div class="kd-blik kd-blik-omg"><p class="kd-blik-label">↧ Ondersteboven, voluit</p><p>' + markeer(esc(iv.diepteOmg), extraTermen) + "</p></div>" : "") +
+      "</section>" : "") +
+    // 6 — symbolen
+    '<section class="kd-groep" style="--i:6"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Op de kaart</h3>' +
+      (iv && iv.symbolen && iv.symbolen.length
+        ? iv.symbolen.map(sym => '<div class="kd-blik"><p class="kd-blik-label">' + esc(sym[0]) + '</p><p>' + markeer(esc(sym[1]), extraTermen, 3) + "</p></div>").join("")
+        : '<div class="kd-blik"><p>' + k.kijkrichting + "</p></div>") +
+    "</section>" +
+    // 7 — herkenbaar?
+    (iv && iv.scenarios && iv.scenarios.length ?
+      '<section class="kd-groep" style="--i:7"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Herkenbaar?</h3>' +
+        iv.scenarios.map(sc => '<div class="patroon-blok"><p class="kd-scenario-titel">' + esc(sc[0]) + '</p><p class="kd-scenario-tekst">' + markeer(esc(sc[1]), extraTermen, 4) + "</p></div>").join("") +
+      "</section>" : "") +
+    // 8 — combinaties
     (iv && iv.combos && iv.combos.length ?
-      '<section class="kd-groep" style="--i:5"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Vaak samen met</h3>' +
+      '<section class="kd-groep" style="--i:8"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Vaak samen met</h3>' +
         iv.combos.map(cb => '<div class="kd-blik"><p class="kd-blik-label">✧ Met ' + esc(cb[0]) + '</p><p>' + markeer(esc(cb[1]), extraTermen, 2) + "</p></div>").join("") +
       "</section>" :
       (ex && ex.samen ?
-      '<section class="kd-groep" style="--i:5"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Vaak samen met</h3>' +
+      '<section class="kd-groep" style="--i:8"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>Vaak samen met</h3>' +
       '<div class="kd-blik"><p>' + markeer(esc(ex.samen), extraTermen) + "</p></div></section>" : "")) +
-    '<section class="kd-groep" style="--i:6"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>In je journaal</h3>' +
+    // 9 — journaal
+    '<section class="kd-groep" style="--i:9"><h3 class="kd-groep-kop"><span class="kd-punt" aria-hidden="true"></span>In je journaal</h3>' +
       '<div class="kd-journaal">' +
         '<p class="kd-mini-label">Reflectievraag</p>' +
         '<p class="reflectie"><span class="reflectie-vraagteken">?</span><span>' + k.reflectievraag + "</span></p>" +
